@@ -1,0 +1,6 @@
+# clasp이 만드는 Apps Script 프로젝트 연결 정보.
+# 설치하는 학교마다 스크립트 ID가 다르므로 저장소에 넣지 않는다.
+.clasp.json
+.clasprc.json
+
+node_modules/

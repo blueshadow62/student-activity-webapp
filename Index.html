@@ -1,0 +1,1999 @@
+<!--
+  © 2026 류기현(부산 동아공고). CC BY-NC-SA 4.0(저작자표시-비영리-동일조건변경허락).
+  https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko  문의: ryu1912@naver.com
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>학생 활동 기록</title>
+  <style>
+    :root {
+      /* 기록부에 펜으로 적는 도구라는 성격에 맞춘 잉크 남색 계열.
+         구글 기본 파랑보다 채도를 낮춰 하루 종일 봐도 피로하지 않게 한다. */
+      --accent:#2B4C7E; --accent-soft:#EAEFF6; --accent-strong:#1D3559;
+      --accent-ring:#C9D6E8;
+      --good:#1F6B3F; --good-soft:#E6F1E9; --good-line:#CFE4D7;
+      --warn:#8A5A08; --warn-soft:#FBF0DC;
+      --danger:#9E2B25; --danger-soft:#F8E7E5; --danger-line:#EFD3D0;
+      --ink:#1B2A3A; --ink-soft:#5A6B7C; --ink-faint:#8B99A7;
+      --line:#DFE4E9; --surface:#fff; --page:#F7F8F9; --page-2:#EFF2F5;
+      --shadow:0 1px 2px rgba(27,42,58,.05),0 4px 12px -6px rgba(27,42,58,.10);
+    }
+    *{box-sizing:border-box}
+    /* 한글 웹폰트는 용량이 커서 학교 네트워크에서 느려진다. OS가 이미 가진
+       가장 좋은 한글 글꼴을 순서대로 쓰고, 위계는 크기·굵기로 만든다. */
+    body{margin:0;background:var(--page);color:var(--ink);
+      font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,
+        "Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+      font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .shell{max-width:1180px;margin:auto;min-height:100vh;background:var(--surface)}
+    header{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line);
+      padding:16px 20px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.015em;color:var(--ink)}
+    .mode{color:var(--accent);font-weight:700;font-size:13px;margin-top:3px}
+    main{padding:18px}.hidden{display:none!important}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .between{justify-content:space-between}.card{border:1px solid var(--line);border-radius:14px;
+      padding:18px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:14px}
+    .card h2,.card h3{margin:0 0 12px;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+    .grid{display:grid;gap:12px}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .activity-filters{display:grid;gap:14px}.activity-filter-row{display:grid;
+      grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+    .assignment-picker{padding-top:14px;border-top:1px solid var(--line);display:grid;gap:12px}
+    .picker-title{font-weight:700;color:var(--ink-soft);font-size:13px}
+    .picker-buttons{display:flex;gap:8px;flex-wrap:wrap}
+    .picker-hint{margin:0;color:var(--ink-soft);font-size:13px}
+    label{display:block;font-weight:700;color:var(--ink-soft);margin-bottom:6px;font-size:13px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;
+      padding:11px 12px;background:var(--surface);color:var(--ink)}
+    input::placeholder,textarea::placeholder{color:var(--ink-faint)}
+    input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--accent);outline-offset:1px}
+    textarea{min-height:105px;resize:vertical}
+    .primary,.secondary,.danger,.ghost{border-radius:10px;padding:10px 15px;font-weight:700;
+      border:1px solid transparent;transition:background .12s ease,border-color .12s ease}
+    .primary{background:var(--accent);color:#fff}
+    .primary:hover:not(:disabled){background:var(--accent-strong)}
+    .secondary{background:var(--accent-soft);color:var(--accent-strong);border-color:#D5DFEC}
+    .secondary:hover:not(:disabled){background:#DFE7F2}
+    .danger{background:var(--danger-soft);color:var(--danger);border-color:var(--danger-line)}
+    .danger:hover:not(:disabled){background:#F2DAD7}
+    .ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+    .ghost:hover:not(:disabled){background:var(--page)}
+    a.secondary{display:inline-block;text-decoration:none}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .status{border-radius:10px;padding:13px 14px;background:var(--page);border:1px solid var(--line)}
+    #installationMessage{white-space:pre-line}
+    .status.error{background:var(--danger-soft);color:var(--danger);border-color:var(--danger-line)}
+    .status.ok{background:var(--good-soft);color:var(--good);border-color:var(--good-line)}
+    .metric{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface)}
+    .metric span{color:var(--ink-soft);font-size:13px;font-weight:600}
+    .metric strong{font-size:26px;display:block;font-weight:800;letter-spacing:-.02em;
+      margin-top:2px;font-variant-numeric:tabular-nums}
+    /* 이용 순서는 실제로 앞 단계를 끝내야 다음이 열리는 순서다.
+       번호를 선으로 이어 어디까지 왔는지 한눈에 보이게 한다. */
+    .steps{list-style:none;margin:0;padding:0;counter-reset:step}
+    .steps li{position:relative;display:flex;gap:14px;align-items:flex-start;
+      color:var(--ink-soft);padding-bottom:20px}
+    .steps li:last-child{padding-bottom:0}
+    .steps li::after{content:'';position:absolute;left:13px;top:32px;bottom:-2px;
+      width:2px;background:var(--line)}
+    .steps li:last-child::after{display:none}
+    .steps li.done::after{background:var(--good)}
+    .steps li::before{counter-increment:step;content:counter(step);position:relative;z-index:1;
+      flex:0 0 28px;height:28px;border-radius:999px;background:var(--surface);
+      border:2px solid var(--line);color:var(--ink-faint);font-weight:700;
+      text-align:center;line-height:24px;font-size:13px}
+    .steps li>span{padding-top:3px}
+    .steps li.done{color:var(--ink)}
+    .steps li.done::before{content:'✓';background:var(--good);border-color:var(--good);color:#fff}
+    .steps li.now{color:var(--ink);font-weight:700}
+    .steps li.now::before{background:var(--accent);border-color:var(--accent);color:#fff;
+      box-shadow:0 0 0 4px var(--accent-soft)}
+    .steps .step-note{font-weight:400;color:var(--ink-soft)}
+    .tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}
+    .tab{white-space:nowrap;border:1px solid var(--line);background:var(--surface);
+      border-radius:999px;padding:9px 15px;color:var(--ink-soft);font-weight:600}
+    /* 선택된 탭은 상태 표시이므로 실행 버튼(.primary)보다 한 단계 약하게 둔다.
+       같은 solid 색을 쓰면 탭과 버튼이 구분되지 않는다. */
+    .tab.active{background:var(--accent-soft);color:var(--accent-strong);
+      border-color:var(--accent);font-weight:700}
+    table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+    th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);font-size:13px;
+      font-weight:700;color:var(--ink-soft);position:sticky;top:0;background:var(--surface);z-index:1}
+    td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}
+    tbody tr:not(.teacher-group):hover td{background:var(--page)}
+    .table-wrap{overflow:auto;max-height:470px}.assignment-list{display:grid;gap:8px}
+    .teacher-group td{background:var(--page-2);font-weight:600}
+    .assignment{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+      border-radius:10px;padding:12px;background:var(--surface)}
+    .assignment input{width:auto}
+    /* 칸을 채우게 두면 창이 넓어질수록 사진·이름 양옆만 빈다. 폭을 고정하고
+       왼쪽부터 채워 번호가 줄맞춤되게 한다. 사진을 켜고 꺼도 폭이 같아야
+       목록이 통째로 바뀐 것처럼 보이지 않으므로 두 상태에 같은 폭을 쓴다. */
+    .students{grid-template-columns:repeat(auto-fill,104px);
+      justify-content:start;gap:8px}
+    .student{border:1.5px solid var(--line);border-radius:14px;background:var(--surface);
+      padding:10px;text-align:center;transition:border-color .12s ease,background .12s ease}
+    .students.photos-on .student{min-height:185px}
+    .students.photos-off .student{min-height:46px;display:flex;align-items:center;
+      justify-content:center;gap:5px;padding:9px 6px;border-radius:10px;line-height:1.3}
+    .student.selected{border-color:var(--accent);background:var(--accent-soft);
+      box-shadow:0 0 0 3px var(--accent-soft)}
+    .student:disabled{opacity:.58}
+    .portrait,.initial,.photo-loading,.photo-error{height:105px;width:78px;
+      border-radius:10px;background:var(--page-2);margin:auto}
+    .portrait{object-fit:cover;display:block}
+    .initial,.photo-loading,.photo-error{display:grid;place-items:center}
+    .initial{grid-template-rows:1fr auto;padding:10px 4px 6px}
+    .photo-state-icon{font-size:35px;color:var(--ink-faint);font-weight:700}
+    .photo-status-text{font-size:11px;line-height:1.2;color:var(--ink-soft);font-weight:700}
+    .photo-loading{align-content:center;gap:8px}
+    .photo-spinner{width:24px;height:24px;border:3px solid var(--accent-ring);
+      border-top-color:var(--accent);border-radius:50%;animation:photo-spin .8s linear infinite}
+    .photo-error{align-content:center;gap:7px}
+    .photo-error .photo-state-icon{font-size:24px;color:var(--danger)}
+    @keyframes photo-spin{to{transform:rotate(360deg)}}
+    .number{color:var(--accent);font-weight:700;font-size:17px;margin-top:8px;
+      font-variant-numeric:tabular-nums}
+    .badge{display:inline-block;padding:3px 9px;border-radius:999px;
+      background:var(--warn-soft);color:var(--warn);font-size:12px;font-weight:700}
+    .students.photos-off .number{margin-top:0;font-size:14px}
+    .competencies{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;
+      padding:8px 13px;color:var(--ink-soft);font-weight:600}
+    .chip.active{border-color:var(--accent);background:var(--accent-soft);
+      color:var(--accent-strong);font-weight:700}
+    .competency-help{margin-top:6px;color:var(--ink-soft);font-size:13px;line-height:1.5;min-height:1.5em}
+    .record{border-bottom:1px solid var(--line);padding:12px 0}.record:last-child{border:0}
+    .muted{color:var(--ink-soft)}.small{font-size:13px}
+    .footer{text-align:center;color:var(--ink-soft);padding:24px 12px;font-size:13px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(27,42,58,.45);display:grid;
+      place-items:center;z-index:200;padding:16px}
+    .modal-box{background:var(--surface);border-radius:16px;
+      box-shadow:0 12px 40px -12px rgba(27,42,58,.35);padding:22px;width:min(430px,92vw)}
+    .modal-message{margin:0 0 14px;white-space:pre-line;line-height:1.55}
+    .modal-input{margin-bottom:14px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px}
+    .loading{position:fixed;inset:0;background:rgba(255,255,255,.82);display:grid;
+      place-items:center;z-index:99;font-weight:700}
+    .loading-content{width:min(280px,70vw);display:grid;gap:12px;text-align:center}
+    .loading-progress{height:6px;overflow:hidden;border-radius:999px;background:var(--accent-ring)}
+    .loading-progress-bar{width:42%;height:100%;border-radius:inherit;background:var(--accent);
+      animation:loading-progress 1.2s ease-in-out infinite}
+    @keyframes loading-progress{from{transform:translateX(-110%)}to{transform:translateX(240%)}}
+    /* 학생 카드 칸은 104px 로 좁아, 안내 문구가 칸에 갇히면 세로로 쪼개진다.
+       문구는 항상 한 줄 전체를 쓰게 한다. */
+    .student-list-message,.students>.muted{grid-column:1/-1}
+    .student-list-message{min-height:150px;display:grid;place-items:center;
+      align-content:center;gap:10px;text-align:center;color:var(--ink-soft)}
+    .student-list-message.error{color:var(--danger)}
+    .list-spinner{width:28px;height:28px;border:3px solid var(--accent-ring);
+      border-top-color:var(--accent);border-radius:50%;animation:photo-spin .8s linear infinite}
+    @media(prefers-reduced-motion:reduce){.photo-spinner,.list-spinner,.loading-progress-bar{animation:none}
+      .loading-progress-bar{width:100%}
+      .primary,.secondary,.danger,.ghost,.student{transition:none}}
+    /* 학생 카드는 폭이 고정이라 auto-fill 이 화면 폭에 맞춰 열 수를 스스로
+       정한다. 화면 크기별로 열 수나 사진 크기를 따로 지정하지 않는다. */
+    @media(max-width:760px){.grid-3,.grid-4{grid-template-columns:1fr 1fr}main{padding:12px}
+      header{padding:12px}
+      th,td{padding:9px 10px}
+      .hide-mobile{display:none}}
+    @media(max-width:430px){.grid-3,.grid-4{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1 id="appTitle">학생 활동 기록</h1>
+        <div id="modeLabel" class="mode">접속 확인 중</div>
+        <div id="userEmailLabel" class="small muted hidden"></div>
+      </div>
+      <div class="row">
+        <button id="toPersonalButton" class="secondary hidden">개인 이용자 모드로 전환</button>
+        <button id="toAdminButton" class="secondary hidden">관리자 모드로 돌아가기</button>
+        <button id="reloadButton" class="ghost">새로고침</button>
+      </div>
+    </header>
+    <main>
+      <section id="errorScreen" class="card hidden">
+        <h2>접속 상태를 확인해 주세요</h2>
+        <div id="errorMessage" class="status error"></div>
+      </section>
+
+      <section id="installationScreen" class="card hidden">
+        <h2 id="installationTitle">학교 설치가 필요합니다</h2>
+        <div id="installationMessage" class="status"></div>
+        <div id="installationSetupForm" class="hidden" style="margin-top:14px">
+          <label for="installationSchoolName">학교명</label>
+          <input id="installationSchoolName" maxlength="100"
+            placeholder="예: 부산 동아공업고등학교">
+          <div class="tabs" style="margin-top:14px">
+            <button class="tab active" data-installation-mode="new">새 중앙 자료 만들기</button>
+            <button class="tab" data-installation-mode="existing">기존 중앙 자료 다시 연결하기</button>
+          </div>
+          <div id="newInstallationPanel">
+            <p class="small muted">현재 관리자 계정의 Drive에 중앙 데이터베이스와 사진 폴더를 생성합니다.</p>
+            <button id="provisionSchoolButton" class="primary">새 중앙 자료 만들기</button>
+          </div>
+          <div id="existingInstallationPanel" class="hidden grid">
+            <div>
+              <label for="installationDatabaseReference">중앙 스프레드시트 URL 또는 파일 ID</label>
+              <input id="installationDatabaseReference"
+                placeholder="Google 스프레드시트 링크를 붙여 넣으세요">
+            </div>
+            <div>
+              <label for="installationPhotoFolderReference">중앙 사진 폴더 URL 또는 폴더 ID</label>
+              <input id="installationPhotoFolderReference"
+                placeholder="Google Drive 폴더 링크를 붙여 넣으세요">
+            </div>
+            <p class="small muted">관리자 계정으로 열 수 있는 기존 자료인지 확인한 뒤 연결합니다. 기존 파일은 삭제·이동하지 않습니다.</p>
+            <button id="connectExistingSchoolButton" class="primary">기존 중앙 자료 다시 연결하기</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="adminScreen" class="hidden">
+        <div class="tabs">
+          <button class="tab active" data-admin-tab="dashboard">연결 상태</button>
+          <button class="tab" data-admin-tab="students">학생 관리</button>
+          <button class="tab" data-admin-tab="photos">사진 관리</button>
+          <button class="tab" data-admin-tab="assignments">교사 담당</button>
+        </div>
+        <div id="adminDashboard" data-admin-panel="dashboard">
+          <div class="card">
+            <div class="row between"><h2>중앙 자료 연결 상태</h2>
+              <div class="row">
+                <button id="initializeCentralButton" class="secondary">중앙 시트 점검·생성</button>
+                <button id="resetSchoolInstallationButton" class="danger">설치 설정 초기화</button>
+              </div></div>
+            <div id="centralStatus" class="status"></div>
+          </div>
+          <div class="grid grid-4">
+            <div class="metric"><span>학생</span><strong id="studentCount">0</strong></div>
+            <div class="metric"><span>사진 연결</span><strong id="photoCount">0</strong></div>
+            <div class="metric"><span>담당 설정</span><strong id="assignmentCount">0</strong></div>
+            <div class="metric"><span>승인 대기 신청</span><strong id="pendingRequestCount">0</strong></div>
+          </div>
+        </div>
+
+        <div class="hidden" data-admin-panel="students">
+          <div class="card">
+            <div class="row between"><h2>중앙 학생 관리</h2><div class="row"><button id="addStudentButton" class="primary">학생 추가</button><button id="resetStudentListButton" class="danger">전체 학생목록 초기화</button></div></div>
+            <div class="grid grid-4">
+              <input id="adminStudentQuery" placeholder="이름 또는 학생키 검색">
+              <input id="adminStudentYear" type="number" placeholder="학년도">
+              <input id="adminStudentGrade" type="number" min="1" max="3" placeholder="학년">
+              <input id="adminStudentClass" type="number" min="1" placeholder="반">
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="searchAdminStudentsButton" class="secondary">조회</button>
+              <button id="deactivateYearButton" class="secondary">학년도 일괄 비활성화</button>
+              <label style="margin:0"><input id="includeInactiveStudents" type="checkbox" style="width:auto"> 비활성 포함</label>
+              <input id="rosterCsvFile" type="file" accept=".csv,text/csv" style="max-width:300px">
+              <button id="importRosterButton" class="secondary">CSV 미리보기·가져오기</button>
+              <button id="exportRosterButton" class="ghost">CSV 내보내기</button>
+            </div>
+          </div>
+          <div class="card table-wrap"><table><thead><tr>
+            <th>학생키</th><th>학년도</th><th>학년-반-번호</th><th>이름</th><th>상태</th><th>관리</th>
+          </tr></thead><tbody id="adminStudentRows"></tbody></table></div>
+        </div>
+
+        <div class="hidden" data-admin-panel="photos">
+          <div class="card">
+            <div class="row between"><h2>중앙 사진 관리</h2>
+              <div class="row"><a id="openPhotoFolderLink" class="secondary hidden" target="_blank" rel="noopener">사진 폴더 열기</a>
+                <button id="loadPhotoStatusButton" class="secondary">현황 조회</button>
+                <button id="syncPhotosButton" class="primary">중앙 폴더 동기화</button></div></div>
+            <p class="muted">사진 파일은 중앙 Drive 폴더에서 직접 추가·교체한 뒤 동기화합니다.
+              파일명은 학년·반·번호를 붙여 만듭니다. 예: 1학년 2반 3번은 <strong>1203.jpg</strong><br>
+              형식은 JPG·PNG·WebP만 지원하고, 용량은 <strong>512KB 이하</strong>여야 합니다
+              (초과하면 동기화는 되지만 화면에는 표시되지 않습니다).
+              화면에는 <strong>78×105px</strong>(가로:세로 = 3:4) 크기로 표시됩니다.
+              선명하게 보이려면 그 2배인 <strong>156×210px</strong> 정도를 권장합니다.</p>
+            <div id="photoSummary" class="status"></div>
+          </div>
+          <div id="photoStatusRows" class="card"></div>
+        </div>
+
+        <div class="hidden" data-admin-panel="assignments">
+          <div class="card">
+            <div class="row between"><h2>교사 담당 수업</h2><div class="row"><button id="newAssignmentButton" class="primary">담당 추가</button><button id="revokeSelectedApprovedTeachersButton" class="danger">선택 교사 일괄 해지</button></div></div>
+            <p class="muted">여러 반은 담당 추가 화면에서 쉼표로 한꺼번에 입력할 수 있습니다. 해지하면 선택한 교사의 담당이 모두 비활성화되고 중앙 자료 보기 권한 제거를 확인합니다. 제거에 실패하면 비활성 교사 행에서 다시 시도할 수 있습니다. 신청·승인 이력과 개인 기록은 유지됩니다.</p>
+          </div>
+          <div class="card table-wrap"><table><thead><tr>
+            <th><input id="selectAllApprovedTeachers" type="checkbox" aria-label="승인된 교사 전체 선택"></th>
+            <th>학년도</th><th>학년-반</th><th>과목</th><th>상태</th><th>관리</th>
+          </tr></thead><tbody id="assignmentRows"></tbody></table></div>
+          <div class="card">
+            <div class="row between"><h2>교사 담당 신청</h2><div class="row"><button id="approveSelectedAssignmentRequestsButton" class="primary">선택 항목 일괄 승인</button><button id="refreshAssignmentRequestsButton" class="secondary">신청 새로고침</button></div></div>
+            <p class="muted">승인된 신청만 실제 담당 수업과 학생 자료 접근에 반영됩니다.</p>
+          </div>
+          <div class="card table-wrap"><table><thead><tr>
+            <th><input id="selectAllAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"></th>
+            <th>교사</th><th>학년도</th><th>학년-반</th><th>과목</th><th>상태</th><th>관리</th>
+          </tr></thead><tbody id="assignmentRequestRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="personalScreen" class="hidden">
+        <div id="personalSteps" class="card hidden"></div>
+        <div id="personalConnection" class="card"></div>
+        <div id="personalTabs" class="tabs hidden">
+          <button id="personalActivityTab" class="tab" data-personal-tab="activity">학생 활동 기록</button>
+          <button class="tab" data-personal-tab="request">내 담당 수업 신청</button>
+          <button class="tab" data-personal-tab="storage">개인 저장소</button>
+        </div>
+        <div class="hidden" data-personal-panel="storage">
+          <div id="personalStorageTab" class="card"></div>
+        </div>
+        <div class="hidden" data-personal-panel="request">
+          <div id="noAssignments" class="card hidden">
+            <h2>등록된 담당 수업이 없습니다</h2>
+            <p>담당 수업 승인을 요청하거나 관리자에게 등록을 요청하세요.</p>
+          </div>
+          <div id="assignmentRequestCard" class="card hidden">
+            <div class="row between"><h2>내 담당 수업 신청</h2>
+              <div class="row">
+                <button id="cancelSelectedMyAssignmentRequestsButton" class="danger">선택 항목 일괄 취소</button>
+                <button id="refreshMyAssignmentRequestsButton" class="ghost">신청 내역 새로고침</button>
+              </div>
+            </div>
+            <p class="muted">담당 학년·과목을 입력하고, 여러 반은 쉼표로 구분하세요. 관리자가 승인하기 전에는 학생 자료가 표시되지 않습니다.</p>
+            <div class="grid grid-4">
+              <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
+              <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
+              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" maxlength="50" placeholder="예: 문학"></div>
+              <div><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
+            </div>
+            <button id="submitAssignmentRequestButton" class="primary" style="margin-top:12px">담당 수업 승인 신청</button>
+            <div class="row" style="margin-top:14px"><input id="selectAllMyAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"><span class="small muted">전체 선택</span></div>
+            <div id="myAssignmentRequestRows" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="hidden" data-personal-panel="activity">
+          <div id="activityArea" class="hidden">
+            <div class="card">
+              <div class="activity-filters">
+                <div class="activity-filter-row">
+                  <div><label for="studentQuery">학생 이름 검색</label><input id="studentQuery" placeholder="이름 일부"></div>
+                  <button id="loadStudentsButton" class="secondary">조회</button>
+                </div>
+                <div class="assignment-picker">
+                  <div class="row between"><span class="picker-title">수업 선택</span>
+                    <button id="toggleStudentPhotosButton" class="ghost" aria-pressed="false">사진 켜기</button></div>
+                  <div><label>과목</label><div id="subjectButtons" class="picker-buttons"></div></div>
+                  <div id="gradePicker" class="hidden"><label>학년</label><div id="gradeButtons" class="picker-buttons"></div></div>
+                  <div id="classPicker" class="hidden"><label>반</label><div id="classButtons" class="picker-buttons"></div></div>
+                  <p id="assignmentHint" class="picker-hint">과목을 선택해 주세요.</p>
+                </div>
+              </div>
+            </div>
+            <div id="studentGrid" class="grid students card"></div>
+            <div id="recordEditor" class="card hidden">
+              <h2 id="selectedStudentLabel">학생 선택</h2>
+              <div class="grid grid-3">
+                <div><label for="recordCategory">구분</label><select id="recordCategory"></select></div>
+                <div style="grid-column:span 2"><label>역량</label><div id="competencyChips" class="competencies"></div><div id="competencyHelp" class="competency-help" aria-live="polite"></div></div>
+              </div>
+              <div style="margin-top:12px"><label for="recordMemo">내용 메모 (선택)</label><textarea id="recordMemo"></textarea></div>
+              <button id="saveRecordButton" class="primary">기록 저장</button>
+              <button id="cancelEditRecordButton" class="ghost hidden">수정 취소</button>
+              <h3 style="margin-top:20px">이 학생의 최근 기록</h3>
+              <div id="recentRecords"></div>
+            </div>
+            <div class="card">
+              <div class="row between"><h2>내 활동 기록 조회</h2>
+                <button id="searchRecordsButton" class="secondary">조회</button></div>
+              <div class="grid grid-3">
+                <div><label for="historyCategory">구분</label><select id="historyCategory">
+                  <option value="">전체</option><option>칭찬·긍정</option><option>지도 필요·부정</option>
+                </select></div>
+                <div><label for="historyArchive">기록 위치</label><select id="historyArchive">
+                  <option value="active">현재 기록</option><option value="archived">보관 기록</option><option value="all">전체</option>
+                </select></div>
+                <div><label for="historySubject">과목</label><input id="historySubject" placeholder="비우면 전체"></div>
+              </div>
+              <div id="historyRecords"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="footer">© 2026 류기현(부산 동아공고) · 제작·배포·관리<br>
+      본 소프트웨어는
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>
+      (저작자표시-비영리-동일조건변경허락)에 따라 이용할 수 있습니다.
+      비영리 목적에 한해 자유롭게 사용·수정·재배포할 수 있으며, 수정본도 같은 라이선스로 배포해야 합니다.
+      문의: <a href="mailto:ryu1912@naver.com">ryu1912@naver.com</a></div>
+  </div>
+  <div id="loading" class="loading" role="status" aria-live="polite">
+    <div class="loading-content">
+      <span>처리 중입니다.</span>
+      <div class="loading-progress" aria-hidden="true">
+        <div class="loading-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    const state = {
+      bootstrap:null, role:'', mode:'', students:[], photos:{},
+      selectedStudent:null, selectedCompetencies:new Set(), records:[], editingRecordId:null,
+      missingPhotos:new Set(), pendingPhotos:new Set(), photoQueue:[],
+      activePhotoLoads:0, photoGeneration:0, photoObserver:null, photosEnabled:false,
+      selectedSubject:'', selectedGradeKey:'', selectedAssignmentKey:'',
+    };
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value == null ? '' : value)
+      .replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      let requestedMode = '';
+      try {
+        if (sessionStorage.getItem('student-activity:last-mode') === 'PERSONAL_USER') {
+          requestedMode = 'PERSONAL_USER';
+        }
+      } catch (error) {
+        // 브라우저 저장소를 사용할 수 없으면 서버 기본 모드로 시작한다.
+      }
+      loadApp(requestedMode);
+    });
+
+    function bindEvents() {
+      $('reloadButton').addEventListener('click', () => loadApp(state.mode));
+      $('toPersonalButton').addEventListener('click', () => loadApp('PERSONAL_USER'));
+      $('toAdminButton').addEventListener('click', () => loadApp('ADMIN_PORTAL'));
+      document.querySelectorAll('[data-admin-tab]').forEach(button => {
+        button.addEventListener('click', () => showAdminTab(button.dataset.adminTab));
+      });
+      document.querySelectorAll('[data-personal-tab]').forEach(button => {
+        button.addEventListener('click', () => showPersonalTab(button.dataset.personalTab));
+      });
+      $('initializeCentralButton').addEventListener('click', initializeCentral);
+      $('resetSchoolInstallationButton').addEventListener('click', resetSchoolInstallation);
+      $('provisionSchoolButton').addEventListener('click', provisionSchool);
+      $('connectExistingSchoolButton').addEventListener('click', connectExistingSchool);
+      document.querySelectorAll('[data-installation-mode]').forEach(button => {
+        button.addEventListener('click', () => showInstallationMode(button.dataset.installationMode));
+      });
+      $('searchAdminStudentsButton').addEventListener('click', loadAdminStudents);
+      $('addStudentButton').addEventListener('click', () => editStudent());
+      $('resetStudentListButton').addEventListener('click', resetStudentList_);
+      $('deactivateYearButton').addEventListener('click', deactivateStudentsByYear_);
+      $('importRosterButton').addEventListener('click', importRoster);
+      $('exportRosterButton').addEventListener('click', exportRoster);
+      $('loadPhotoStatusButton').addEventListener('click', loadPhotoStatus);
+      $('syncPhotosButton').addEventListener('click', synchronizePhotos);
+      $('newAssignmentButton').addEventListener('click', () => editAssignment());
+      $('refreshAssignmentRequestsButton').addEventListener('click', loadAssignments);
+      $('approveSelectedAssignmentRequestsButton').addEventListener('click', approveSelectedAssignmentRequests_);
+      $('selectAllAssignmentRequests').addEventListener('change', event => {
+        document.querySelectorAll('[data-assignment-request]').forEach(input => {
+          input.checked = event.target.checked;
+        });
+      });
+      $('revokeSelectedApprovedTeachersButton').addEventListener('click', revokeSelectedApprovedTeachers_);
+      $('selectAllApprovedTeachers').addEventListener('change', event => {
+        document.querySelectorAll('[data-approved-teacher]').forEach(input => {
+          input.checked = event.target.checked;
+        });
+      });
+      $('submitAssignmentRequestButton').addEventListener('click', submitAssignmentRequest);
+      $('refreshMyAssignmentRequestsButton').addEventListener('click', () => loadApp(state.mode));
+      $('cancelSelectedMyAssignmentRequestsButton').addEventListener('click', cancelSelectedMyAssignmentRequests_);
+      $('selectAllMyAssignmentRequests').addEventListener('change', event => {
+        document.querySelectorAll('[data-select-request]').forEach(input => {
+          input.checked = event.target.checked;
+        });
+      });
+      $('myAssignmentRequestRows').addEventListener('click', event => {
+        const button = event.target.closest('[data-cancel-request]');
+        if (button) cancelAssignmentRequest_(button.dataset.cancelRequest);
+      });
+      $('subjectButtons').addEventListener('click', event => {
+        const button = event.target.closest('[data-subject]');
+        if (button) selectAssignmentSubject_(button.dataset.subject);
+      });
+      $('gradeButtons').addEventListener('click', event => {
+        const button = event.target.closest('[data-grade-key]');
+        if (button) selectAssignmentGrade_(button.dataset.gradeKey);
+      });
+      $('classButtons').addEventListener('click', event => {
+        const button = event.target.closest('[data-assignment-key]');
+        if (button) selectAssignmentClass_(button.dataset.assignmentKey);
+      });
+      $('toggleStudentPhotosButton').addEventListener('click', toggleStudentPhotos);
+      $('loadStudentsButton').addEventListener('click', loadStudents);
+      $('studentQuery').addEventListener('input', debounce(loadStudents, 250));
+      $('recordCategory').addEventListener('change', renderCompetencies);
+      $('saveRecordButton').addEventListener('click', saveActivityRecord);
+      $('cancelEditRecordButton').addEventListener('click', cancelEditRecord_);
+      $('searchRecordsButton').addEventListener('click', searchMyRecords);
+    }
+
+    async function loadApp(requestedMode) {
+      resetClientData();
+      setLoading(true);
+      try {
+        const bootstrap = await callServer('getAppBootstrapState', requestedMode || '');
+        state.bootstrap = bootstrap;
+        state.role = bootstrap.role;
+        state.mode = bootstrap.mode;
+        try {
+          if (state.role === 'ADMIN' && state.mode === 'PERSONAL_USER') {
+            sessionStorage.setItem('student-activity:last-mode', 'PERSONAL_USER');
+          } else {
+            sessionStorage.removeItem('student-activity:last-mode');
+          }
+        } catch (error) {
+          // 모드 기억 실패는 현재 접속의 정상 사용을 막지 않는다.
+        }
+        renderBootstrap();
+        if (state.mode === 'PERSONAL_USER') {
+          await loadPersonalCentralStatus_();
+        }
+      } catch (error) {
+        showError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // 중앙 자료 상태·담당 목록은 별도 호출로 가져온다. 승인 전 교사는
+    // 중앙 자료 접근 권한이 없는 게 정상이므로, 이 호출의 실패를 치명적
+    // 오류로 취급하지 않고 상태 문구만 갱신한다.
+    async function loadPersonalCentralStatus_() {
+      try {
+        const status = await callServer('getPersonalCentralStatus');
+        state.bootstrap.central = status.central;
+        state.bootstrap.assignments = status.assignments;
+      } catch (error) {
+        state.bootstrap.central = {
+          ready: false,
+          message: '학교 공통 학생 자료에 접근할 권한이 없습니다. '
+            + '관리자에게 중앙 자료 공유 및 접근 권한을 확인해 달라고 요청하세요.',
+        };
+        state.bootstrap.assignments = [];
+      }
+      renderPersonalBootstrap();
+    }
+
+    function resetClientData() {
+      resetStudentPhotoLoading_(true);
+      state.bootstrap = null;
+      state.students = [];
+      state.photosEnabled = false;
+      $('toggleStudentPhotosButton').textContent = '사진 켜기';
+      $('toggleStudentPhotosButton').setAttribute('aria-pressed', 'false');
+      state.selectedStudent = null;
+      state.selectedCompetencies = new Set();
+      state.records = [];
+      state.selectedSubject = '';
+      state.selectedGradeKey = '';
+      state.selectedAssignmentKey = '';
+      $('adminScreen').classList.add('hidden');
+      $('personalScreen').classList.add('hidden');
+      $('errorScreen').classList.add('hidden');
+      $('installationScreen').classList.add('hidden');
+      $('installationSetupForm').classList.add('hidden');
+      $('toPersonalButton').classList.add('hidden');
+      $('toAdminButton').classList.add('hidden');
+      $('userEmailLabel').textContent = '';
+      $('userEmailLabel').classList.add('hidden');
+      $('studentGrid').replaceChildren();
+      $('recentRecords').replaceChildren();
+    }
+
+    function renderBootstrap() {
+      // 학교마다 각자 배포하므로 어느 학교 자료인지 제목에 드러낸다.
+      const schoolName = state.bootstrap && state.bootstrap.schoolName;
+      const userEmail = String(
+        state.bootstrap && state.bootstrap.userEmail || ''
+      ).trim();
+      $('appTitle').textContent = schoolName
+        ? `${schoolName} 학생 활동 기록` : '학생 활동 기록';
+      $('userEmailLabel').textContent = userEmail ? `접속 계정: ${userEmail}` : '';
+      $('userEmailLabel').classList.toggle('hidden', !userEmail);
+      $('toPersonalButton').classList.toggle('hidden', !(state.role === 'ADMIN' && state.mode === 'ADMIN_PORTAL'));
+      $('toAdminButton').classList.toggle('hidden', !(state.role === 'ADMIN' && state.mode === 'PERSONAL_USER'));
+      if (state.mode === 'INSTALLATION') {
+        renderInstallation(state.bootstrap.installation);
+        return;
+      }
+      if (state.mode === 'ADMIN_PORTAL') {
+        $('modeLabel').textContent = '관리자 포털';
+        $('adminScreen').classList.remove('hidden');
+        renderAdminDashboard(state.bootstrap.dashboard);
+        showAdminTab('dashboard');
+      } else {
+        $('modeLabel').textContent = state.role === 'ADMIN'
+          ? '개인 이용자 모드 · 관리자 계정' : '개인 이용자 모드';
+        $('personalScreen').classList.remove('hidden');
+        renderPersonalBootstrap();
+      }
+    }
+
+    function renderInstallation(installation) {
+      const isInitialRegistrationRequired =
+        installation.state === 'ADMIN_REGISTRATION_REQUIRED';
+      const isAdministrator = state.role === 'ADMIN';
+      $('modeLabel').textContent = '학교 설치';
+      $('installationTitle').textContent = isInitialRegistrationRequired
+        ? '최초 관리자 등록이 필요합니다'
+        : isAdministrator
+          ? '중앙 자료 설치가 필요합니다'
+          : '관리자가 학교 설치를 진행 중입니다';
+      $('installationMessage').textContent = isInitialRegistrationRequired
+        ? [
+          '프로젝트 소유자가 Apps Script 편집기에서 아래 순서대로 한 번만 실행해 주세요.',
+          '',
+          '1. 왼쪽 파일 목록에서 InstallationSetup.gs 를 클릭해 엽니다.',
+          '→ 이 파일을 열어야 다음 함수가 목록에 나타납니다.',
+          '2. 편집기 위쪽 함수 선택 목록에서 registerInitialSchoolAdministrator 를 고릅니다.',
+          '3. 실행을 누르고 권한 요청을 허용합니다.',
+          '4. 이 화면으로 돌아와 새로고침을 누릅니다.',
+          '',
+          '실행한 Google 계정이 이 학교의 관리자로 등록됩니다. 관리자로 사용할 계정으로 편집기를 열었는지 확인해 주세요.',
+        ].join('\n')
+        : isAdministrator
+          ? '최초 관리자 등록이 완료되었습니다. 다음 설치 단계에서 중앙 데이터베이스와 사진 폴더를 연결합니다.'
+          : '학교 관리자가 중앙 데이터베이스와 사진 폴더 설정을 완료한 뒤 다시 접속해 주세요.';
+      $('installationMessage').className =
+        `status ${isAdministrator ? 'ok' : ''}`;
+      $('installationSetupForm').classList.toggle(
+        'hidden',
+        isInitialRegistrationRequired || !isAdministrator
+      );
+      if (isAdministrator && !$('installationSchoolName').value) {
+        $('installationSchoolName').value = installation.schoolName || '';
+      }
+      $('installationScreen').classList.remove('hidden');
+    }
+
+    function showInstallationMode(mode) {
+      const reconnecting = mode === 'existing';
+      document.querySelectorAll('[data-installation-mode]').forEach(button => {
+        button.classList.toggle(
+          'active',
+          button.dataset.installationMode === mode
+        );
+      });
+      $('newInstallationPanel').classList.toggle('hidden', reconnecting);
+      $('existingInstallationPanel').classList.toggle('hidden', !reconnecting);
+    }
+
+    async function provisionSchool() {
+      const schoolName = $('installationSchoolName').value.trim();
+      if (!schoolName) {
+        await showAlert('학교명을 입력해 주세요.');
+        $('installationSchoolName').focus();
+        return;
+      }
+      if (!(await showConfirm(`${schoolName}의 중앙 데이터베이스와 사진 폴더를 준비할까요?`))) return;
+      await runAction(async () => {
+        await callServer('provisionSchoolCentralResources', {
+          schoolName: schoolName,
+        });
+        await loadApp('ADMIN_PORTAL');
+      });
+    }
+
+    async function connectExistingSchool() {
+      const schoolName = $('installationSchoolName').value.trim();
+      const databaseReference =
+        $('installationDatabaseReference').value.trim();
+      const photoFolderReference =
+        $('installationPhotoFolderReference').value.trim();
+      if (!schoolName) {
+        await showAlert('학교명을 입력해 주세요.');
+        $('installationSchoolName').focus();
+        return;
+      }
+      if (!databaseReference || !photoFolderReference) {
+        await showAlert('중앙 스프레드시트와 사진 폴더 링크를 모두 입력해 주세요.');
+        (!databaseReference
+          ? $('installationDatabaseReference')
+          : $('installationPhotoFolderReference')).focus();
+        return;
+      }
+      if (!(await showConfirm(`${schoolName}의 기존 중앙 자료를 다시 연결할까요?`))) return;
+      await runAction(async () => {
+        await callServer('connectExistingSchoolCentralResources', {
+          schoolName: schoolName,
+          databaseReference: databaseReference,
+          photoFolderReference: photoFolderReference,
+        });
+        await loadApp('ADMIN_PORTAL');
+      });
+    }
+
+    async function resetSchoolInstallation() {
+      if (!(await showConfirm(
+        '중앙 자료 연결과 학교 설치 상태를 초기화합니다.\n'
+        + '담당 수업 신청 이력도 함께 지워집니다. 연결이 끊기면 승인 이력이\n'
+        + '가리키던 담당 행을 찾을 수 없어 교사가 승인된 것으로 잘못 보이기 때문입니다.\n'
+        + '교사는 재연결 후 다시 신청하면 됩니다.\n\n'
+        + '기존 Drive 파일과 관리자·교사 개인 기록은 삭제되지 않습니다.'
+      ))) return;
+      const confirmation = await showPrompt(
+        '계속하려면 초기화를 입력해 주세요.'
+      );
+      if (confirmation !== '초기화') {
+        if (confirmation !== null) await showAlert('초기화가 취소되었습니다.');
+        return;
+      }
+      await runAction(async () => {
+        await callServer('resetSchoolInstallationConnections', {
+          confirmation: confirmation,
+        });
+        try {
+          sessionStorage.removeItem('student-activity:last-mode');
+        } catch (error) {
+          // 모드 기억 삭제 실패는 설치 화면 전환을 막지 않는다.
+        }
+        await loadApp('');
+      });
+    }
+
+    function renderAdminDashboard(dashboard) {
+      const connection = dashboard.connection;
+      $('centralStatus').textContent = connection.message;
+      $('centralStatus').className = `status ${connection.ready ? 'ok' : 'error'}`;
+      $('studentCount').textContent = connection.counts.students;
+      $('photoCount').textContent = connection.counts.photos;
+      $('assignmentCount').textContent = connection.counts.assignments;
+      $('pendingRequestCount').textContent = dashboard.pendingAssignmentRequests || 0;
+    }
+
+    async function loadAdminDashboard() {
+      await runAction(async () => {
+        const dashboard = await callServer('getAdminDashboard');
+        state.bootstrap.dashboard = dashboard;
+        renderAdminDashboard(dashboard);
+      });
+    }
+
+    async function initializeCentral() {
+      if (!(await showConfirm('누락된 중앙 시트를 생성하고 머리글을 점검할까요? 기존 학생 데이터는 삭제하지 않습니다.'))) return;
+      await runAction(async () => {
+        const dashboard = await callServer('initializeCentralDataSchema');
+        state.bootstrap.dashboard = dashboard;
+        renderAdminDashboard(dashboard);
+      });
+    }
+
+    function showAdminTab(name) {
+      document.querySelectorAll('[data-admin-tab]').forEach(button => button.classList.toggle('active', button.dataset.adminTab === name));
+      document.querySelectorAll('[data-admin-panel]').forEach(panel => panel.classList.toggle('hidden', panel.dataset.adminPanel !== name));
+      // 집계는 다른 탭에서 명단·사진·담당을 바꾸면 바로 낡는다. 다른 탭과
+      // 마찬가지로 들어올 때마다 다시 조회한다.
+      if (name === 'dashboard') loadAdminDashboard();
+      if (name === 'students') loadAdminStudents();
+      if (name === 'photos') loadPhotoStatus();
+      if (name === 'assignments') loadAssignments();
+    }
+
+    async function loadAdminStudents() {
+      await runAction(async () => {
+        const students = await callServer('getAdminStudents', {
+          query:$('adminStudentQuery').value,
+          schoolYear:$('adminStudentYear').value,
+          grade:$('adminStudentGrade').value,
+          classNumber:$('adminStudentClass').value,
+          includeInactive:$('includeInactiveStudents').checked,
+        });
+        $('adminStudentRows').innerHTML = students.map(student => `<tr>
+          <td class="small">${escapeHtml(student.studentKey)}</td>
+          <td>${student.schoolYear}</td><td>${student.grade}-${student.classNumber}-${student.studentNumber}</td>
+          <td>${escapeHtml(student.name)}</td><td>${escapeHtml(student.status)}${student.active ? '' : ' (비활성)'}</td>
+          <td><button class="ghost" data-edit-student="${escapeHtml(student.studentKey)}">수정</button>
+          <button class="danger" data-delete-student="${escapeHtml(student.studentKey)}">비활성/삭제</button></td></tr>`).join('');
+        document.querySelectorAll('[data-edit-student]').forEach(button => button.addEventListener('click', () => {
+          editStudent(students.find(student => student.studentKey === button.dataset.editStudent));
+        }));
+        document.querySelectorAll('[data-delete-student]').forEach(button => button.addEventListener('click', () => removeStudent(button.dataset.deleteStudent)));
+      });
+    }
+
+    async function editStudent(student) {
+      const year = await showPrompt('학년도', student ? student.schoolYear : new Date().getFullYear()); if (year == null) return;
+      const grade = await showPrompt('학년(1~3)', student ? student.grade : ''); if (grade == null) return;
+      const classNumber = await showPrompt('반', student ? student.classNumber : ''); if (classNumber == null) return;
+      const studentNumber = await showPrompt('번호', student ? student.studentNumber : ''); if (studentNumber == null) return;
+      const name = await showPrompt('이름', student ? student.name : ''); if (name == null) return;
+      const status = await showPrompt('학적상태(재학/위탁/전학/자퇴)', student ? student.status : '재학'); if (status == null) return;
+      await runAction(async () => {
+        const payload = {schoolYear:year,grade,classNumber,studentNumber,name,status,active:true};
+        if (student) await callServer('updateCentralStudent', student.studentKey, payload);
+        else await callServer('addCentralStudent', payload);
+        await loadAdminStudents();
+      });
+    }
+
+    async function removeStudent(studentKey) {
+      if (!(await showConfirm('이 학생을 비활성화하시겠습니까? 기존 v8.3 호환 시트에서는 행이 삭제됩니다.'))) return;
+      await runAction(async () => {
+        await callServer('deleteCentralStudent', studentKey);
+        await loadAdminStudents();
+      });
+    }
+
+    // 새 학년도로 넘어갈 때 이전 학년도 명단을 검색·개별 삭제 없이 한 번에 정리한다.
+    async function deactivateStudentsByYear_() {
+      const year = $('adminStudentYear').value;
+      if (!year) return await showAlert('일괄 비활성화할 학년도를 학년도 칸에 입력해 주세요.');
+      if (!(await showConfirm(`${year}학년도 학생 전체를 비활성화할까요? 기존 v8.3 호환 시트에서는 행이 삭제됩니다.`))) return;
+      await runAction(async () => {
+        const result = await callServer('deactivateCentralStudentsByYear', year);
+        await showAlert(`${result.count}명을 비활성화했습니다.`);
+        await loadAdminStudents();
+      });
+    }
+
+    // 배포 직후 연습용 명단을 지우고 실제 학교 명단을 새로 올릴 수 있게 한다.
+    // getAdminStudents는 화면 표시용으로 결과를 100명까지 자르므로, 확인창에
+    // 미리 인원수를 보여주는 대신 실제 삭제 후 정확한 수를 알린다.
+    async function resetStudentList_() {
+      if (!(await showConfirm(
+        '중앙 학생목록 전체를 영구 삭제할까요?\n'
+        + '되돌릴 수 없습니다. 실제 학교 명단을 올리기 전 연습용 데이터를 지울 때만 사용하세요.'
+      ))) return;
+      await runAction(async () => {
+        const result = await callServer('resetCentralStudentList');
+        await showAlert(
+          result.removedCount
+            ? `${result.removedCount}명의 학생 데이터를 삭제했습니다.`
+            : '삭제할 학생 데이터가 없었습니다.'
+        );
+        await loadAdminStudents();
+      });
+    }
+
+    async function importRoster() {
+      const file = $('rosterCsvFile').files[0];
+      if (!file) return await showAlert('CSV 파일을 선택해 주세요.');
+      const text = await file.text();
+      await runAction(async () => {
+        const preview = await callServer('previewCentralStudentCsv', text);
+        if (!(await showConfirm(`${preview.count}명의 명단으로 현재 중앙 학생목록을 교체할까요?\n다른 파일에서 옮길 때는 반드시 값만 붙여넣기 하세요.`))) return;
+        const year = Number($('adminStudentYear').value) || new Date().getFullYear();
+        await callServer('importCentralStudentCsv', text, year);
+        await loadAdminStudents();
+      });
+    }
+
+    async function exportRoster() {
+      await runAction(async () => {
+        const csv = await callServer('exportCentralStudentCsv', {
+          schoolYear:$('adminStudentYear').value,
+          grade:$('adminStudentGrade').value,
+          classNumber:$('adminStudentClass').value,
+        });
+        const blob = new Blob(['\ufeff', csv], {type:'text/csv;charset=utf-8'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `중앙_학생명단_${new Date().getFullYear()}.csv`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      });
+    }
+
+    async function loadPhotoStatus() {
+      await runAction(async () => {
+        const result = await callServer('getAdminPhotoStatus', {});
+        const s = result.summary;
+        const folderLink = $('openPhotoFolderLink');
+        folderLink.classList.toggle('hidden', !result.folderUrl);
+        if (result.folderUrl) folderLink.href = result.folderUrl;
+        $('photoSummary').textContent = `전체 ${s.total}명 · 연결 ${s.CONNECTED} · 동기화 가능 ${s.READY_TO_SYNC} · 누락 ${s.MISSING} · 중복 ${s.DUPLICATE}`;
+        $('photoStatusRows').innerHTML = result.rows.map(row => `<div class="record">
+          ${row.student.grade}-${row.student.classNumber}-${row.student.studentNumber} ${escapeHtml(row.student.name)}
+          <span class="badge">${escapeHtml(row.status)}</span></div>`).join('')
+          || '<p class="muted">조회된 학생이 없습니다.</p>';
+      });
+    }
+
+    async function synchronizePhotos() {
+      if (!(await showConfirm('중앙 사진 폴더의 파일명으로 학생 연결정보를 다시 만들까요?'))) return;
+      await runAction(async () => {
+        const result = await callServer('syncCentralStudentPhotos');
+        await showAlert(`연결 ${result.connectedCount}, 누락 ${result.missingCount}, 중복 ${result.duplicateCount}, 잘못된 파일 ${result.invalidFileCount}`);
+        await loadPhotoStatus();
+      });
+    }
+
+    async function loadAssignments() {
+      await runAction(async () => {
+        const [assignments, requests, approvedTeachers] = await Promise.all([
+          callServer('getAdminTeacherAssignments', {}),
+          callServer('getAdminAssignmentRequests', {}),
+          callServer('getApprovedTeachers'),
+        ]);
+        $('assignmentCount').textContent = assignments.length;
+        renderTeacherAssignmentGroups_(assignments, approvedTeachers);
+        $('assignmentRequestRows').innerHTML = requests.map(request => `<tr>
+          <td>${request.status === 'PENDING' ? `<input type="checkbox" data-assignment-request="${escapeHtml(request.requestKey)}" aria-label="담당 신청 선택">` : ''}</td>
+          <td>${escapeHtml(request.teacherEmail)}</td><td>${request.schoolYear}</td>
+          <td>${request.grade}-${request.classNumber}</td><td>${escapeHtml(request.subject)}</td>
+          <td>${escapeHtml(request.statusLabel)}</td><td>${request.status === 'PENDING'
+            ? `<button class="secondary" data-approve-request="${escapeHtml(request.requestKey)}">승인</button>
+               <button class="danger" data-reject-request="${escapeHtml(request.requestKey)}">거부</button>`
+            : escapeHtml(request.processedAt || '')}</td></tr>`).join('')
+          || '<tr><td colspan="7" class="muted">담당 신청이 없습니다.</td></tr>';
+        $('selectAllAssignmentRequests').checked = false;
+        document.querySelectorAll('[data-approve-request]').forEach(button => {
+          button.addEventListener('click', () => reviewAssignmentRequest_(button.dataset.approveRequest, 'APPROVED'));
+        });
+        document.querySelectorAll('[data-reject-request]').forEach(button => {
+          button.addEventListener('click', () => reviewAssignmentRequest_(button.dataset.rejectRequest, 'REJECTED'));
+        });
+      });
+    }
+
+    // 교사별로 묶어서 각 교사의 반 목록을 그 아래 나열하고, 활성 담당이
+    // 있는 교사에는 그룹 머리글에 체크박스·해지 버튼을 붙인다.
+    function renderTeacherAssignmentGroups_(assignments, approvedTeachers) {
+      const approvedByEmail = new Map(approvedTeachers.map(t => [t.teacherEmail, t]));
+      const byTeacher = new Map();
+      assignments.forEach(a => {
+        const list = byTeacher.get(a.teacherEmail) || [];
+        list.push(a);
+        byTeacher.set(a.teacherEmail, list);
+      });
+      const teacherEmails = Array.from(byTeacher.keys()).sort((a, b) => a.localeCompare(b));
+      $('assignmentRows').innerHTML = teacherEmails.map(teacherEmail => {
+        const rows = byTeacher.get(teacherEmail);
+        const approved = approvedByEmail.get(teacherEmail);
+        const retryButton = !approved && rows.some(a => !a.active)
+          ? `<button class="secondary" data-retry-access-revocation="${escapeHtml(teacherEmail)}" style="margin-left:8px">Drive 권한 제거 재시도</button>`
+          : '';
+        const headerCell = approved
+          ? `<td><input type="checkbox" data-approved-teacher="${escapeHtml(teacherEmail)}" aria-label="교사 선택"></td>
+             <td colspan="5"><strong>${escapeHtml(teacherEmail)}</strong> · 담당 ${approved.assignmentCount}개 · 마지막 승인 ${escapeHtml(approved.lastApprovedAt || '')}
+             <button class="danger" data-revoke-teacher="${escapeHtml(teacherEmail)}" style="margin-left:8px">해지</button></td>`
+          : `<td></td><td colspan="5"><strong>${escapeHtml(teacherEmail)}</strong> · 활성 담당 없음${retryButton}</td>`;
+        const detailRows = rows.map(a => `<tr>
+          <td></td><td>${a.schoolYear}</td><td>${a.grade}-${a.classNumber}</td><td>${escapeHtml(a.subject)}</td>
+          <td>${a.active ? '사용' : '비활성'}</td><td>
+          <button class="ghost" data-edit-assignment="${escapeHtml(a.assignmentKey)}">수정</button>
+          <button class="secondary" data-toggle-assignment="${escapeHtml(a.assignmentKey)}">${a.active ? '비활성화' : '활성화'}</button></td></tr>`).join('');
+        return `<tr class="teacher-group">${headerCell}</tr>${detailRows}`;
+      }).join('') || '<tr><td colspan="6" class="muted">등록된 담당이 없습니다.</td></tr>';
+
+      $('selectAllApprovedTeachers').checked = false;
+      document.querySelectorAll('[data-edit-assignment]').forEach(button => button.addEventListener('click', () => {
+        editAssignment(assignments.find(a => a.assignmentKey === button.dataset.editAssignment));
+      }));
+      document.querySelectorAll('[data-toggle-assignment]').forEach(button => button.addEventListener('click', async () => {
+        const item = assignments.find(a => a.assignmentKey === button.dataset.toggleAssignment);
+        await runAction(async () => { await callServer('setTeacherAssignmentActive', item.assignmentKey, !item.active); await loadAssignments(); });
+      }));
+      document.querySelectorAll('[data-revoke-teacher]').forEach(button => {
+        button.addEventListener('click', () => revokeApprovedTeachers_([button.dataset.revokeTeacher]));
+      });
+      document.querySelectorAll('[data-retry-access-revocation]').forEach(button => {
+        button.addEventListener('click', () => retryApprovedTeacherAccessRevocation_(
+          button.dataset.retryAccessRevocation
+        ));
+      });
+    }
+
+    async function revokeSelectedApprovedTeachers_() {
+      const emails = Array.from(document.querySelectorAll('[data-approved-teacher]:checked'))
+        .map(input => input.dataset.approvedTeacher);
+      if (!emails.length) return await showAlert('해지할 교사를 하나 이상 선택해 주세요.');
+      await revokeApprovedTeachers_(emails);
+    }
+
+    async function revokeApprovedTeachers_(emails) {
+      const typed = await showPrompt(`${emails.length}명의 담당과 중앙 자료 접근 권한을 해지합니다. 계속하려면 "해지"를 입력하세요.`);
+      if (typed !== '해지') return;
+      await runAction(async () => {
+        const result = await callServer('revokeApprovedTeachersAccess', emails);
+        const warning = result.results.map(item => item.warning).find(Boolean);
+        const failures = result.results.filter(item => !item.accessRevoked);
+        const failureMessage = failures.length
+          ? `\n담당은 비활성화했지만 다음 Drive 권한 제거를 확인하지 못했습니다.\n${failures.map(formatAccessRevocationFailure_).join('\n')}\n비활성 교사 행의 재시도 버튼을 이용해 주세요.`
+          : '\n중앙 데이터베이스와 사진 폴더의 직접 접근 권한 제거를 확인했습니다.';
+        await showAlert(`${result.deactivatedCount}건의 담당을 해지했습니다.${failureMessage}${warning ? `\n${warning}` : ''}`);
+        await loadAssignments();
+      });
+    }
+
+    function formatAccessRevocationFailure_(result) {
+      const details = Array.isArray(result.failureDetails)
+        ? result.failureDetails.join(' ') : '권한 제거 상태를 확인하지 못했습니다.';
+      return `- ${result.teacherEmail}: ${details}`;
+    }
+
+    async function retryApprovedTeacherAccessRevocation_(teacherEmail) {
+      await runAction(async () => {
+        const result = await callServer(
+          'retryApprovedTeacherAccessRevocation',
+          teacherEmail
+        );
+        const message = result.accessRevoked
+          ? `${teacherEmail}의 중앙 Drive 직접 접근 권한 제거를 확인했습니다.`
+          : formatAccessRevocationFailure_(result);
+        await showAlert(`${message}${result.warning ? `\n${result.warning}` : ''}`);
+        await loadAssignments();
+      });
+    }
+
+    async function approveSelectedAssignmentRequests_() {
+      const keys = Array.from(document.querySelectorAll('[data-assignment-request]:checked'))
+        .map(input => input.dataset.assignmentRequest);
+      if (!keys.length) return await showAlert('승인할 담당 신청을 하나 이상 선택해 주세요.');
+      if (!(await showConfirm(`${keys.length}건의 담당 신청을 한 번에 승인할까요?`))) return;
+      await runAction(async () => {
+        const result = await callServer('approveAssignmentRequestsBatch', keys);
+        await showAlert(`${result.count}건의 담당 신청을 승인했습니다.`);
+        await loadAssignments();
+      });
+    }
+
+    async function editAssignment(item) {
+      const teacherEmail = await showPrompt('교사 Google 계정 이메일', item ? item.teacherEmail : ''); if (teacherEmail == null) return;
+      const schoolYear = await showPrompt('학년도', item ? item.schoolYear : new Date().getFullYear()); if (schoolYear == null) return;
+      const grade = await showPrompt('담당 학년', item ? item.grade : ''); if (grade == null) return;
+      const subject = await showPrompt('담당 과목', item ? item.subject : ''); if (subject == null) return;
+      const classNumbers = await showPrompt(
+        item ? '담당 반' : '담당 반(여러 반은 쉼표로 구분)',
+        item ? item.classNumber : ''
+      );
+      if (classNumbers == null) return;
+      await runAction(async () => {
+        if (item) {
+          await callServer('saveTeacherAssignment', {
+            assignmentKey:item.assignmentKey,
+            teacherEmail,schoolYear,grade,classNumber:classNumbers,subject,
+            assignmentType:item.assignmentType,
+            active:item.active,
+          });
+        } else {
+          const result = await callServer('saveTeacherAssignmentsBatch', {
+            teacherEmail,schoolYear,grade,subject,classNumbers,
+            assignmentType:'교과',
+          });
+          await showAlert(`${result.count}개 반의 담당 수업을 등록했습니다.`);
+        }
+        await loadAssignments();
+      });
+    }
+
+    async function reviewAssignmentRequest_(requestKey, decision) {
+      let reason = '';
+      if (decision === 'REJECTED') {
+        reason = (await showPrompt('거부 사유를 입력해 주세요.', '')) || '';
+        if (!reason.trim()) return await showAlert('거부 사유가 필요합니다.');
+      }
+      if (!(await showConfirm(decision === 'APPROVED' ? '이 담당 신청을 승인할까요?' : '이 담당 신청을 거부할까요?'))) return;
+      await runAction(async () => {
+        await callServer('reviewAssignmentRequest', requestKey, decision, reason);
+        await loadAssignments();
+      });
+    }
+
+    function renderPersonalBootstrap() {
+      const b = state.bootstrap;
+      const connectionReady = b.central && b.central.ready;
+      const storageReady = b.storage && b.storage.ok;
+      $('personalTabs').classList.add('hidden');
+      $('assignmentRequestCard').classList.add('hidden');
+      $('noAssignments').classList.add('hidden');
+      $('activityArea').classList.add('hidden');
+      $('personalConnection').innerHTML = `<h2>현재 접속 상태</h2>
+        <div class="status ${connectionReady && storageReady ? 'ok' : 'error'}">
+          중앙 자료: ${escapeHtml(b.central ? b.central.message : '확인되지 않음')}<br>
+          개인 저장소: ${storageReady ? '준비됨' : escapeHtml(personalStorageMessage_(b.storage))}
+        </div>`;
+      renderPersonalSteps(storageReady, (b.assignments || []).length > 0);
+      // 담당 수업 신청은 개인 저장소를 전혀 쓰지 않는다. 신청은 중앙 시트와
+      // 스크립트 속성에만 기록되므로, 개인 데이터베이스가 없거나 망가져도
+      // 신청은 할 수 있어야 한다. 여기서 막으면 교사가 승인을 받을 방법이
+      // 없어 아무것도 못 하는 상태에 갇힌다.
+      $('personalTabs').classList.remove('hidden');
+      $('assignmentRequestCard').classList.remove('hidden');
+      if (!$('requestSchoolYear').value) {
+        $('requestSchoolYear').value = b.currentSchoolYear || new Date().getFullYear();
+      }
+      const assignments = b.assignments || [];
+      $('noAssignments').classList.toggle('hidden', assignments.length > 0);
+      // 활동 기록 저장은 개인 데이터베이스가 있어야 하므로 둘 다 갖춰야 연다.
+      $('personalActivityTab').disabled = assignments.length === 0 || !storageReady;
+      // 저장소가 안 갖춰졌으면 만들기/복구가 최우선이니 그 탭부터 연다.
+      showPersonalTab(!storageReady ? 'storage' : (assignments.length ? 'activity' : 'request'));
+    }
+
+    // 처음 접속한 교사는 무엇부터 해야 하는지 알기 어렵다. 남은 순서와
+    // 지금 할 일을 함께 보여 준다.
+    function renderPersonalSteps(storageReady, hasAssignments) {
+      const box = $('personalSteps');
+      box.replaceChildren();
+      box.classList.remove('hidden');
+      const title = document.createElement('h2');
+      title.textContent = '이용 순서';
+      const list = document.createElement('ol');
+      list.className = 'steps';
+      const steps = [
+        {
+          label: '개인 저장소 만들기',
+          note: '활동 기록을 저장할 내 Drive 스프레드시트입니다.',
+          done: storageReady,
+        },
+        {
+          label: '담당 수업 신청하고 승인받기',
+          note: '관리자가 승인해야 담당 학급 학생이 보입니다.',
+          done: hasAssignments,
+        },
+        {
+          label: '학생 활동 기록하기',
+          note: '위 두 단계가 끝나면 기록할 수 있습니다.',
+          done: false,
+        },
+      ];
+      const currentIndex = steps.findIndex(step => !step.done);
+      steps.forEach((step, index) => {
+        const item = document.createElement('li');
+        if (step.done) item.classList.add('done');
+        else if (index === currentIndex) item.classList.add('now');
+        const text = document.createElement('span');
+        text.textContent = step.label;
+        const note = document.createElement('span');
+        note.className = 'step-note';
+        note.textContent = ` — ${step.note}`;
+        text.append(note);
+        item.append(text);
+        list.append(item);
+      });
+      box.append(title, list);
+    }
+
+    // 서버는 실패 상태와 함께 취할 수 있는 복구 동작을 돌려주는데 화면에
+    // 배선되어 있지 않아, 개인 저장소가 한 번 망가지면 빠져나올 수 없었다.
+    const PERSONAL_STORAGE_ACTION_LABELS = {
+      RESTORE_DATABASE: '휴지통에서 되살리기',
+      CREATE_NEW_DATABASE: '새 개인 저장소 만들기',
+      RESTORE_CANDIDATE: '휴지통 후보로 연결',
+      RECONNECT_CANDIDATE: '기존 파일로 다시 연결',
+      CANCEL: '취소',
+    };
+
+    function renderPersonalStorageRecovery(storage) {
+      const box = $('personalStorageTab');
+      const actions = (storage && storage.actions) || [];
+      box.replaceChildren();
+      if (storage && storage.ok) {
+        const readyTitle = document.createElement('h2');
+        readyTitle.textContent = '개인 저장소';
+        const status = document.createElement('p');
+        status.className = 'muted';
+        status.textContent = '준비됨';
+        box.append(readyTitle, status);
+        const url = storage.database && storage.database.url;
+        if (url) {
+          const link = document.createElement('a');
+          link.className = 'secondary';
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = '스프레드시트 열기';
+          box.append(link);
+        }
+        return;
+      }
+      const title = document.createElement('h2');
+      title.textContent = '개인 저장소 만들기';
+      const hint = document.createElement('p');
+      hint.className = 'muted';
+      hint.textContent = '활동 기록은 선생님 Google Drive의 스프레드시트에 저장됩니다. '
+        + '처음이면 새로 만들고, 전에 쓰던 파일이 있으면 연결하세요. '
+        + '담당 수업 신청은 지금도 할 수 있습니다.';
+      const row = document.createElement('div');
+      row.className = 'row';
+      const candidates = storage.recoveryCandidates || [];
+      // 서버가 준 동작은 그대로 노출한다. 새 복구 수단이 생기면 자동으로 뜬다.
+      actions.forEach(action => {
+        const needsToken = action === 'RESTORE_CANDIDATE' || action === 'RECONNECT_CANDIDATE';
+        (needsToken ? candidates : [null]).forEach(candidate => {
+          const button = document.createElement('button');
+          button.className = action === 'CANCEL' ? 'ghost' : 'secondary';
+          const label = PERSONAL_STORAGE_ACTION_LABELS[action] || action;
+          button.textContent = candidate ? `${label} · ${candidate.label}` : label;
+          button.addEventListener('click', () => {
+            resolveStorageIssue(action, candidate && candidate.token);
+          });
+          row.append(button);
+        });
+      });
+      // 이름을 바꿨거나 앱 폴더 밖으로 옮긴 파일은 서버가 후보로 찾지 못한다.
+      // 링크로 직접 연결하는 길을 항상 열어 둔다.
+      const linkButton = document.createElement('button');
+      linkButton.className = 'secondary';
+      linkButton.textContent = '기존 개인 저장소 연결하기';
+      const linkArea = document.createElement('div');
+      linkArea.className = 'hidden';
+      linkArea.style.marginTop = '12px';
+      linkButton.addEventListener('click', () => {
+        linkArea.classList.toggle('hidden');
+        if (!linkArea.classList.contains('hidden')) linkArea.querySelector('input').focus();
+      });
+      const linkLabel = document.createElement('label');
+      linkLabel.textContent = '개인 저장소 스프레드시트 URL 또는 파일 ID';
+      const linkInput = document.createElement('input');
+      linkInput.type = 'text';
+      linkInput.placeholder = 'Google 스프레드시트 링크를 붙여 넣으세요';
+      const linkHint = document.createElement('p');
+      linkHint.className = 'muted';
+      linkHint.textContent = '지금 로그인한 계정이 소유한, 이 앱이 만든 올해 파일만 연결됩니다.';
+      const linkSubmit = document.createElement('button');
+      linkSubmit.className = 'primary';
+      linkSubmit.textContent = '이 파일로 연결';
+      linkSubmit.addEventListener('click', () => connectStorageByLink(linkInput.value));
+      linkInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') connectStorageByLink(linkInput.value);
+      });
+      linkArea.append(linkLabel, linkInput, linkHint, linkSubmit);
+      row.append(linkButton);
+      box.append(title, hint, row, linkArea);
+    }
+
+    async function connectStorageByLink(reference) {
+      if (!String(reference || '').trim()) {
+        await showAlert('연결할 스프레드시트 링크를 입력해 주세요.');
+        return;
+      }
+      await runAction(async () => {
+        const storage = await callServer('connectPersonalDatabaseByLink', reference);
+        state.bootstrap.storage = storage;
+        if (storage.ok) { await loadApp(state.mode); return; }
+        renderPersonalBootstrap();
+      });
+    }
+
+    async function resolveStorageIssue(action, candidateToken) {
+      if (action === 'CREATE_NEW_DATABASE' && !(await showConfirm(
+        '새 개인 데이터베이스를 만들까요?\n'
+        + '기존에 연결됐던 파일은 삭제하지 않습니다.'
+      ))) return;
+      await runAction(async () => {
+        const storage = await callServer(
+          'resolvePersonalStorageIssue', action, candidateToken || ''
+        );
+        state.bootstrap.storage = storage;
+        if (storage.ok) { await loadApp(state.mode); return; }
+        renderPersonalBootstrap();
+      });
+    }
+
+    // 서버가 주는 필드명은 statusMessage 다. message 로 읽으면 실패 사유가
+    // 빈칸으로 나와 무엇이 잘못됐는지 알 수 없다.
+    function personalStorageMessage_(storage) {
+      if (!storage) return '중앙 자료 연결 후 준비됩니다.';
+      return storage.statusMessage || storage.state || '준비하지 못했습니다.';
+    }
+
+    function showPersonalTab(name) {
+      const assignments = state.bootstrap && state.bootstrap.assignments || [];
+      const selected = name === 'activity' && assignments.length ? 'activity'
+        : name === 'storage' ? 'storage' : 'request';
+      document.querySelectorAll('[data-personal-tab]').forEach(button => button.classList.toggle('active', button.dataset.personalTab === selected));
+      document.querySelectorAll('[data-personal-panel]').forEach(panel => panel.classList.toggle('hidden', panel.dataset.personalPanel !== selected));
+      if (selected === 'activity') showActivityArea();
+      if (selected === 'request') loadMyAssignmentRequests();
+      if (selected === 'storage') renderPersonalStorageRecovery(state.bootstrap && state.bootstrap.storage);
+    }
+
+
+    async function submitAssignmentRequest() {
+      const payload = {
+        schoolYear:$('requestSchoolYear').value,
+        grade:$('requestGrade').value,
+        subject:$('requestSubject').value,
+        classNumbers:$('requestClasses').value,
+      };
+      await runAction(async () => {
+        const result = await callServer('submitMyAssignmentRequest', payload);
+        $('requestClasses').value = '';
+        // 목록을 먼저 갱신해야 확인을 누른 직후 바로 최신 상태가 보인다.
+        // alert 를 먼저 띄우면 확인을 누르는 동안 목록 갱신이 미뤄져,
+        // 확인 후에도 잠깐 목록이 그대로인 것처럼 보인다.
+        await loadMyAssignmentRequests();
+        await showAlert(`${result.count}개 반의 담당 승인을 신청했습니다.`);
+      });
+    }
+
+    async function loadMyAssignmentRequests() {
+      await runAction(async () => {
+        const requests = await callServer('getMyAssignmentRequests');
+        $('myAssignmentRequestRows').innerHTML = requests.map(request => `<div class="record">
+          <div class="row between">
+            <strong>${request.schoolYear}학년도 ${request.grade}학년 ${request.classNumber}반 ${escapeHtml(request.subject)}</strong>
+            <span class="badge">${escapeHtml(request.statusLabel)}</span>
+          </div>
+          <div class="small muted">신청 ${escapeHtml(request.requestedAt || '')}${request.reason ? ` · 사유: ${escapeHtml(request.reason)}` : ''}</div>
+          ${request.status === 'PENDING'
+            ? `<div class="row" style="margin-top:6px">
+                 <input type="checkbox" data-select-request="${escapeHtml(request.requestKey)}" aria-label="신청 선택">
+                 <button class="ghost" data-cancel-request="${escapeHtml(request.requestKey)}">신청 취소</button>
+               </div>`
+            : ''}
+        </div>`).join('') || '<p class="muted">신청 내역이 없습니다.</p>';
+        $('selectAllMyAssignmentRequests').checked = false;
+      }, false);
+    }
+
+    // 승인·거부가 끝난 신청은 취소 버튼 자체가 없으므로(서버도 PENDING만 허용)
+    // 여기서는 클릭된 버튼의 존재만으로 취소 대상을 신뢰한다.
+    async function cancelAssignmentRequest_(requestKey) {
+      if (!(await showConfirm('이 담당 수업 신청을 취소할까요?'))) return;
+      await runAction(async () => {
+        await callServer('cancelMyAssignmentRequest', requestKey);
+        await loadMyAssignmentRequests();
+      }, false);
+    }
+
+    async function cancelSelectedMyAssignmentRequests_() {
+      const keys = Array.from(document.querySelectorAll('[data-select-request]:checked'))
+        .map(input => input.dataset.selectRequest);
+      if (!keys.length) return await showAlert('취소할 신청을 하나 이상 선택해 주세요.');
+      if (!(await showConfirm(`${keys.length}건의 신청을 한 번에 취소할까요?`))) return;
+      await runAction(async () => {
+        await callServer('cancelAssignmentRequestsBatch', keys);
+        await loadMyAssignmentRequests();
+      });
+    }
+
+    function showActivityArea() {
+      const assignments = state.bootstrap.assignments || [];
+      $('activityArea').classList.toggle('hidden', assignments.length === 0);
+      $('recordCategory').innerHTML = (state.bootstrap.categories || []).map(c => `<option>${escapeHtml(c)}</option>`).join('');
+      renderCompetencies();
+      renderAssignmentPicker_();
+      if (!state.selectedAssignmentKey && !state.students.length) {
+        renderStudentListMessage_('과목을 선택해 주세요.');
+      }
+    }
+
+    function assignmentGradeKey_(assignment) {
+      return `${assignment.schoolYear}|${assignment.grade}`;
+    }
+
+    function assignmentGradeOptions_(assignments) {
+      const options = new Map();
+      assignments.forEach(assignment => {
+        const key = assignmentGradeKey_(assignment);
+        if (!options.has(key)) {
+          options.set(key, {
+            key,
+            schoolYear:assignment.schoolYear,
+            grade:assignment.grade,
+          });
+        }
+      });
+      return Array.from(options.values()).sort((left, right) =>
+        left.schoolYear - right.schoolYear || left.grade - right.grade
+      );
+    }
+
+    function renderAssignmentPicker_() {
+      const assignments = state.bootstrap && state.bootstrap.assignments || [];
+      const subjects = Array.from(new Set(assignments.map(item => item.subject)))
+        .sort((left, right) => left.localeCompare(right, 'ko'));
+      if (!subjects.includes(state.selectedSubject)) {
+        state.selectedSubject = '';
+        state.selectedGradeKey = '';
+        state.selectedAssignmentKey = '';
+      }
+      const subjectAssignments = assignments.filter(item => item.subject === state.selectedSubject);
+      const gradeOptions = assignmentGradeOptions_(subjectAssignments);
+      if (gradeOptions.length === 1) {
+        state.selectedGradeKey = gradeOptions[0].key;
+      } else if (!gradeOptions.some(item => item.key === state.selectedGradeKey)) {
+        state.selectedGradeKey = '';
+      }
+      const classAssignments = subjectAssignments.filter(
+        item => assignmentGradeKey_(item) === state.selectedGradeKey
+      );
+      if (!classAssignments.some(item => item.assignmentKey === state.selectedAssignmentKey)) {
+        state.selectedAssignmentKey = '';
+      }
+      $('subjectButtons').innerHTML = subjects.map(subject =>
+        `<button class="chip ${subject === state.selectedSubject ? 'active' : ''}" data-subject="${escapeHtml(subject)}">${escapeHtml(subject)}</button>`
+      ).join('');
+      const showSchoolYear = new Set(gradeOptions.map(item => item.schoolYear)).size > 1;
+      $('gradePicker').classList.toggle('hidden', gradeOptions.length <= 1);
+      $('gradeButtons').innerHTML = gradeOptions.map(option =>
+        `<button class="chip ${option.key === state.selectedGradeKey ? 'active' : ''}" data-grade-key="${escapeHtml(option.key)}">`
+          + `${showSchoolYear ? `${option.schoolYear}학년도 ` : ''}${option.grade}학년</button>`
+      ).join('');
+      $('classPicker').classList.toggle('hidden', !state.selectedGradeKey);
+      $('classButtons').innerHTML = classAssignments.map(assignment =>
+        `<button class="chip ${assignment.assignmentKey === state.selectedAssignmentKey ? 'active' : ''}" `
+          + `data-assignment-key="${escapeHtml(assignment.assignmentKey)}">${assignment.classNumber}반</button>`
+      ).join('');
+      const selected = assignments.find(item => item.assignmentKey === state.selectedAssignmentKey);
+      $('assignmentHint').textContent = selected ? selected.label
+        : !state.selectedSubject ? '과목을 선택해 주세요.'
+        : !state.selectedGradeKey ? '학년을 선택해 주세요.'
+        : '반을 선택해 주세요.';
+      $('loadStudentsButton').disabled = !state.selectedAssignmentKey;
+      $('toggleStudentPhotosButton').disabled = !state.selectedAssignmentKey;
+    }
+
+    function selectAssignmentSubject_(subject) {
+      state.selectedSubject = subject;
+      state.selectedGradeKey = '';
+      state.selectedAssignmentKey = '';
+      renderAssignmentPicker_();
+      clearStudentsForAssignment_(
+        state.selectedGradeKey ? '반을 선택해 주세요.' : '학년을 선택해 주세요.'
+      );
+    }
+
+    function selectAssignmentGrade_(gradeKey) {
+      state.selectedGradeKey = gradeKey;
+      state.selectedAssignmentKey = '';
+      renderAssignmentPicker_();
+      clearStudentsForAssignment_('반을 선택해 주세요.');
+    }
+
+    function selectAssignmentClass_(assignmentKey) {
+      const assignment = (state.bootstrap.assignments || []).find(item =>
+        item.assignmentKey === assignmentKey
+          && item.subject === state.selectedSubject
+          && assignmentGradeKey_(item) === state.selectedGradeKey
+      );
+      if (!assignment) return;
+      if (assignment.assignmentKey !== state.selectedAssignmentKey) {
+        state.photosEnabled = false;
+        $('toggleStudentPhotosButton').textContent = '사진 켜기';
+        $('toggleStudentPhotosButton').setAttribute('aria-pressed', 'false');
+      }
+      state.selectedAssignmentKey = assignment.assignmentKey;
+      renderAssignmentPicker_();
+      loadStudents();
+    }
+
+    function clearStudentsForAssignment_(message) {
+      resetStudentPhotoLoading_();
+      state.students = [];
+      state.selectedStudent = null;
+      cancelEditRecord_();
+      $('recordEditor').classList.add('hidden');
+      $('recentRecords').replaceChildren();
+      renderStudentListMessage_(message);
+    }
+
+    function renderStudentListMessage_(message, error) {
+      const grid = $('studentGrid');
+      grid.classList.remove('photos-on', 'photos-off');
+      grid.innerHTML = `<div class="student-list-message ${error ? 'error' : ''}" role="${error ? 'alert' : 'status'}">`
+        + `${escapeHtml(message)}</div>`;
+    }
+
+    function renderStudentListLoading_() {
+      const grid = $('studentGrid');
+      grid.classList.remove('photos-on', 'photos-off');
+      grid.innerHTML = '<div class="student-list-message student-list-loading" role="status">'
+        + '<span class="list-spinner" aria-hidden="true"></span>'
+        + '<span>학생 목록을 불러오는 중입니다...</span></div>';
+    }
+
+    async function loadStudents() {
+      const assignmentKey = state.selectedAssignmentKey;
+      if (!assignmentKey) {
+        renderStudentListMessage_('반을 선택해 주세요.');
+        return;
+      }
+      resetStudentPhotoLoading_();
+      const generation = state.photoGeneration;
+      state.students = [];
+      state.selectedStudent = null;
+      $('recordEditor').classList.add('hidden');
+      $('loadStudentsButton').disabled = true;
+      $('toggleStudentPhotosButton').disabled = true;
+      renderStudentListLoading_();
+      try {
+        const students = await callServer('searchStudents', {
+          assignmentKey,
+          query:$('studentQuery').value,
+          limit:50,
+        });
+        if (generation !== state.photoGeneration) return;
+        state.students = students;
+        renderStudents();
+      } catch (error) {
+        if (generation !== state.photoGeneration) return;
+        renderStudentListMessage_(safeErrorMessage(error), true);
+      } finally {
+        if (generation === state.photoGeneration) renderAssignmentPicker_();
+      }
+    }
+
+    function renderStudents() {
+      const grid = $('studentGrid');
+      grid.classList.toggle('photos-on', state.photosEnabled);
+      grid.classList.toggle('photos-off', !state.photosEnabled);
+      grid.innerHTML = state.students.map(student => {
+        const photo = state.photosEnabled && state.photos[student.studentKey];
+        const shouldLoadPhoto = state.photosEnabled
+          && student.photoAvailable
+          && !photo
+          && !state.missingPhotos.has(student.studentKey);
+        const selected = state.selectedStudent && state.selectedStudent.studentKey === student.studentKey;
+        const photoSlot = !state.photosEnabled ? ''
+          : photo ? `<img class="portrait photo-slot" src="${photo}" alt="">`
+          : shouldLoadPhoto
+            ? '<span class="photo-loading photo-slot" role="status"><span class="photo-spinner" aria-hidden="true"></span><span class="photo-status-text">로딩 중</span></span>'
+            : `<span class="initial photo-slot" aria-label="사진 없음"><span class="photo-state-icon">${escapeHtml(student.name.slice(0,1))}</span><span class="photo-status-text">사진 없음</span></span>`;
+        return `<button class="student ${selected ? 'selected' : ''}" data-student="${escapeHtml(student.studentKey)}"
+          ${shouldLoadPhoto ? `data-photo-student="${escapeHtml(student.studentKey)}"` : ''}
+          ${student.recordable ? '' : 'disabled'}>
+          ${photoSlot}
+          <div class="number">${student.studentNumber}번</div><div>${escapeHtml(student.name)}</div>
+          ${student.status === '재학' ? '' : `<span class="badge">${escapeHtml(student.status)}</span>`}</button>`;
+      }).join('') || '<p class="muted">조회된 학생이 없습니다.</p>';
+      document.querySelectorAll('[data-student]').forEach(button => button.addEventListener('click', () => selectStudent(button.dataset.student)));
+      observeVisibleStudentPhotos_();
+    }
+
+    function toggleStudentPhotos() {
+      state.photosEnabled = !state.photosEnabled;
+      resetStudentPhotoLoading_();
+      $('toggleStudentPhotosButton').textContent = state.photosEnabled ? '사진 끄기' : '사진 켜기';
+      $('toggleStudentPhotosButton').setAttribute('aria-pressed', String(state.photosEnabled));
+      renderStudents();
+    }
+
+    async function selectStudent(studentKey) {
+      state.selectedStudent = state.students.find(student => student.studentKey === studentKey);
+      enqueueStudentPhoto_(studentKey);
+      pumpStudentPhotoQueue_();
+      cancelEditRecord_();
+      renderStudents();
+      $('selectedStudentLabel').textContent = `${state.selectedStudent.grade}학년 ${state.selectedStudent.classNumber}반 ${state.selectedStudent.studentNumber}번 ${state.selectedStudent.name}`;
+      $('recordEditor').classList.remove('hidden');
+      await loadRecentRecords();
+      $('recordEditor').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function resetStudentPhotoLoading_(clearCache) {
+      if (state.photoObserver) state.photoObserver.disconnect();
+      state.photoObserver = null;
+      state.photoGeneration += 1;
+      if (clearCache) {
+        state.photos = {};
+        state.missingPhotos = new Set();
+      }
+      state.pendingPhotos = new Set();
+      state.photoQueue = [];
+      state.activePhotoLoads = 0;
+    }
+
+    function observeVisibleStudentPhotos_() {
+      if (state.photoObserver) state.photoObserver.disconnect();
+      const candidates = Array.from(document.querySelectorAll('[data-photo-student]'));
+      if (!candidates.length) return;
+      if (!('IntersectionObserver' in window)) {
+        candidates.slice(0, 6).forEach(card => {
+          enqueueStudentPhoto_(card.dataset.photoStudent);
+        });
+        pumpStudentPhotoQueue_();
+        return;
+      }
+      state.photoObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          state.photoObserver.unobserve(entry.target);
+          enqueueStudentPhoto_(entry.target.dataset.photoStudent);
+        });
+        pumpStudentPhotoQueue_();
+      }, {rootMargin:'160px 0px',threshold:0.01});
+      candidates.forEach(card => state.photoObserver.observe(card));
+    }
+
+    function enqueueStudentPhoto_(studentKey) {
+      const student = state.students.find(item => item.studentKey === studentKey);
+      if (
+        !state.photosEnabled
+          || !student
+          || !student.photoAvailable
+          || state.photos[studentKey]
+          || state.missingPhotos.has(studentKey)
+          || state.pendingPhotos.has(studentKey)
+      ) return;
+      state.pendingPhotos.add(studentKey);
+      state.photoQueue.push({
+        studentKey,
+        assignmentKey:state.selectedAssignmentKey,
+        generation:state.photoGeneration,
+      });
+    }
+
+    function pumpStudentPhotoQueue_() {
+      while (state.activePhotoLoads < 2 && state.photoQueue.length) {
+        const request = state.photoQueue.shift();
+        if (request.generation !== state.photoGeneration) {
+          state.pendingPhotos.delete(request.studentKey);
+          continue;
+        }
+        const batch = [request];
+        while (
+          batch.length < 6
+            && state.photoQueue.length
+            && state.photoQueue[0].generation === request.generation
+            && state.photoQueue[0].assignmentKey === request.assignmentKey
+        ) {
+          batch.push(state.photoQueue.shift());
+        }
+        const studentKeys = batch.map(item => item.studentKey);
+        let deferredStudentKeys = [];
+        state.activePhotoLoads += 1;
+        callServer(
+          'getStudentPhotosForMyAssignment',
+          request.assignmentKey,
+          studentKeys
+        ).then(result => {
+          if (request.generation !== state.photoGeneration) return;
+          const photos = result && result.photos || {};
+          studentKeys.forEach(studentKey => {
+            if (!photos[studentKey]) return;
+            state.photos[studentKey] = photos[studentKey];
+            updateStudentPhotoElement_(studentKey, photos[studentKey]);
+          });
+          (result && result.missingStudentKeys || []).forEach(studentKey => {
+            state.missingPhotos.add(studentKey);
+            updateStudentPhotoStatus_(studentKey, 'missing');
+          });
+          deferredStudentKeys = result && result.deferredStudentKeys || [];
+        }).catch(() => {
+          studentKeys.forEach(studentKey => updateStudentPhotoStatus_(studentKey, 'error'));
+        }).finally(() => {
+          if (request.generation !== state.photoGeneration) return;
+          studentKeys.forEach(studentKey => state.pendingPhotos.delete(studentKey));
+          state.activePhotoLoads = Math.max(state.activePhotoLoads - 1, 0);
+          deferredStudentKeys.forEach(enqueueStudentPhoto_);
+          pumpStudentPhotoQueue_();
+        });
+      }
+    }
+
+    function updateStudentPhotoElement_(studentKey, dataUrl) {
+      const card = Array.from(document.querySelectorAll('[data-student]'))
+        .find(item => item.dataset.student === studentKey);
+      if (!card) return;
+      const placeholder = card.querySelector('.photo-slot');
+      if (!placeholder) return;
+      const image = document.createElement('img');
+      image.className = 'portrait photo-slot';
+      image.alt = '';
+      image.src = dataUrl;
+      placeholder.replaceWith(image);
+      delete card.dataset.photoStudent;
+    }
+
+    function updateStudentPhotoStatus_(studentKey, status) {
+      const card = Array.from(document.querySelectorAll('[data-student]'))
+        .find(item => item.dataset.student === studentKey);
+      const placeholder = card && card.querySelector('.photo-slot');
+      const student = state.students.find(item => item.studentKey === studentKey);
+      if (!placeholder || !student) return;
+      const failed = status === 'error';
+      placeholder.className = `${failed ? 'photo-error' : 'initial'} photo-slot`;
+      placeholder.removeAttribute('role');
+      placeholder.setAttribute('aria-label', failed ? '사진 불러오기 실패' : '사진 없음');
+      placeholder.replaceChildren();
+      const icon = document.createElement('span');
+      icon.className = 'photo-state-icon';
+      icon.textContent = failed ? '!' : student.name.slice(0, 1);
+      const label = document.createElement('span');
+      label.className = 'photo-status-text';
+      label.textContent = failed ? '불러오기 실패' : '사진 없음';
+      placeholder.append(icon, label);
+      delete card.dataset.photoStudent;
+    }
+
+    function renderCompetencies() {
+      const category = $('recordCategory').value;
+      const items = (state.bootstrap && state.bootstrap.competencies && state.bootstrap.competencies[category]) || [];
+      state.selectedCompetencies = new Set(Array.from(state.selectedCompetencies).filter(value => items.some(item => item.label === value)));
+      $('competencyChips').innerHTML = items.map(item => `<button type="button" class="chip ${state.selectedCompetencies.has(item.label) ? 'active' : ''}" data-competency="${escapeHtml(item.label)}">${escapeHtml(item.label)}</button>`).join('');
+      $('competencyHelp').textContent = items
+        .filter(item => state.selectedCompetencies.has(item.label) && item.description)
+        .map(item => `${item.label}: ${item.description}`)
+        .join(' · ');
+      document.querySelectorAll('[data-competency]').forEach(button => button.addEventListener('click', () => {
+        const value = button.dataset.competency;
+        if (state.selectedCompetencies.has(value)) state.selectedCompetencies.delete(value); else state.selectedCompetencies.add(value);
+        renderCompetencies();
+      }));
+    }
+
+    async function saveActivityRecord() {
+      if (!state.selectedStudent) return;
+      const assignmentKey = state.selectedAssignmentKey;
+      await runAction(async () => {
+        if (state.editingRecordId) {
+          const result = await callServer('updateRecord', state.editingRecordId, {
+            category:$('recordCategory').value,
+            competencies:Array.from(state.selectedCompetencies),
+            memo:$('recordMemo').value,
+          });
+          cancelEditRecord_();
+          state.records = result.recentRecords;
+          renderRecentRecords();
+          return;
+        }
+        const result = await callServer('saveRecord', {
+          assignmentKey,
+          studentKey:state.selectedStudent.studentKey,
+          category:$('recordCategory').value,
+          competencies:Array.from(state.selectedCompetencies),
+          memo:$('recordMemo').value,
+        });
+        $('recordMemo').value = '';
+        state.selectedCompetencies = new Set();
+        renderCompetencies();
+        state.records = [
+          result.savedRecord,
+          ...state.records.filter(record => record.id !== result.savedRecord.id),
+        ].slice(0, 5);
+        renderRecentRecords();
+      });
+    }
+
+    async function loadRecentRecords() {
+      if (!state.selectedStudent) return;
+      state.records = await callServer(
+        'getRecentRecords',
+        state.selectedStudent.studentKey,
+        state.selectedAssignmentKey,
+        10
+      );
+      renderRecentRecords();
+    }
+
+    function renderRecentRecords() {
+      $('recentRecords').innerHTML = state.records.map(record => `<div class="record">
+        <div class="row between"><strong>${escapeHtml(record.subject)} · ${escapeHtml(record.category)}</strong>
+        <span class="small muted">${escapeHtml(record.recordedAt)}</span></div>
+        <div class="small">${record.competencies.map(escapeHtml).join(', ')}</div>
+        <div>${escapeHtml(record.memo)}</div>
+        ${record.canEdit ? `<button class="ghost small" data-edit-record="${escapeHtml(record.id)}">수정</button>` : ''}
+        ${record.canDelete ? `<button class="danger small" data-delete-record="${escapeHtml(record.id)}">삭제</button>` : ''}
+      </div>`).join('') || '<p class="muted">최근 기록이 없습니다.</p>';
+      document.querySelectorAll('[data-edit-record]').forEach(button => button.addEventListener('click', () => {
+        const record = state.records.find(item => item.id === button.dataset.editRecord);
+        if (record) startEditRecord_(record);
+      }));
+      document.querySelectorAll('[data-delete-record]').forEach(button => button.addEventListener('click', async () => {
+        if (!(await showConfirm('이 기록을 삭제기록으로 옮길까요?'))) return;
+        await runAction(async () => {
+          const result = await callServer('deleteRecord', button.dataset.deleteRecord, '웹앱에서 삭제');
+          if (state.editingRecordId === button.dataset.deleteRecord) cancelEditRecord_();
+          state.records = result.recentRecords || [];
+          renderRecentRecords();
+        });
+      }));
+    }
+
+    // 기존 저장 폼을 재사용해 기록을 고친다. 별도 편집 화면을 새로 만들지
+    // 않고, 폼에 현재 값을 채운 뒤 저장 버튼의 동작만 바꾼다.
+    function startEditRecord_(record) {
+      state.editingRecordId = record.id;
+      $('recordCategory').value = record.category;
+      state.selectedCompetencies = new Set(record.competencies);
+      renderCompetencies();
+      $('recordMemo').value = record.memo;
+      $('saveRecordButton').textContent = '수정 저장';
+      $('cancelEditRecordButton').classList.remove('hidden');
+      $('recordMemo').focus();
+    }
+
+    function cancelEditRecord_() {
+      state.editingRecordId = null;
+      state.selectedCompetencies = new Set();
+      renderCompetencies();
+      $('recordMemo').value = '';
+      $('saveRecordButton').textContent = '기록 저장';
+      $('cancelEditRecordButton').classList.add('hidden');
+    }
+
+    async function searchMyRecords() {
+      await runAction(async () => {
+        const records = await callServer('searchRecords', {
+          category:$('historyCategory').value,
+          subject:$('historySubject').value,
+          archiveState:$('historyArchive').value,
+          limit:100,
+        });
+        $('historyRecords').innerHTML = records.map(record => `<div class="record">
+          <div class="row between"><strong>${escapeHtml(record.student.name)} · ${escapeHtml(record.subject)}</strong>
+          <span class="small muted">${escapeHtml(record.recordedAt)}${record.archived ? ' · 보관' : ''}</span></div>
+          <div class="small">${record.student.grade}-${record.student.classNumber}-${record.student.studentNumber} · ${escapeHtml(record.category)}</div>
+          <div>${escapeHtml(record.memo)}</div></div>`).join('')
+          || '<p class="muted">조건에 맞는 기록이 없습니다.</p>';
+      });
+    }
+
+    async function runAction(action, overlay = true) {
+      if (overlay) setLoading(true);
+      try { return await action(); }
+      catch (error) {
+        await showAlert(safeErrorMessage(error));
+        // 이 오류는 대부분 방금 요청이 이미 처리된 뒤에 뜬다. 확인을 누르면
+        // 수동으로 새로고침하지 않아도 바로 최신 상태가 보이게 한다.
+        if (isTransientAccessError_(error)) await loadApp(state.mode);
+      }
+      finally { if (overlay) setLoading(false); }
+    }
+
+    // 브라우저 기본 alert/confirm/prompt는 창 제목에 Apps Script의 내부
+    // iframe 주소(*.googleusercontent.com)를 그대로 노출해 없어 보이고,
+    // 스타일도 맞출 수 없다. 화면 안에서 그리는 팝업으로 대체한다.
+    function showModal_(message, options) {
+      const opts = options || {};
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        const box = document.createElement('div');
+        box.className = 'modal-box';
+        const text = document.createElement('p');
+        text.className = 'modal-message';
+        text.textContent = message;
+        box.append(text);
+        let input = null;
+        if (opts.type === 'prompt') {
+          input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'modal-input';
+          input.value = opts.defaultValue == null ? '' : String(opts.defaultValue);
+          box.append(input);
+        }
+        const actions = document.createElement('div');
+        actions.className = 'modal-actions';
+
+        function close(value) {
+          document.removeEventListener('keydown', onKeyDown);
+          overlay.remove();
+          resolve(value);
+        }
+        function onKeyDown(event) {
+          if (event.key === 'Escape') {
+            close(opts.type === 'prompt' ? null : false);
+          } else if (event.key === 'Enter' && opts.type !== 'confirm') {
+            event.preventDefault();
+            close(opts.type === 'prompt' ? input.value : true);
+          }
+        }
+
+        if (opts.type === 'confirm') {
+          const cancelButton = document.createElement('button');
+          cancelButton.type = 'button';
+          cancelButton.className = 'ghost';
+          cancelButton.textContent = '취소';
+          cancelButton.addEventListener('click', () => close(false));
+          actions.append(cancelButton);
+        }
+        const okButton = document.createElement('button');
+        okButton.type = 'button';
+        okButton.className = 'primary';
+        okButton.textContent = '확인';
+        okButton.addEventListener('click', () => close(opts.type === 'prompt' ? input.value : true));
+        actions.append(okButton);
+        box.append(actions);
+        overlay.append(box);
+        document.body.append(overlay);
+        document.addEventListener('keydown', onKeyDown);
+        (input || okButton).focus();
+        if (input) input.select();
+      });
+    }
+    function showAlert(message) { return showModal_(message, {type:'alert'}); }
+    function showConfirm(message) { return showModal_(message, {type:'confirm'}); }
+    function showPrompt(message, defaultValue) { return showModal_(message, {type:'prompt', defaultValue}); }
+
+    function showError(error) {
+      $('toPersonalButton').classList.add('hidden');
+      $('toAdminButton').classList.add('hidden');
+      $('errorScreen').classList.remove('hidden');
+      $('errorMessage').textContent = safeErrorMessage(error);
+      $('modeLabel').textContent = '접속 오류';
+    }
+    // Apps Script가 간헐적으로 던지는 원본 오류로, 우리 쪽 코드 문제가
+    // 아니다. 실제로는 방금 요청 자체는 이미 정상 처리된 경우가 대부분이다.
+    function isTransientAccessError_(error) {
+      const message = String(error && error.message || error || '');
+      return /요청한 문서(를|에).{0,4}액세스할 권한이 없습니다/.test(message);
+    }
+    function safeErrorMessage(error) {
+      const message = String(error && error.message || error || '요청을 처리하지 못했습니다.')
+        .replace(/[A-Za-z0-9_-]{25,}/g, '[보호된 식별자]');
+      // 사용자를 놀라게 하는 원본 문구 대신 안내 문구로 완전히 대체한다.
+      if (isTransientAccessError_(error)) {
+        return '방금 요청은 정상적으로 처리되었을 가능성이 높습니다.\n'
+          + '페이지를 새로고침해 최신 상태를 확인해 주세요.';
+      }
+      return message;
+    }
+    function setLoading(show) { $('loading').classList.toggle('hidden', !show); }
+    function debounce(fn, wait) {
+      let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), wait); };
+    }
+
+    function callServer(method, ...args) {
+      return new Promise((resolve, reject) => {
+        // 카카오톡·메신저의 인앱 브라우저나 일부 내장 브라우저는 Apps Script가
+        // 쓰는 iframe 통신을 막아 google.script.run 이 아예 만들어지지 않는다.
+        // 앱 결함이 아니라 브라우저 제약이므로 할 일을 알려 준다.
+        if (!window.google || !google.script || !google.script.run) {
+          reject(new Error(
+            '이 브라우저에서는 앱을 실행할 수 없습니다. '
+            + '주소를 복사해 Chrome, Safari 등 기본 브라우저에서 열어 주세요.'
+          ));
+          return;
+        }
+        const runner = google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject);
+        const methods = {
+          getAppBootstrapState:() => runner.getAppBootstrapState(args[0]),
+          getPersonalCentralStatus:() => runner.getPersonalCentralStatus(),
+          resolvePersonalStorageIssue:() => runner.resolvePersonalStorageIssue(args[0],args[1]),
+          connectPersonalDatabaseByLink:() => runner.connectPersonalDatabaseByLink(args[0]),
+          provisionSchoolCentralResources:() => runner.provisionSchoolCentralResources(args[0]),
+          connectExistingSchoolCentralResources:() => runner.connectExistingSchoolCentralResources(args[0]),
+          resetSchoolInstallationConnections:() => runner.resetSchoolInstallationConnections(args[0]),
+          initializeCentralDataSchema:() => runner.initializeCentralDataSchema(),
+          getAdminDashboard:() => runner.getAdminDashboard(),
+          getAdminStudents:() => runner.getAdminStudents(args[0]),
+          addCentralStudent:() => runner.addCentralStudent(args[0]),
+          updateCentralStudent:() => runner.updateCentralStudent(args[0],args[1]),
+          deleteCentralStudent:() => runner.deleteCentralStudent(args[0]),
+          deactivateCentralStudentsByYear:() => runner.deactivateCentralStudentsByYear(args[0]),
+          resetCentralStudentList:() => runner.resetCentralStudentList(),
+          previewCentralStudentCsv:() => runner.previewCentralStudentCsv(args[0]),
+          importCentralStudentCsv:() => runner.importCentralStudentCsv(args[0],args[1]),
+          exportCentralStudentCsv:() => runner.exportCentralStudentCsv(args[0]),
+          getAdminPhotoStatus:() => runner.getAdminPhotoStatus(args[0]),
+          syncCentralStudentPhotos:() => runner.syncCentralStudentPhotos(),
+          getAdminTeacherAssignments:() => runner.getAdminTeacherAssignments(args[0]),
+          saveTeacherAssignment:() => runner.saveTeacherAssignment(args[0]),
+          saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
+          setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
+          getAdminAssignmentRequests:() => runner.getAdminAssignmentRequests(args[0]),
+          reviewAssignmentRequest:() => runner.reviewAssignmentRequest(args[0],args[1],args[2]),
+          approveAssignmentRequestsBatch:() => runner.approveAssignmentRequestsBatch(args[0]),
+          getApprovedTeachers:() => runner.getApprovedTeachers(),
+          revokeApprovedTeachersAccess:() => runner.revokeApprovedTeachersAccess(args[0]),
+          retryApprovedTeacherAccessRevocation:() => runner.retryApprovedTeacherAccessRevocation(args[0]),
+          submitMyAssignmentRequest:() => runner.submitMyAssignmentRequest(args[0]),
+          getMyAssignmentRequests:() => runner.getMyAssignmentRequests(),
+          cancelMyAssignmentRequest:() => runner.cancelMyAssignmentRequest(args[0]),
+          cancelAssignmentRequestsBatch:() => runner.cancelAssignmentRequestsBatch(args[0]),
+          searchStudents:() => runner.searchStudents(args[0]),
+          getStudentPhotosForMyAssignment:() => runner.getStudentPhotosForMyAssignment(args[0],args[1]),
+          saveRecord:() => runner.saveRecord(args[0]),
+          getRecentRecords:() => runner.getRecentRecords(args[0],args[1],args[2]),
+          searchRecords:() => runner.searchRecords(args[0]),
+          deleteRecord:() => runner.deleteRecord(args[0],args[1]),
+          updateRecord:() => runner.updateRecord(args[0],args[1]),
+        };
+        if (!methods[method]) { reject(new Error('지원하지 않는 요청입니다.')); return; }
+        methods[method]();
+      });
+    }
+  </script>
+</body>
+</html>
