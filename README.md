@@ -208,4 +208,4 @@ node .\verify-v8.4.js
 - **상업적 이용**: 금지한다. 별도 상업적 이용 허락이 필요하면 아래 연락처로
   문의한다.
 
-문의: ryu1912@naver.com
+문의: [GitHub Issues](https://github.com/blueshadow62/student-activity-webapp/issues)
