@@ -1,5 +1,6 @@
 // © 2026 류기현(부산 동아공고). CC BY-NC-SA 4.0(저작자표시-비영리-동일조건변경허락).
-// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko  문의: ryu1912@naver.com
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko
+// 문의: https://github.com/blueshadow62/student-activity-webapp/issues
 
 const CENTRAL_ASSIGNMENT_REQUEST_STATUS = Object.freeze({
   pending: 'PENDING',
