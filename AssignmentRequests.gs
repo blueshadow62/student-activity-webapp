@@ -21,9 +21,8 @@ function submitMyAssignmentRequest(payload) {
   const teacherEmail = getRequiredActiveUserEmail_();
   requireAllowedTeacherEmail_(teacherEmail);
   const value = payload || {};
-  const classNumbers = normalizeCentralClassNumberList_(
-    value.classNumbers
-  );
+  const requestType = normalizeAssignmentRequestType_(value);
+  const classNumbers = requestType.classNumbers;
   const result = withCentralWriteLock_(function () {
     // 승인 전 교사는 중앙 교사담당 시트에 접근 권한이 없을 수 있다. 이미
     // 승인된 반인지 미리 확인하는 절차만 건너뛰고, 실제 중복 여부는 승인
@@ -42,18 +41,23 @@ function submitMyAssignmentRequest(payload) {
         grade: value.grade,
         classNumber: classNumber,
         subject: value.subject,
-        assignmentType: '교과',
+        assignmentType: requestType.assignmentType,
+        groupName: requestType.groupName,
         active: true,
       });
     });
+    const isGroup = requestType.assignmentType === CENTRAL_ASSIGNMENT_TYPES.group;
+    const describe = function (normalized) {
+      return isGroup ? requestType.groupName : `${normalized.classNumber}반`;
+    };
     const alreadyAssigned = normalizedItems.filter(function (normalized) {
       return assignments.some(function (assignment) {
         return isDuplicateTeacherAssignment_(assignment, normalized, '');
       });
-    }).map(function (normalized) { return normalized.classNumber; });
+    }).map(describe);
     if (alreadyAssigned.length) {
       throw new Error(
-        `이미 승인된 담당 반이 있습니다: ${alreadyAssigned.join(', ')}반`
+        `이미 승인된 담당이 있습니다: ${alreadyAssigned.join(', ')}`
       );
     }
     const alreadyPending = normalizedItems.filter(function (normalized) {
@@ -61,10 +65,10 @@ function submitMyAssignmentRequest(payload) {
         return request.status === CENTRAL_ASSIGNMENT_REQUEST_STATUS.pending
           && assignmentRequestMatches_(request, normalized);
       });
-    }).map(function (normalized) { return normalized.classNumber; });
+    }).map(describe);
     if (alreadyPending.length) {
       throw new Error(
-        `이미 승인 대기 중인 담당 반이 있습니다: ${alreadyPending.join(', ')}반`
+        `이미 승인 대기 중인 담당이 있습니다: ${alreadyPending.join(', ')}`
       );
     }
     if (
@@ -82,6 +86,8 @@ function submitMyAssignmentRequest(payload) {
         grade: normalized.grade,
         classNumber: normalized.classNumber,
         subject: normalized.subject,
+        assignmentType: requestType.assignmentType,
+        groupName: requestType.groupName,
         status: CENTRAL_ASSIGNMENT_REQUEST_STATUS.pending,
         requestedAt: requestedAt,
         processedAt: '',
@@ -167,7 +173,7 @@ function notifyAdminsOfNewAssignmentRequest_(teacherEmail, createdRequests) {
   const adminEmails = getCentralConfiguration_().adminEmails;
   if (!adminEmails.length) return;
   const lines = createdRequests.map(function (request) {
-    return `- ${request.schoolYear}학년도 ${request.grade}학년 ${request.classNumber}반 ${request.subject}`;
+    return `- ${assignmentRequestLabel_(request)}`;
   });
   const body = `${teacherEmail} 님이 아래 담당 수업 승인을 신청했습니다.\n\n${lines.join('\n')}\n\n관리자 포털의 교사 담당 탭에서 승인·거부할 수 있습니다.`;
   adminEmails.forEach(function (email) {
@@ -256,6 +262,7 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
       ? readCentralTeacherAssignments_(assignmentSheet, true) : [];
     const now = new Date();
     const assignmentRows = [];
+    const approvedGroups = [];
     const processed = selected.map(function (request) {
       let assignmentKey = '';
       if (approved) {
@@ -265,7 +272,9 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
           grade: request.grade,
           classNumber: request.classNumber,
           subject: request.subject,
-          assignmentType: '교과',
+          assignmentType: request.assignmentType
+            || CENTRAL_ASSIGNMENT_TYPES.subject,
+          groupName: request.groupName || '',
           active: true,
         });
         const existing = assignments.find(function (assignment) {
@@ -281,6 +290,12 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
           assignmentRows.push(buildTeacherAssignmentRow_(
             normalized, assignmentKey, now, now
           ));
+          if (centralAssignmentIsGroup_(normalized)) {
+            approvedGroups.push({
+              assignmentKey: assignmentKey,
+              groupName: normalized.groupName,
+            });
+          }
         }
       }
       return {
@@ -302,6 +317,10 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
       ).setValues(assignmentRows);
       clearCentralTeacherAssignmentCache_(assignmentSheet.getParent());
     }
+    // 담당 행을 쓴 뒤에 그룹 이름을 남긴다. 담당 행이 없으면 가리킬 대상이 없다.
+    approvedGroups.forEach(function (group) {
+      upsertCentralGroupName_(group.assignmentKey, group.groupName);
+    });
     const auditSheet = getRequiredCentralAssignmentRequestSheet_();
     auditSheet.getRange(
       auditSheet.getLastRow() + 1,
@@ -340,7 +359,7 @@ function notifyTeachersOfAssignmentReview_(processed, decision, reason) {
   processed.forEach(function (request) {
     const labels = labelsByTeacher.get(request.teacherEmail) || [];
     labels.push(
-      `${request.schoolYear}학년도 ${request.grade}학년 ${request.classNumber}반 ${request.subject}`
+      assignmentRequestLabel_(request)
     );
     labelsByTeacher.set(request.teacherEmail, labels);
   });
@@ -360,6 +379,64 @@ function notifyTeachersOfAssignmentReview_(processed, decision, reason) {
     }
     notifyTeacherByEmail_(teacherEmail, subject, lines.join('\n'));
   });
+}
+
+// 학급 단위는 여러 반을 한 번에 신청하지만, 수강 그룹은 이름 하나로 한 건만
+// 신청한다. 그룹 담당의 반은 실제로 없는 0으로 고정해 학급 단위 담당과 절대
+// 겹치지 않게 한다.
+function normalizeAssignmentRequestType_(value) {
+  const requested = String(value && value.assignmentType || '').trim();
+  if (requested !== CENTRAL_ASSIGNMENT_TYPES.group) {
+    return {
+      assignmentType: CENTRAL_ASSIGNMENT_TYPES.subject,
+      groupName: '',
+      classNumbers: normalizeCentralClassNumberList_(value && value.classNumbers),
+    };
+  }
+  const groupName = String(value && value.groupName || '').trim();
+  if (!groupName) {
+    throw new Error('수강 그룹 이름을 입력해 주세요.');
+  }
+  if (groupName.length > CENTRAL_CONFIG.maxGroupNameLength) {
+    throw new Error(
+      `수강 그룹 이름은 ${CENTRAL_CONFIG.maxGroupNameLength}자 이내로 입력해 주세요.`
+    );
+  }
+  return {
+    assignmentType: CENTRAL_ASSIGNMENT_TYPES.group,
+    groupName: groupName,
+    classNumbers: [CENTRAL_CONFIG.externalClassNumber],
+  };
+}
+
+// 승인으로 담당 행이 새로 생겼을 때 그룹 이름을 기록한다. 담당키가 이미 있으면
+// 이름만 갱신하고 생성일시는 보존한다.
+function upsertCentralGroupName_(assignmentKey, groupName) {
+  const sheet = getRequiredCentralGroupSheet_();
+  const rowCount = sheet.getLastRow() - 1;
+  const keys = rowCount > 0
+    ? sheet.getRange(2, 1, rowCount, 1).getDisplayValues()
+    : [];
+  const index = keys.findIndex(function (row) {
+    return String(row[0] || '').trim() === assignmentKey;
+  });
+  const now = new Date();
+  if (index >= 0) {
+    sheet.getRange(index + 2, 2, 1, 3).setValues([[
+      sanitizeSpreadsheetText_(groupName),
+      sheet.getRange(index + 2, 3).getValue() || now,
+      now,
+    ]]);
+  } else {
+    sheet.getRange(sheet.getLastRow() + 1, 1, 1, CENTRAL_GROUP_HEADERS.length)
+      .setValues([[
+        assignmentKey,
+        sanitizeSpreadsheetText_(groupName),
+        now,
+        now,
+      ]]);
+  }
+  clearCentralGroupCache_(sheet.getParent());
 }
 
 function normalizeAssignmentRequestKeys_(requestKeys) {
@@ -484,18 +561,26 @@ function assignmentRequestPropertyKey_(teacherEmail) {
 }
 
 function isValidStoredAssignmentRequest_(request) {
-  return Boolean(
-    request
-      && request.requestKey
-      && isValidCentralEmail_(request.teacherEmail)
-      && Number.isInteger(Number(request.schoolYear))
-      && APP_CONFIG.allowedGrades.includes(Number(request.grade))
-      && Number.isInteger(Number(request.classNumber))
-      && Number(request.classNumber) > 0
-      && String(request.subject || '').trim()
-      && Object.values(CENTRAL_ASSIGNMENT_REQUEST_STATUS)
+  if (
+    !request
+      || !request.requestKey
+      || !isValidCentralEmail_(request.teacherEmail)
+      || !Number.isInteger(Number(request.schoolYear))
+      || !APP_CONFIG.allowedGrades.includes(Number(request.grade))
+      || !Number.isInteger(Number(request.classNumber))
+      || !String(request.subject || '').trim()
+      || !Object.values(CENTRAL_ASSIGNMENT_REQUEST_STATUS)
         .includes(String(request.status || '').trim().toUpperCase())
-  );
+  ) {
+    return false;
+  }
+  // 그룹 신청은 반이 0이고 이름이 있어야 한다. 학급 단위는 반이 1 이상이어야
+  // 한다. 담당유형이 없는 기존 신청은 학급 단위로 본다.
+  if (String(request.assignmentType || '').trim() === CENTRAL_ASSIGNMENT_TYPES.group) {
+    return Number(request.classNumber) === CENTRAL_CONFIG.externalClassNumber
+      && Boolean(String(request.groupName || '').trim());
+  }
+  return Number(request.classNumber) > 0;
 }
 
 function compareStoredAssignmentRequests_(left, right) {
@@ -521,12 +606,24 @@ function buildCentralAssignmentRequestRow_(request) {
 }
 
 function toPublicAssignmentRequest_(request, includeTeacherEmail) {
+  const assignmentType = String(request.assignmentType || '').trim()
+    === CENTRAL_ASSIGNMENT_TYPES.group
+    ? CENTRAL_ASSIGNMENT_TYPES.group
+    : CENTRAL_ASSIGNMENT_TYPES.subject;
+  const groupName = String(request.groupName || '');
   const result = {
     requestKey: request.requestKey,
     schoolYear: Number(request.schoolYear),
     grade: Number(request.grade),
     classNumber: Number(request.classNumber),
     subject: String(request.subject || ''),
+    assignmentType: assignmentType,
+    groupName: groupName,
+    // 관리자가 무엇을 승인하는지 한 줄로 알 수 있어야 한다. 그룹 신청은 반이
+    // 0이라 반 번호를 보여줘도 의미가 없다.
+    target: assignmentType === CENTRAL_ASSIGNMENT_TYPES.group
+      ? groupName
+      : `${Number(request.classNumber)}반`,
     status: String(request.status || ''),
     statusLabel: assignmentRequestStatusLabel_(request.status),
     requestedAt: formatDateTime_(assignmentRequestDate_(request.requestedAt), ''),
@@ -536,6 +633,15 @@ function toPublicAssignmentRequest_(request, includeTeacherEmail) {
   };
   if (includeTeacherEmail) result.teacherEmail = request.teacherEmail;
   return result;
+}
+
+// 알림 메일과 화면이 같은 문구를 쓰게 한 곳에 모은다. 그룹 신청은 반이 0이라
+// '0반'이라고 쓰면 받는 사람이 무슨 수업인지 알 수 없다.
+function assignmentRequestLabel_(request) {
+  const base = `${request.schoolYear}학년도 ${request.grade}학년`;
+  return String(request.assignmentType || '').trim() === CENTRAL_ASSIGNMENT_TYPES.group
+    ? `${base} ${request.groupName || '이름 없는 그룹'} ${request.subject}`
+    : `${base} ${request.classNumber}반 ${request.subject}`;
 }
 
 function assignmentRequestMatches_(request, assignment) {

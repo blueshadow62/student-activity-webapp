@@ -50,6 +50,18 @@
     .picker-title{font-weight:700;color:var(--ink-soft);font-size:13px}
     .picker-buttons{display:flex;gap:8px;flex-wrap:wrap}
     .picker-hint{margin:0;color:var(--ink-soft);font-size:13px}
+    .roster{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-top:8px}
+    .roster-list{list-style:none;margin:6px 0 0;padding:4px;min-height:200px;max-height:400px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+    .roster-list li{padding:5px 7px;border-radius:6px}
+    .roster-item{cursor:grab}
+    .roster-item:hover{background:var(--page-2)}
+    .roster-item label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0}
+    .roster-actions{display:flex;flex-direction:column;gap:8px;padding-top:78px}
+    .roster-drop{outline:2px dashed var(--accent-ring);outline-offset:-4px}
+    @media (max-width:720px){
+      .roster{grid-template-columns:1fr}
+      .roster-actions{flex-direction:row;justify-content:center;padding-top:0}
+    }
     label{display:block;font-weight:700;color:var(--ink-soft);margin-bottom:6px;font-size:13px}
     input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;
       padding:11px 12px;background:var(--surface);color:var(--ink)}
@@ -347,12 +359,14 @@
                 <button id="refreshMyAssignmentRequestsButton" class="ghost">신청 내역 새로고침</button>
               </div>
             </div>
-            <p class="muted">담당 학년·과목을 입력하고, 여러 반은 쉼표로 구분하세요. 관리자가 승인하기 전에는 학생 자료가 표시되지 않습니다.</p>
+            <p class="muted">담당 학년·과목을 입력하고, 여러 반은 쉼표로 구분하세요. 학급 단위로 수업하지 않는 과목은 수강 그룹으로 신청한 뒤 승인 후 학생을 직접 편성합니다. 관리자가 승인하기 전에는 학생 자료가 표시되지 않습니다.</p>
             <div class="grid grid-4">
+              <div><label for="requestAssignmentType">담당 유형</label><select id="requestAssignmentType"><option value="교과">학급 단위</option><option value="그룹">수강 그룹</option></select></div>
               <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
               <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
               <div><label for="requestSubject">담당 과목</label><input id="requestSubject" maxlength="50" placeholder="예: 문학"></div>
-              <div><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
+              <div id="requestClassesField"><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
+              <div id="requestGroupNameField" class="hidden"><label for="requestGroupName">수강 그룹 이름</label><input id="requestGroupName" maxlength="50" placeholder="예: 심화국어 A"></div>
             </div>
             <button id="submitAssignmentRequestButton" class="primary" style="margin-top:12px">담당 수업 승인 신청</button>
             <div class="row" style="margin-top:14px"><input id="selectAllMyAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"><span class="small muted">전체 선택</span></div>
@@ -377,6 +391,30 @@
                 </div>
               </div>
             </div>
+            <section id="groupRosterPanel" class="card hidden">
+              <div class="row between"><span class="picker-title">학생 편성</span>
+                <span id="groupMemberCount" class="small muted"></span></div>
+              <p class="small muted">체크한 뒤 가운데 버튼으로 옮기거나, 학생을 끌어다 놓으세요. 옮긴 뒤 <strong>편성 저장</strong>을 눌러야 반영됩니다.</p>
+              <div class="roster">
+                <div>
+                  <label for="groupCandidateFilter">후보 학생</label>
+                  <input id="groupCandidateFilter" placeholder="이름으로 거르기">
+                  <ul id="groupCandidateList" class="roster-list"></ul>
+                </div>
+                <div class="roster-actions">
+                  <button id="groupAddSelected" class="secondary" aria-label="선택한 학생을 그룹에 넣기">▶</button>
+                  <button id="groupRemoveSelected" class="ghost" aria-label="선택한 학생을 그룹에서 빼기">◀</button>
+                </div>
+                <div>
+                  <label for="groupMemberList">그룹원</label>
+                  <ul id="groupMemberList" class="roster-list"></ul>
+                </div>
+              </div>
+              <div class="row" style="margin-top:12px">
+                <button id="groupAddExternal" class="ghost">공동교육과정 학생 추가</button>
+                <button id="groupSaveRoster" class="primary">편성 저장</button>
+              </div>
+            </section>
             <div id="studentGrid" class="grid students card"></div>
             <div id="recordEditor" class="card hidden">
               <h2 id="selectedStudentLabel">학생 선택</h2>
@@ -430,7 +468,7 @@
       selectedStudent:null, selectedCompetencies:new Set(), records:[], editingRecordId:null,
       missingPhotos:new Set(), pendingPhotos:new Set(), photoQueue:[],
       activePhotoLoads:0, photoGeneration:0, photoObserver:null, photosEnabled:false,
-      selectedSubject:'', selectedGradeKey:'', selectedAssignmentKey:'',
+      selectedSubject:'', selectedGradeKey:'', selectedAssignmentKey:'', groupRoster:null,
     };
     const $ = id => document.getElementById(id);
     const escapeHtml = value => String(value == null ? '' : value)
@@ -489,6 +527,12 @@
         });
       });
       $('submitAssignmentRequestButton').addEventListener('click', submitAssignmentRequest);
+      $('requestAssignmentType').addEventListener('change', renderAssignmentRequestType_);
+      $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
+      $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
+      $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
+      $('groupSaveRoster').addEventListener('click', saveGroupRoster_);
+      $('groupAddExternal').addEventListener('click', addExternalGroupStudent_);
       $('refreshMyAssignmentRequestsButton').addEventListener('click', () => loadApp(state.mode));
       $('cancelSelectedMyAssignmentRequestsButton').addEventListener('click', cancelSelectedMyAssignmentRequests_);
       $('selectAllMyAssignmentRequests').addEventListener('change', event => {
@@ -1296,21 +1340,35 @@
 
 
     async function submitAssignmentRequest() {
+      const isGroup = $('requestAssignmentType').value === '그룹';
       const payload = {
+        assignmentType: isGroup ? '그룹' : '교과',
+        groupName: isGroup ? $('requestGroupName').value : '',
         schoolYear:$('requestSchoolYear').value,
         grade:$('requestGrade').value,
         subject:$('requestSubject').value,
-        classNumbers:$('requestClasses').value,
+        classNumbers: isGroup ? '' : $('requestClasses').value,
       };
       await runAction(async () => {
         const result = await callServer('submitMyAssignmentRequest', payload);
         $('requestClasses').value = '';
+        $('requestGroupName').value = '';
         // 목록을 먼저 갱신해야 확인을 누른 직후 바로 최신 상태가 보인다.
         // alert 를 먼저 띄우면 확인을 누르는 동안 목록 갱신이 미뤄져,
         // 확인 후에도 잠깐 목록이 그대로인 것처럼 보인다.
         await loadMyAssignmentRequests();
-        await showAlert(`${result.count}개 반의 담당 승인을 신청했습니다.`);
+        await showAlert(isGroup
+          ? '수강 그룹 담당 승인을 신청했습니다.'
+          : `${result.count}개 반의 담당 승인을 신청했습니다.`);
       });
+    }
+
+    // 유형에 따라 반 입력과 그룹명 입력 중 하나만 보인다. 둘 다 보이면 무엇을
+    // 채워야 하는지 알기 어렵고, 안 쓰는 칸에 입력한 값이 조용히 버려진다.
+    function renderAssignmentRequestType_() {
+      const isGroup = $('requestAssignmentType').value === '그룹';
+      $('requestGroupNameField').classList.toggle('hidden', !isGroup);
+      $('requestClassesField').classList.toggle('hidden', isGroup);
     }
 
     async function loadMyAssignmentRequests() {
@@ -1418,17 +1476,131 @@
           + `${showSchoolYear ? `${option.schoolYear}학년도 ` : ''}${option.grade}학년</button>`
       ).join('');
       $('classPicker').classList.toggle('hidden', !state.selectedGradeKey);
+      // 수강 그룹은 반이 0으로만 기록되므로 '0반'이라고 쓰면 무슨 수업인지 모른다.
       $('classButtons').innerHTML = classAssignments.map(assignment =>
         `<button class="chip ${assignment.assignmentKey === state.selectedAssignmentKey ? 'active' : ''}" `
-          + `data-assignment-key="${escapeHtml(assignment.assignmentKey)}">${assignment.classNumber}반</button>`
+          + `data-assignment-key="${escapeHtml(assignment.assignmentKey)}">`
+          + `${assignment.isGroup ? escapeHtml(assignment.groupName || '이름 없는 그룹') : `${assignment.classNumber}반`}</button>`
       ).join('');
       const selected = assignments.find(item => item.assignmentKey === state.selectedAssignmentKey);
       $('assignmentHint').textContent = selected ? selected.label
         : !state.selectedSubject ? '과목을 선택해 주세요.'
         : !state.selectedGradeKey ? '학년을 선택해 주세요.'
-        : '반을 선택해 주세요.';
+        : '반 또는 수강 그룹을 선택해 주세요.';
       $('loadStudentsButton').disabled = !state.selectedAssignmentKey;
       $('toggleStudentPhotosButton').disabled = !state.selectedAssignmentKey;
+      const showRoster = Boolean(selected && selected.isGroup);
+      $('groupRosterPanel').classList.toggle('hidden', !showRoster);
+      if (!showRoster) {
+        state.groupRoster = null;
+      } else if (!state.groupRoster || state.groupRoster.assignmentKey !== selected.assignmentKey) {
+        loadGroupRoster_(selected.assignmentKey);
+      }
+    }
+
+    // 편성 화면은 서버를 한 번만 부르고, 이동은 화면 안에서만 처리한다.
+    // 옮길 때마다 저장하면 잠깐 잘못 옮긴 상태까지 중앙 시트에 남는다.
+    async function loadGroupRoster_(assignmentKey) {
+      await runAction(async () => {
+        const roster = await callServer('getMyGroupRoster', assignmentKey);
+        state.groupRoster = {
+          assignmentKey: assignmentKey,
+          candidates: roster.candidates,
+          memberKeys: new Set(roster.memberKeys),
+          maxMembers: roster.maxMembers,
+        };
+        renderGroupRoster_();
+      });
+    }
+
+    function renderGroupRoster_() {
+      const roster = state.groupRoster;
+      if (!roster) return;
+      const filter = $('groupCandidateFilter').value.trim().toLocaleLowerCase('ko');
+      const inGroup = student => roster.memberKeys.has(student.studentKey);
+      const item = student => `<li class="roster-item" draggable="true"
+        data-student-key="${escapeHtml(student.studentKey)}">
+        <label><input type="checkbox" data-roster-check="${escapeHtml(student.studentKey)}">
+        <span>${student.classNumber === 0 ? '공동' : `${student.classNumber}반`} ${student.studentNumber}번 ${escapeHtml(student.name)}</span>
+        ${student.status === '재학' ? '' : `<span class="badge">${escapeHtml(student.status)}</span>`}
+        </label></li>`;
+      $('groupCandidateList').innerHTML = roster.candidates
+        .filter(student => !inGroup(student)
+          && (!filter || student.name.toLocaleLowerCase('ko').includes(filter)))
+        .map(item).join('') || '<li class="muted">후보 학생이 없습니다.</li>';
+      $('groupMemberList').innerHTML = roster.candidates.filter(inGroup)
+        .map(item).join('') || '<li class="muted">아직 편성한 학생이 없습니다.</li>';
+      $('groupMemberCount').textContent = `${roster.memberKeys.size}명 / 최대 ${roster.maxMembers}명`;
+      bindGroupRosterDrag_();
+    }
+
+    function moveGroupSelection_(toMember) {
+      const roster = state.groupRoster;
+      if (!roster) return;
+      const listId = toMember ? 'groupCandidateList' : 'groupMemberList';
+      document.querySelectorAll(`#${listId} [data-roster-check]:checked`)
+        .forEach(box => applyGroupMembership_(box.dataset.rosterCheck, toMember));
+      renderGroupRoster_();
+    }
+
+    function applyGroupMembership_(studentKey, toMember) {
+      const roster = state.groupRoster;
+      if (!roster || !studentKey) return;
+      if (!toMember) {
+        roster.memberKeys.delete(studentKey);
+        return;
+      }
+      if (roster.memberKeys.has(studentKey)) return;
+      if (roster.memberKeys.size >= roster.maxMembers) return;
+      roster.memberKeys.add(studentKey);
+    }
+
+    // 드래그는 보조 수단이다. 체크 이동 버튼이 항상 동작하므로 터치·키보드처럼
+    // 드래그가 어려운 환경에서도 편성이 막히지 않는다.
+    function bindGroupRosterDrag_() {
+      document.querySelectorAll('#groupRosterPanel .roster-item').forEach(node => {
+        node.addEventListener('dragstart', event => {
+          event.dataTransfer.setData('text/plain', node.dataset.studentKey);
+        });
+      });
+      [['groupCandidateList', false], ['groupMemberList', true]].forEach(([id, toMember]) => {
+        const list = $(id);
+        list.addEventListener('dragover', event => {
+          event.preventDefault();
+          list.classList.add('roster-drop');
+        });
+        list.addEventListener('dragleave', () => list.classList.remove('roster-drop'));
+        list.addEventListener('drop', event => {
+          event.preventDefault();
+          list.classList.remove('roster-drop');
+          applyGroupMembership_(event.dataTransfer.getData('text/plain'), toMember);
+          renderGroupRoster_();
+        });
+      });
+    }
+
+    async function saveGroupRoster_() {
+      const roster = state.groupRoster;
+      if (!roster) return;
+      await runAction(async () => {
+        const result = await callServer('saveMyGroupRoster',
+          roster.assignmentKey, Array.from(roster.memberKeys));
+        await showAlert(`${result.count}명으로 편성을 저장했습니다.`);
+      });
+    }
+
+    async function addExternalGroupStudent_() {
+      const roster = state.groupRoster;
+      if (!roster) return;
+      const name = await showPrompt('공동교육과정으로 수강하는 타교 학생의 이름을 입력해 주세요.');
+      if (!name || !String(name).trim()) return;
+      await runAction(async () => {
+        const result = await callServer('addExternalStudentToMyGroup',
+          roster.assignmentKey, { name: name });
+        // 새 학생이 후보 목록에 들어가야 하므로 서버에서 다시 받는다.
+        await loadGroupRoster_(roster.assignmentKey);
+        await showAlert(`${result.student.name} 학생을 ${result.student.studentNumber}번으로 추가했습니다.`);
+      });
     }
 
     function selectAssignmentSubject_(subject) {
@@ -1983,6 +2155,9 @@
           cancelMyAssignmentRequest:() => runner.cancelMyAssignmentRequest(args[0]),
           cancelAssignmentRequestsBatch:() => runner.cancelAssignmentRequestsBatch(args[0]),
           searchStudents:() => runner.searchStudents(args[0]),
+          getMyGroupRoster:() => runner.getMyGroupRoster(args[0]),
+          saveMyGroupRoster:() => runner.saveMyGroupRoster(args[0],args[1]),
+          addExternalStudentToMyGroup:() => runner.addExternalStudentToMyGroup(args[0],args[1]),
           getStudentPhotosForMyAssignment:() => runner.getStudentPhotosForMyAssignment(args[0],args[1]),
           saveRecord:() => runner.saveRecord(args[0]),
           getRecentRecords:() => runner.getRecentRecords(args[0],args[1],args[2]),

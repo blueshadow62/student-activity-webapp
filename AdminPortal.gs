@@ -61,6 +61,18 @@ function initializeCentralDataSchema() {
       CENTRAL_ASSIGNMENT_REQUEST_HEADERS,
       '#e37400'
     );
+    ensureCentralAdminSheet_(
+      spreadsheet,
+      CENTRAL_CONFIG.groupSheetName,
+      CENTRAL_GROUP_HEADERS,
+      '#00838f'
+    );
+    ensureCentralAdminSheet_(
+      spreadsheet,
+      CENTRAL_CONFIG.groupMemberSheetName,
+      CENTRAL_GROUP_MEMBER_HEADERS,
+      '#5f6368'
+    );
     const appSettings = ensureCentralAdminSheet_(
       spreadsheet,
       CENTRAL_CONFIG.appSettingsSheetName,
@@ -74,6 +86,7 @@ function initializeCentralDataSchema() {
     );
     removeCentralDefaultSheet_(spreadsheet);
     clearCentralStudentCache_();
+    clearCentralGroupCache_(spreadsheet);
     clearCentralTeacherAssignmentCache_(spreadsheet);
     clearCentralPhotoRowsCache_(spreadsheet);
     return buildAdminDashboard_();
@@ -174,43 +187,46 @@ function addCentralStudent(payload) {
   return withCentralWriteLock_(function () {
     const sheet = getRequiredCentralStudentSheet_();
     const student = normalizeCentralStudentPayload_(payload, null);
-    assertNoCentralStudentDuplicate_(sheet, student, '');
-    const now = new Date();
-    const key = Utilities.getUuid();
-    if (centralHeadersMatch_(sheet, CENTRAL_STUDENT_HEADERS)) {
-      sheet.appendRow([
-        key,
-        student.schoolYear,
-        student.grade,
-        student.classNumber,
-        student.studentNumber,
-        sanitizeSpreadsheetText_(student.name),
-        student.status,
-        true,
-        now,
-        now,
-      ]);
-    } else {
-      sheet.appendRow([
-        student.grade,
-        student.classNumber,
-        student.studentNumber,
-        sanitizeSpreadsheetText_(student.name),
-        student.status,
-        key,
-        student.schoolYear,
-      ]);
-    }
-    clearCentralStudentCache_();
     return {
       ok: true,
-      student: toPublicCentralStudent_({
-        ...student,
-        studentKey: key,
-        active: true,
-      }),
+      student: toPublicCentralStudent_(appendCentralStudentRow_(sheet, student)),
     };
   });
+}
+
+// 행을 쓰는 부분만 떼어낸다. 관리자 추가와 교사의 타교생 추가가 같은 중복
+// 검사·시트 형식·캐시 정리를 쓰게 해서 두 경로가 어긋나지 않게 한다.
+// 호출자가 쓰기 잠금과 권한 확인을 마친 뒤에 부른다.
+function appendCentralStudentRow_(sheet, student) {
+  assertNoCentralStudentDuplicate_(sheet, student, '');
+  const now = new Date();
+  const key = Utilities.getUuid();
+  if (centralHeadersMatch_(sheet, CENTRAL_STUDENT_HEADERS)) {
+    sheet.appendRow([
+      key,
+      student.schoolYear,
+      student.grade,
+      student.classNumber,
+      student.studentNumber,
+      sanitizeSpreadsheetText_(student.name),
+      student.status,
+      true,
+      now,
+      now,
+    ]);
+  } else {
+    sheet.appendRow([
+      student.grade,
+      student.classNumber,
+      student.studentNumber,
+      sanitizeSpreadsheetText_(student.name),
+      student.status,
+      key,
+      student.schoolYear,
+    ]);
+  }
+  clearCentralStudentCache_();
+  return { ...student, studentKey: key, active: true };
 }
 
 function updateCentralStudent(studentKey, payload) {
@@ -368,7 +384,13 @@ function normalizeCentralStudentPayload_(payload, current) {
   if (!APP_CONFIG.allowedGrades.includes(student.grade)) {
     throw new Error('학년은 1·2·3 중에서 선택해 주세요.');
   }
-  if (!Number.isInteger(student.classNumber) || student.classNumber < 1) {
+  // 공동교육과정 타교생은 우리 학교 어느 반에도 속하지 않는다. 실제로 없는
+  // 0반에 두어야 그 반 담임의 학생 목록에 모르는 학생이 나타나지 않는다.
+  if (student.status === '공동') {
+    if (student.classNumber !== CENTRAL_CONFIG.externalClassNumber) {
+      throw new Error('공동교육과정 학생의 반은 0이어야 합니다.');
+    }
+  } else if (!Number.isInteger(student.classNumber) || student.classNumber < 1) {
     throw new Error('반은 1 이상의 정수여야 합니다.');
   }
   if (
@@ -807,13 +829,26 @@ function saveTeacherAssignmentsBatch(payload) {
 }
 
 function isDuplicateTeacherAssignment_(assignment, normalized, excludedKey) {
-  return assignment.assignmentKey !== excludedKey
+  const sameBase = assignment.assignmentKey !== excludedKey
     && assignment.active
     && assignment.teacherEmail === normalized.teacherEmail
     && assignment.schoolYear === normalized.schoolYear
     && assignment.grade === normalized.grade
-    && assignment.classNumber === normalized.classNumber
     && assignment.subject === normalized.subject;
+  if (!sameBase) return false;
+  const storedIsGroup = centralAssignmentIsGroup_(assignment);
+  const incomingIsGroup = centralAssignmentIsGroup_(normalized);
+  if (storedIsGroup !== incomingIsGroup) return false;
+  // 그룹 담당은 반이 모두 0이라 반 비교로는 구별되지 않는다. 같은 학년·과목이라도
+  // 이름이 다르면 다른 수업이므로 그룹명까지 봐야 한다.
+  if (storedIsGroup) {
+    const storedName = String(
+      assignment.groupName
+        || centralGroupNameFor_(assignment.assignmentKey)
+    ).trim();
+    return storedName === String(normalized.groupName || '').trim();
+  }
+  return assignment.classNumber === normalized.classNumber;
 }
 
 function buildTeacherAssignmentRow_(normalized, key, createdAt, updatedAt) {
@@ -870,7 +905,23 @@ function normalizeTeacherAssignmentPayload_(payload) {
   if (!APP_CONFIG.allowedGrades.includes(grade)) {
     throw new Error('담당 학년을 확인해 주세요.');
   }
-  if (!Number.isInteger(classNumber) || classNumber < 1) {
+  // 수강 그룹은 학급으로 묶이지 않아 반 번호가 없다. 실제로 없는 0반에 두어
+  // 학급 단위 담당과 절대 겹치지 않게 한다.
+  const isGroup = assignmentType === CENTRAL_ASSIGNMENT_TYPES.group;
+  const groupName = String(value.groupName || '').trim();
+  if (isGroup) {
+    if (classNumber !== CENTRAL_CONFIG.externalClassNumber) {
+      throw new Error('수강 그룹 담당의 반은 0이어야 합니다.');
+    }
+    if (!groupName) {
+      throw new Error('수강 그룹 이름을 입력해 주세요.');
+    }
+    if (groupName.length > CENTRAL_CONFIG.maxGroupNameLength) {
+      throw new Error(
+        `수강 그룹 이름은 ${CENTRAL_CONFIG.maxGroupNameLength}자 이내로 입력해 주세요.`
+      );
+    }
+  } else if (!Number.isInteger(classNumber) || classNumber < 1) {
     throw new Error('담당 반을 확인해 주세요.');
   }
   if (!subject || subject.length > APP_CONFIG.maxSubjectLength) {
@@ -886,6 +937,7 @@ function normalizeTeacherAssignmentPayload_(payload) {
     classNumber: classNumber,
     subject: subject,
     assignmentType: assignmentType.slice(0, 30),
+    groupName: isGroup ? groupName : '',
     active: value.active == null ? true : Boolean(value.active),
   };
 }

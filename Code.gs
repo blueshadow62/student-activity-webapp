@@ -9,8 +9,10 @@ const APP_CONFIG = Object.freeze({
   deletedRecordSheetName: '삭제기록',
   settingsSheetName: '설정',
   allowedGrades: Object.freeze([1, 2, 3]),
-  studentStatuses: Object.freeze(['재학', '위탁', '전학', '자퇴']),
-  recordableStudentStatuses: Object.freeze(['재학', '위탁']),
+  // 위탁은 우리 학교에서 밖으로 나간 학생이라 여기서 수업을 듣지 않는다.
+  // 공동은 공동교육과정으로 들어온 타교생이라 기록 대상이다.
+  studentStatuses: Object.freeze(['재학', '위탁', '전학', '자퇴', '공동']),
+  recordableStudentStatuses: Object.freeze(['재학', '공동']),
   categories: Object.freeze(['칭찬·긍정', '지도 필요·부정']),
   maxStudentNameLength: 50,
   maxStudentNumber: 999,

@@ -9,13 +9,15 @@ const CENTRAL_CONFIG = Object.freeze({
   staffGroupEmailProperty: 'STAFF_GROUP_EMAIL',
   schemaVersionProperty: 'CENTRAL_SCHEMA_VERSION',
   legacyDatabaseIdProperty: 'STUDENT_ACTIVITY_DATABASE_SPREADSHEET_ID',
-  schemaVersion: '2',
+  schemaVersion: '3',
   studentSheetName: '학생목록',
   legacyStudentSheetName: '데이터베이스',
   photoSheetName: '사진정보',
   legacyPhotoSheetName: '학생사진',
   teacherAssignmentSheetName: '교사담당',
   assignmentRequestSheetName: '담당신청',
+  groupSheetName: '수강그룹',
+  groupMemberSheetName: '수강그룹원',
   appSettingsSheetName: '앱설정',
   maxAssignmentsPerUser: 30,
   maxClassNumbersPerBatch: 20,
@@ -24,6 +26,11 @@ const CENTRAL_CONFIG = Object.freeze({
   maxPhotoBatchSize: 6,
   maxPhotoResponseChars: 900000,
   maxPhotoBytes: 512 * 1024,
+  maxGroupCandidates: 400,
+  maxGroupMembers: 100,
+  maxGroupNameLength: 50,
+  externalClassNumber: 0,
+  externalStudentNumberStart: 99,
   maxCsvRows: 2000,
   maxCsvLength: 2 * 1024 * 1024,
   cacheSeconds: 300,
@@ -50,6 +57,18 @@ const CENTRAL_ASSIGNMENT_REQUEST_HEADERS = Object.freeze([
   '신청키', '교사이메일', '학년도', '학년', '반', '과목', '상태',
   '신청일시', '처리일시', '처리자', '처리사유', '담당키',
 ]);
+const CENTRAL_GROUP_HEADERS = Object.freeze([
+  '담당키', '그룹명', '생성일시', '수정일시',
+]);
+const CENTRAL_GROUP_MEMBER_HEADERS = Object.freeze([
+  '담당키', '학생키', '추가일시',
+]);
+// 담당유형은 기존 교사담당 시트에 이미 있는 열이다. 지금까지 '교과' 하나만
+// 쓰였고, 고교학점제 수강 그룹이 두 번째 값이 된다.
+const CENTRAL_ASSIGNMENT_TYPES = Object.freeze({
+  subject: '교과',
+  group: '그룹',
+});
 const CENTRAL_APP_SETTING_HEADERS = Object.freeze(['항목', '값', '수정일시']);
 const CENTRAL_ROSTER_CSV_HEADERS = Object.freeze([
   '학년', '반', '번호', '이름', '학적상태',
@@ -784,6 +803,103 @@ function clearCentralPhotoRowsCache_(spreadsheet) {
   clearCentralReadCache_('photo-rows', spreadsheet);
 }
 
+// 수강그룹·수강그룹원은 나중에 추가된 시트라 기존 설치에는 없을 수 있다.
+// 그때는 관리자에게 무엇을 하면 되는지 알려 준다. 머리글 대조는 기존 중앙
+// 시트와 같은 규약을 따른다.
+function getRequiredCentralSheetByName_(sheetName, headers) {
+  const sheet = getCentralDatabase_().getSheetByName(sheetName);
+  if (!sheet) {
+    throw createCentralError_(
+      'CENTRAL_SCHEMA_INVALID',
+      `중앙 '${sheetName}' 시트가 없습니다. 관리자에게 중앙 시트 점검·생성 실행을 요청해 주세요.`
+    );
+  }
+  if (!centralHeadersMatch_(sheet, headers)) {
+    throw createCentralError_(
+      'CENTRAL_SCHEMA_INVALID',
+      `중앙 '${sheetName}' 시트의 머리글을 확인해 주세요.`
+    );
+  }
+  return sheet;
+}
+
+function getRequiredCentralGroupSheet_() {
+  return getRequiredCentralSheetByName_(
+    CENTRAL_CONFIG.groupSheetName,
+    CENTRAL_GROUP_HEADERS
+  );
+}
+
+function getRequiredCentralGroupMemberSheet_() {
+  return getRequiredCentralSheetByName_(
+    CENTRAL_CONFIG.groupMemberSheetName,
+    CENTRAL_GROUP_MEMBER_HEADERS
+  );
+}
+
+// 두 시트 모두 첫 열이 담당키이고 둘째 열만 다르다(그룹명 / 학생키).
+// 읽기·캐시 규약이 같아 한 함수로 처리한다.
+function readCentralGroupRows_(sheet, headers, suffix) {
+  const cache = CacheService.getScriptCache();
+  const key = centralCacheKey_(sheet.getParent(), suffix);
+  const cached = cache.get(key);
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch (error) {
+      // 손상된 캐시는 중앙 원본에서 다시 만든다.
+    }
+  }
+  const rowCount = sheet.getLastRow() - 1;
+  const rows = [];
+  if (rowCount > 0) {
+    sheet.getRange(2, 1, rowCount, headers.length)
+      .getDisplayValues()
+      .forEach(function (row) {
+        const assignmentKey = String(row[0] || '').trim();
+        if (assignmentKey) {
+          rows.push([assignmentKey, String(row[1] || '').trim()]);
+        }
+      });
+  }
+  const json = JSON.stringify(rows);
+  if (json.length <= 90000) {
+    try {
+      cache.put(key, json, CENTRAL_CONFIG.cacheSeconds);
+    } catch (error) {
+      // 캐시는 성능 최적화이므로 실패해도 원본 결과를 사용한다.
+    }
+  }
+  return rows;
+}
+
+function readCentralGroupNamesCached_() {
+  return new Map(readCentralGroupRows_(
+    getRequiredCentralGroupSheet_(),
+    CENTRAL_GROUP_HEADERS,
+    'group-names'
+  ));
+}
+
+function readCentralGroupMembersCached_() {
+  const result = new Map();
+  readCentralGroupRows_(
+    getRequiredCentralGroupMemberSheet_(),
+    CENTRAL_GROUP_MEMBER_HEADERS,
+    'group-members'
+  ).forEach(function (pair) {
+    if (!pair[1]) return;
+    if (!result.has(pair[0])) result.set(pair[0], new Set());
+    result.get(pair[0]).add(pair[1]);
+  });
+  return result;
+}
+
+function clearCentralGroupCache_(spreadsheet) {
+  clearCentralReadCache_('group-names', spreadsheet);
+  clearCentralReadCache_('group-members', spreadsheet);
+}
+
 function clearCentralReadCache_(suffix, spreadsheet) {
   try {
     const target = spreadsheet || getCentralDatabase_();
@@ -951,6 +1067,10 @@ function compareCentralAssignments_(left, right) {
 }
 
 function toPublicCentralAssignment_(assignment) {
+  const isGroup = centralAssignmentIsGroup_(assignment);
+  const groupName = isGroup
+    ? centralGroupNameFor_(assignment.assignmentKey)
+    : '';
   return {
     assignmentKey: assignment.assignmentKey,
     schoolYear: assignment.schoolYear,
@@ -958,8 +1078,14 @@ function toPublicCentralAssignment_(assignment) {
     classNumber: assignment.classNumber,
     subject: assignment.subject,
     assignmentType: assignment.assignmentType,
-    label: `${assignment.schoolYear}학년도 ${assignment.grade}학년 `
-      + `${assignment.classNumber}반 ${assignment.subject}`,
+    isGroup: isGroup,
+    groupName: groupName,
+    // 그룹 담당의 반은 0으로만 기록되므로 화면에 반 번호를 보여줄 이유가 없다.
+    label: isGroup
+      ? `${assignment.schoolYear}학년도 ${assignment.grade}학년 `
+        + `${groupName || '이름 없는 그룹'} ${assignment.subject}`
+      : `${assignment.schoolYear}학년도 ${assignment.grade}학년 `
+        + `${assignment.classNumber}반 ${assignment.subject}`,
   };
 }
 
@@ -1037,10 +1163,33 @@ function normalizeCentralStudentQuery_(options) {
   };
 }
 
+function centralAssignmentIsGroup_(assignment) {
+  return String(assignment && assignment.assignmentType || '').trim()
+    === CENTRAL_ASSIGNMENT_TYPES.group;
+}
+
+// 고교학점제 수강 그룹은 학급으로 묶이지 않아 학년도·학년·반 대조로 판정할 수
+// 없다. 담당유형 하나로 여기서 갈라 두면 이 함수를 거치는 학생 조회·사진 조회·
+// 기록 저장·수정·삭제·검색이 모두 같은 규칙을 따르므로 다른 경로는 손대지 않는다.
 function centralStudentBelongsToAssignment_(student, assignment) {
+  if (centralAssignmentIsGroup_(assignment)) {
+    const members = readCentralGroupMembersCached_()
+      .get(assignment.assignmentKey);
+    return Boolean(members && members.has(student.studentKey));
+  }
   return Number(student.schoolYear) === Number(assignment.schoolYear)
     && Number(student.grade) === Number(assignment.grade)
     && Number(student.classNumber) === Number(assignment.classNumber);
+}
+
+// 그룹명은 신설 시트에 있다. 아직 시트를 만들지 않은 설치에서 담당 목록 전체가
+// 실패하지 않도록 조회 실패를 흡수한다.
+function centralGroupNameFor_(assignmentKey) {
+  try {
+    return readCentralGroupNamesCached_().get(assignmentKey) || '';
+  } catch (error) {
+    return '';
+  }
 }
 
 function requireCentralStudentAssignment_(student, assignment) {
