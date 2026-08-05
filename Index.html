@@ -310,7 +310,9 @@
               <input id="rosterCsvFile" type="file" accept=".csv,text/csv" style="max-width:300px">
               <button id="importRosterButton" class="secondary">CSV 미리보기·가져오기</button>
               <button id="exportRosterButton" class="ghost">CSV 내보내기</button>
+              <button id="rosterTemplateButton" class="ghost">빈 양식 받기</button>
             </div>
+            <p class="small muted">처음이라면 <strong>빈 양식 받기</strong>로 CSV를 내려받아 채운 뒤 올리세요. 이미 올린 명단이 있으면 <strong>CSV 내보내기</strong>로 받은 파일을 고쳐서 다시 올려도 됩니다. 두 파일의 열 구성은 같습니다.</p>
           </div>
           <div class="card table-wrap"><table><thead><tr>
             <th>학생키</th><th>학년도</th><th>학년-반-번호</th><th>이름</th><th>상태</th><th>관리</th>
@@ -552,6 +554,7 @@
       $('deactivateYearButton').addEventListener('click', deactivateStudentsByYear_);
       $('importRosterButton').addEventListener('click', importRoster);
       $('exportRosterButton').addEventListener('click', exportRoster);
+      $('rosterTemplateButton').addEventListener('click', downloadRosterTemplate);
       $('loadPhotoStatusButton').addEventListener('click', loadPhotoStatus);
       $('syncPhotosButton').addEventListener('click', synchronizePhotos);
       $('newAssignmentButton').addEventListener('click', () => editAssignment());
@@ -1126,13 +1129,27 @@
           grade:$('adminStudentGrade').value,
           classNumber:$('adminStudentClass').value,
         });
-        const blob = new Blob(['\ufeff', csv], {type:'text/csv;charset=utf-8'});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `중앙_학생명단_${new Date().getFullYear()}.csv`;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        downloadCsv_(csv, `중앙_학생명단_${new Date().getFullYear()}.csv`);
       });
+    }
+
+    // 내보낸 명단도 그대로 다시 올릴 수 있지만, 처음 설치한 관리자는 학생이
+    // 0명이라 '내보내기'로 양식을 얻을 수 있다는 걸 알 방법이 없다.
+    async function downloadRosterTemplate() {
+      await runAction(async () => {
+        const csv = await callServer('getCentralRosterCsvTemplate');
+        downloadCsv_(csv, '학생명단_양식.csv');
+      });
+    }
+
+    // 맨 앞의 ﻿ 는 엑셀이 UTF-8 로 열게 하는 표식이다. 없으면 한글이 깨진다.
+    function downloadCsv_(csv, fileName) {
+      const blob = new Blob(['﻿', csv], {type:'text/csv;charset=utf-8'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     }
 
     async function loadPhotoStatus() {
@@ -2512,6 +2529,7 @@
           saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
           setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
           getAssignmentRequestPolicy:() => runner.getAssignmentRequestPolicy(),
+          getCentralRosterCsvTemplate:() => runner.getCentralRosterCsvTemplate(),
           getSchoolYearTransition:() => runner.getSchoolYearTransition(),
           runSchoolYearTransition:() => runner.runSchoolYearTransition(args[0]),
           saveAssignmentRequestPolicy:() => runner.saveAssignmentRequestPolicy(args[0]),

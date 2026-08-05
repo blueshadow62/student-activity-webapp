@@ -621,6 +621,14 @@ function importCentralStudentCsv(csvText, schoolYear) {
   });
 }
 
+// 내보낸 CSV 를 그대로 다시 올릴 수 있으므로 사실 그것도 양식이다. 다만 처음
+// 설치한 관리자는 학생이 0명이라 '내보내기'를 눌러 볼 생각을 하지 못한다.
+// 머리글은 서버 상수 하나에서만 나오게 해서 양쪽이 어긋날 일을 없앤다.
+function getCentralRosterCsvTemplate() {
+  requireAdmin_();
+  return CENTRAL_ROSTER_CSV_HEADERS.join(',');
+}
+
 function exportCentralStudentCsv(filters) {
   requireAdmin_();
   const criteria = normalizeAdminStudentFilters_({

@@ -1099,6 +1099,24 @@ test(75, '개인 파일 시트를 보는 순서대로 놓는다', () => {
   );
 });
 
+test(76, '빈 CSV 양식과 내보내기가 같은 열을 쓴다', () => {
+  assert(html.includes('id="rosterTemplateButton"'), '빈 양식 받기 버튼이 없습니다.');
+  assert(
+    html.includes('getCentralRosterCsvTemplate:()'),
+    '양식 함수가 클라이언트 호출 목록에 없습니다.',
+  );
+  // 양식과 내보내기가 서로 다른 열을 쓰면 받아서 채운 파일이 업로드에서 막힌다.
+  // 둘 다 같은 상수 하나에서만 나오게 해 어긋날 수 없게 한다.
+  assert(
+    functionBody(admin, 'getCentralRosterCsvTemplate').includes('CENTRAL_ROSTER_CSV_HEADERS')
+      && functionBody(admin, 'exportCentralStudentCsv').includes('CENTRAL_ROSTER_CSV_HEADERS')
+      && functionBody(fs.readFileSync(path.join(__dirname, 'SchoolSetup.gs'), 'utf8'),
+        'parseAndValidateRosterCsv_').includes('ROSTER_CSV_HEADERS'),
+    '양식·내보내기·가져오기가 같은 머리글 상수를 쓰지 않습니다.',
+  );
+  assertAdminGuardIn_('getCentralRosterCsvTemplate');
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1118,7 +1136,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 75) {
-  console.error(`FAIL expected 75 tests, got ${tests.length}`);
+if (tests.length !== 76) {
+  console.error(`FAIL expected 76 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
