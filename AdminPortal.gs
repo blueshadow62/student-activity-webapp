@@ -876,25 +876,30 @@ function buildTeacherAssignmentRow_(normalized, key, createdAt, updatedAt) {
   ];
 }
 
+// 사용 여부만 바꾼다. saveTeacherAssignment 를 거치면 그룹명 같은 나머지 항목까지
+// 다시 검증하는데, 그 값들은 이 시트에 없어서 되살릴 수 없다. 그래서 이름이 비어
+// 버린 수강 그룹은 비활성화조차 못 하고 '이름을 입력해 주세요'로 막혔다.
 function setTeacherAssignmentActive(assignmentKey, active) {
   requireAdmin_();
   const key = normalizeCentralKey_(assignmentKey, '담당키');
-  const current = readCentralTeacherAssignments_(
-    getRequiredCentralAssignmentSheet_(),
-    true
-  ).find(function (assignment) {
-    return assignment.assignmentKey === key;
-  });
-  if (!current) throw new Error('담당 수업을 찾을 수 없습니다.');
-  return saveTeacherAssignment({
-    assignmentKey: key,
-    teacherEmail: current.teacherEmail,
-    schoolYear: current.schoolYear,
-    grade: current.grade,
-    classNumber: current.classNumber,
-    subject: current.subject,
-    assignmentType: current.assignmentType,
-    active: Boolean(active),
+  return withCentralWriteLock_(function () {
+    const sheet = getRequiredCentralAssignmentSheet_();
+    const current = readCentralTeacherAssignments_(sheet, true)
+      .find(function (assignment) {
+        return assignment.assignmentKey === key;
+      });
+    if (!current) throw new Error('담당 수업을 찾을 수 없습니다.');
+    sheet.getRange(current.rowNumber, 8).setValue(Boolean(active));
+    sheet.getRange(current.rowNumber, 10).setValue(new Date());
+    clearCentralTeacherAssignmentCache_(sheet.getParent());
+    return {
+      ok: true,
+      assignment: {
+        ...toPublicCentralAssignment_(current),
+        teacherEmail: current.teacherEmail,
+        active: Boolean(active),
+      },
+    };
   });
 }
 

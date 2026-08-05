@@ -902,6 +902,42 @@ test(62, '관리자가 만든 수강 그룹도 이름을 저장한다', () => {
   });
 });
 
+test(63, '담당 사용 여부 전환은 다른 항목을 다시 검증하지 않는다', () => {
+  const body = functionBody(admin, 'setTeacherAssignmentActive');
+  assert(
+    !body.includes('saveTeacherAssignment('),
+    '사용 여부 전환이 저장 함수를 거쳐, 이름이 빈 수강 그룹은 비활성화조차 막힙니다.',
+  );
+  assert(
+    body.includes('current.rowNumber') && body.includes('clearCentralTeacherAssignmentCache_'),
+    '사용 칸만 고쳐 쓰고 캐시를 비우는 처리가 없습니다.',
+  );
+});
+test(64, '관리자 담당 수정이 수강 그룹 이름을 함께 보낸다', () => {
+  const body = functionBody(html, 'editAssignment');
+  assert(
+    body.includes('item.isGroup') && body.includes('groupName'),
+    '그룹 담당을 수정할 때 이름을 묻지 않아 저장이 거부됩니다.',
+  );
+});
+test(65, '교사 담당 표는 교사별로 접어서 보여 준다', () => {
+  assert(html.includes('data-admin-tab="assignments">교사 관리<'), '탭 이름이 교사 관리가 아닙니다.');
+  const body = functionBody(html, 'renderTeacherAssignmentGroups_');
+  assert(
+    body.includes('data-teacher-toggle') && body.includes('data-teacher-rows'),
+    '교사 줄을 눌러 펼치는 구조가 없습니다.',
+  );
+  assert(
+    /data-teacher-rows="\$\{escapeHtml\(teacherEmail\)\}"/.test(body)
+      && body.includes('class="hidden" data-teacher-rows'),
+    '하위 수업 줄이 기본으로 접혀 있지 않습니다.',
+  );
+  assert(
+    body.includes('a.isGroup') && body.includes('groupName'),
+    '관리자 표가 수강 그룹을 0반으로만 보여 줍니다.',
+  );
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -914,7 +950,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 62) {
-  console.error(`FAIL expected 62 tests, got ${tests.length}`);
+if (tests.length !== 65) {
+  console.error(`FAIL expected 65 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

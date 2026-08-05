@@ -123,6 +123,8 @@
     tbody tr:not(.teacher-group):hover td{background:var(--page)}
     .table-wrap{overflow:auto;max-height:470px}.assignment-list{display:grid;gap:8px}
     .teacher-group td{background:var(--page-2);font-weight:600}
+    .teacher-group{cursor:pointer}
+    .teacher-marker{display:inline-block;width:1em;color:var(--ink-soft)}
     .assignment{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
       border-radius:10px;padding:12px;background:var(--surface)}
     .assignment input{width:auto}
@@ -257,7 +259,7 @@
           <button class="tab active" data-admin-tab="dashboard">연결 상태</button>
           <button class="tab" data-admin-tab="students">학생 관리</button>
           <button class="tab" data-admin-tab="photos">사진 관리</button>
-          <button class="tab" data-admin-tab="assignments">교사 담당</button>
+          <button class="tab" data-admin-tab="assignments">교사 관리</button>
         </div>
         <div id="adminDashboard" data-admin-panel="dashboard">
           <div class="card">
@@ -1008,20 +1010,39 @@
         const retryButton = !approved && rows.some(a => !a.active)
           ? `<button class="secondary" data-retry-access-revocation="${escapeHtml(teacherEmail)}" style="margin-left:8px">Drive 권한 제거 재시도</button>`
           : '';
+        // 교사 수가 늘면 반 목록이 화면을 가득 채워 누가 있는지 한눈에 안 보인다.
+        // 기본은 교사 줄만 접어서 보여 주고, 눌렀을 때 그 교사의 수업을 펼친다.
+        const marker = `<span class="teacher-marker" data-teacher-marker="${escapeHtml(teacherEmail)}">▸</span> `;
         const headerCell = approved
           ? `<td><input type="checkbox" data-approved-teacher="${escapeHtml(teacherEmail)}" aria-label="교사 선택"></td>
-             <td colspan="5"><strong>${escapeHtml(teacherEmail)}</strong> · 담당 ${approved.assignmentCount}개 · 마지막 승인 ${escapeHtml(approved.lastApprovedAt || '')}
+             <td colspan="5">${marker}<strong>${escapeHtml(teacherEmail)}</strong> · 담당 ${approved.assignmentCount}개 · 마지막 승인 ${escapeHtml(approved.lastApprovedAt || '')}
              <button class="danger" data-revoke-teacher="${escapeHtml(teacherEmail)}" style="margin-left:8px">해지</button></td>`
-          : `<td></td><td colspan="5"><strong>${escapeHtml(teacherEmail)}</strong> · 활성 담당 없음${retryButton}</td>`;
-        const detailRows = rows.map(a => `<tr>
-          <td></td><td>${a.schoolYear}</td><td>${a.grade}-${a.classNumber}</td><td>${escapeHtml(a.subject)}</td>
+          : `<td></td><td colspan="5">${marker}<strong>${escapeHtml(teacherEmail)}</strong> · 수업 ${rows.length}개 · 활성 담당 없음${retryButton}</td>`;
+        const detailRows = rows.map(a => `<tr class="hidden" data-teacher-rows="${escapeHtml(teacherEmail)}">
+          <td></td><td>${a.schoolYear}</td>
+          <td>${a.isGroup ? `${a.grade}학년 ${escapeHtml(a.groupName || '이름 없는 그룹')}` : `${a.grade}-${a.classNumber}`}</td>
+          <td>${escapeHtml(a.subject)}</td>
           <td>${a.active ? '사용' : '비활성'}</td><td>
           <button class="ghost" data-edit-assignment="${escapeHtml(a.assignmentKey)}">수정</button>
           <button class="secondary" data-toggle-assignment="${escapeHtml(a.assignmentKey)}">${a.active ? '비활성화' : '활성화'}</button></td></tr>`).join('');
-        return `<tr class="teacher-group">${headerCell}</tr>${detailRows}`;
+        return `<tr class="teacher-group" data-teacher-toggle="${escapeHtml(teacherEmail)}">${headerCell}</tr>${detailRows}`;
       }).join('') || '<tr><td colspan="6" class="muted">등록된 담당이 없습니다.</td></tr>';
 
       $('selectAllApprovedTeachers').checked = false;
+      document.querySelectorAll('[data-teacher-toggle]').forEach(row => {
+        row.addEventListener('click', event => {
+          // 머리글의 체크박스·해지 버튼을 누른 것은 펼치기 신호가 아니다.
+          if (event.target.closest('button, input')) return;
+          const selector = `[data-teacher-rows="${CSS.escape(row.dataset.teacherToggle)}"]`;
+          const details = Array.from(document.querySelectorAll(selector));
+          const willShow = details.length > 0 && details[0].classList.contains('hidden');
+          details.forEach(detail => detail.classList.toggle('hidden', !willShow));
+          const marker = document.querySelector(
+            `[data-teacher-marker="${CSS.escape(row.dataset.teacherToggle)}"]`
+          );
+          if (marker) marker.textContent = willShow ? '▾' : '▸';
+        });
+      });
       document.querySelectorAll('[data-edit-assignment]').forEach(button => button.addEventListener('click', () => {
         editAssignment(assignments.find(a => a.assignmentKey === button.dataset.editAssignment));
       }));
@@ -1098,17 +1119,29 @@
       const schoolYear = await showPrompt('학년도', item ? item.schoolYear : new Date().getFullYear()); if (schoolYear == null) return;
       const grade = await showPrompt('담당 학년', item ? item.grade : ''); if (grade == null) return;
       const subject = await showPrompt('담당 과목', item ? item.subject : ''); if (subject == null) return;
-      const classNumbers = await showPrompt(
-        item ? '담당 반' : '담당 반(여러 반은 쉼표로 구분)',
-        item ? item.classNumber : ''
-      );
-      if (classNumbers == null) return;
+      // 수강 그룹은 반이 0으로 고정이고 대신 이름으로 구분한다. 반을 물으면
+      // 관리자가 0을 바꿔 저장이 막히고, 이름을 안 물으면 수정 자체가 막힌다.
+      const isGroup = Boolean(item && item.isGroup);
+      let groupName = '';
+      let classNumbers = '';
+      if (isGroup) {
+        groupName = await showPrompt('수강 그룹 이름', item.groupName || '');
+        if (groupName == null) return;
+      } else {
+        classNumbers = await showPrompt(
+          item ? '담당 반' : '담당 반(여러 반은 쉼표로 구분)',
+          item ? item.classNumber : ''
+        );
+        if (classNumbers == null) return;
+      }
       await runAction(async () => {
         if (item) {
           await callServer('saveTeacherAssignment', {
             assignmentKey:item.assignmentKey,
-            teacherEmail,schoolYear,grade,classNumber:classNumbers,subject,
+            teacherEmail,schoolYear,grade,subject,
+            classNumber: isGroup ? 0 : classNumbers,
             assignmentType:item.assignmentType,
+            groupName,
             active:item.active,
           });
         } else {
