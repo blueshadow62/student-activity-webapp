@@ -171,10 +171,6 @@ function replaceCentralGroupMembers_(assignmentKey, studentKeys) {
   const rows = kept.concat(studentKeys.map(function (studentKey) {
     return [assignmentKey, studentKey, now];
   }));
-  clearCentralSheetRows_(sheet, CENTRAL_GROUP_MEMBER_HEADERS.length);
-  if (rows.length) {
-    sheet.getRange(2, 1, rows.length, CENTRAL_GROUP_MEMBER_HEADERS.length)
-      .setValues(rows);
-  }
+  replaceCentralSheetRows_(sheet, CENTRAL_GROUP_MEMBER_HEADERS.length, rows);
   clearCentralGroupCache_(sheet.getParent());
 }

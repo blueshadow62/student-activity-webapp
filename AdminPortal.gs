@@ -610,12 +610,13 @@ function importCentralStudentCsv(csvText, schoolYear) {
         ];
     });
     const rows = preservedRows.concat(importedRows);
-    clearCentralSheetRows_(sheet, canonical
-      ? CENTRAL_STUDENT_HEADERS.length
-      : CENTRAL_LEGACY_STUDENT_HEADERS.length);
-    if (rows.length) {
-      sheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
-    }
+    replaceCentralSheetRows_(
+      sheet,
+      canonical
+        ? CENTRAL_STUDENT_HEADERS.length
+        : CENTRAL_LEGACY_STUDENT_HEADERS.length,
+      rows
+    );
     clearCentralStudentCache_();
     return {
       ok: true,
@@ -656,10 +657,14 @@ function exportCentralStudentCsv(filters) {
     .join('\r\n');
 }
 
-function clearCentralSheetRows_(sheet, width) {
-  const count = sheet.getLastRow() - 1;
-  if (count > 0) {
-    sheet.getRange(2, 1, count, width).clearContent();
+function replaceCentralSheetRows_(sheet, width, rows) {
+  const previousCount = Math.max(sheet.getLastRow() - 1, 0);
+  if (rows.length) {
+    sheet.getRange(2, 1, rows.length, width).setValues(rows);
+  }
+  const trailingCount = previousCount - rows.length;
+  if (trailingCount > 0) {
+    sheet.getRange(rows.length + 2, 1, trailingCount, width).clearContent();
   }
 }
 
@@ -1284,15 +1289,7 @@ function syncCentralStudentPhotos() {
       ]);
       connectedCount += 1;
     });
-    clearCentralSheetRows_(photoSheet, CENTRAL_PHOTO_HEADERS.length);
-    if (rows.length) {
-      photoSheet.getRange(
-        2,
-        1,
-        rows.length,
-        CENTRAL_PHOTO_HEADERS.length
-      ).setValues(rows);
-    }
+    replaceCentralSheetRows_(photoSheet, CENTRAL_PHOTO_HEADERS.length, rows);
     clearCentralPhotoRowsCache_(photoSheet.getParent());
     return {
       ok: true,

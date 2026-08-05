@@ -1142,10 +1142,12 @@ function countMyPreviousAssignments_(assignmentSheet) {
 function requireMyAssignment_(assignmentKey) {
   const key = normalizeCentralKey_(assignmentKey, '담당키');
   const email = getRequiredActiveUserEmail_();
+  const schoolYear = getCurrentSchoolYear_();
   const assignment = readCentralTeacherAssignmentsCached_(false)
     .find(function (candidate) {
     return candidate.assignmentKey === key
-      && candidate.teacherEmail === email;
+      && candidate.teacherEmail === email
+      && candidate.schoolYear === schoolYear;
   });
   if (!assignment) {
     throw createCentralError_(

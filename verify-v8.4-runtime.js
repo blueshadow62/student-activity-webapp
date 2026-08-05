@@ -593,6 +593,112 @@ test(27, '아무것도 고르지 않으면 정리를 막는다', () => {
   });
 });
 
+test(28, '그룹 담당 활성 상태 변경이 기존 그룹명을 보존한다', () => {
+  const originals = {
+    requireAdmin_: app.requireAdmin_,
+    withCentralWriteLock_: app.withCentralWriteLock_,
+    normalizeCentralKey_: app.normalizeCentralKey_,
+    getRequiredCentralAssignmentSheet_: app.getRequiredCentralAssignmentSheet_,
+    readCentralTeacherAssignments_: app.readCentralTeacherAssignments_,
+    centralGroupNameFor_: app.centralGroupNameFor_,
+    clearCentralTeacherAssignmentCache_: app.clearCentralTeacherAssignmentCache_,
+  };
+  const writes = [];
+  const sheet = {
+    getParent: () => ({}),
+    getRange: (row, column) => ({
+      setValue(value) { writes.push({ row, column, value }); },
+    }),
+  };
+  Object.assign(app, {
+    requireAdmin_: () => {},
+    withCentralWriteLock_: (run) => run(),
+    normalizeCentralKey_: (key) => key,
+    getRequiredCentralAssignmentSheet_: () => sheet,
+    readCentralTeacherAssignments_: () => [{ ...GROUP_ASSIGNMENT, rowNumber: 2 }],
+    centralGroupNameFor_: () => GROUP_ASSIGNMENT.groupName,
+    clearCentralTeacherAssignmentCache_: () => {},
+  });
+  try {
+    const result = app.setTeacherAssignmentActive('A-GRP', false);
+    assert(
+      writes[0].column === 8
+        && writes[0].value === false
+        && result.assignment.groupName === GROUP_ASSIGNMENT.groupName,
+      '그룹 담당 상태만 바꾸지 못했거나 기존 그룹명이 사라졌습니다.',
+    );
+  } finally {
+    Object.assign(app, originals);
+  }
+});
+
+test(29, '서버 권한검사가 현재 학년도 담당키만 허용한다', () => {
+  const originals = {
+    normalizeCentralKey_: app.normalizeCentralKey_,
+    getRequiredActiveUserEmail_: app.getRequiredActiveUserEmail_,
+    getCurrentSchoolYear_: app.getCurrentSchoolYear_,
+    readCentralTeacherAssignmentsCached_: app.readCentralTeacherAssignmentsCached_,
+  };
+  Object.assign(app, {
+    normalizeCentralKey_: (key) => key,
+    getRequiredActiveUserEmail_: () => CLASS_ASSIGNMENT.teacherEmail,
+    getCurrentSchoolYear_: () => 2026,
+    readCentralTeacherAssignmentsCached_: () => [
+      CLASS_ASSIGNMENT,
+      { ...CLASS_ASSIGNMENT, assignmentKey: 'A-OLD', schoolYear: 2025 },
+    ],
+  });
+  try {
+    assert(
+      app.requireMyAssignment_('A-SUB').assignmentKey === 'A-SUB',
+      '현재 학년도 담당키가 거부됩니다.',
+    );
+    let rejected = false;
+    try {
+      app.requireMyAssignment_('A-OLD');
+    } catch (error) {
+      rejected = true;
+    }
+    assert(rejected, '과거 학년도 담당키가 서버 권한검사를 통과합니다.');
+  } finally {
+    Object.assign(app, originals);
+  }
+});
+
+test(30, '시트 전체 교체는 새 데이터 저장 후 남는 행을 지운다', () => {
+  const events = [];
+  const sheet = {
+    getLastRow: () => 6,
+    getRange: (row, column, rowCount, width) => ({
+      setValues() { events.push(['write', row, rowCount, width]); },
+      clearContent() { events.push(['clear', row, rowCount, width]); },
+    }),
+  };
+  app.replaceCentralSheetRows_(sheet, 2, [['A', 1], ['B', 2], ['C', 3]]);
+  assert(
+    events[0][0] === 'write'
+      && events[1][0] === 'clear'
+      && events[1][1] === 5
+      && events[1][2] === 2,
+    '새 데이터를 쓰기 전에 기존 행을 지우거나 남는 행 범위가 잘못됐습니다.',
+  );
+
+  let clearedAfterFailure = false;
+  const failingSheet = {
+    getLastRow: () => 6,
+    getRange: () => ({
+      setValues() { throw new Error('WRITE_FAILED'); },
+      clearContent() { clearedAfterFailure = true; },
+    }),
+  };
+  try {
+    app.replaceCentralSheetRows_(failingSheet, 2, [['A', 1]]);
+  } catch (error) {
+    assert(error.message === 'WRITE_FAILED', '예상한 쓰기 실패가 아닙니다.');
+  }
+  assert(!clearedAfterFailure, '새 데이터 쓰기 실패 뒤 기존 행을 지웠습니다.');
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -605,7 +711,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 27) {
-  console.error(`FAIL expected 27 tests, got ${tests.length}`);
+if (tests.length !== 30) {
+  console.error(`FAIL expected 30 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
