@@ -57,8 +57,11 @@ function loadAppsScript(fileNames, constantNames) {
 }
 
 const app = loadAppsScript(
-  ['Code.gs', 'CentralData.gs'],
-  ['APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS'],
+  ['Code.gs', 'CentralData.gs', 'PersonalStorage.gs'],
+  [
+    'APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS',
+    'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
+  ],
 );
 
 // 머리글 1행 + 자료 행으로 이루어진 시트 흉내. getRange 좌표는 1부터 센다.
@@ -151,6 +154,133 @@ test(6, '재학인데 반이 0인 행은 계속 걸러진다', () => {
   );
 });
 
+// --- 활동기록 담당키 --------------------------------------------------------
+
+const GROUP_ASSIGNMENT = {
+  assignmentKey: 'A-GRP',
+  schoolYear: 2026,
+  grade: 2,
+  classNumber: 0,
+  subject: '물리학Ⅰ',
+  assignmentType: '그룹',
+  isGroup: true,
+  groupName: '물리 3반군',
+};
+const CLASS_ASSIGNMENT = {
+  assignmentKey: 'A-SUB',
+  schoolYear: 2026,
+  grade: 2,
+  classNumber: 3,
+  subject: '물리학Ⅰ',
+  assignmentType: '교과',
+  isGroup: false,
+  groupName: '',
+};
+
+// 그룹 기록은 담당 반이 0인데도 학생의 실제 반(7반)이 그대로 남는다. 이 어긋남이
+// 담당키가 필요한 이유이므로 시험 자료에서도 일부러 어긋나게 둔다.
+function recordRow(studentClassNumber, assignmentKey) {
+  return [
+    'REC-1', new Date('2026-05-01T01:00:00Z'), 2, studentClassNumber, 12,
+    '홍길동', '재학', '칭찬·긍정', '탐구·문제해결', '물리학Ⅰ', '메모',
+    '교사A', new Date('2026-05-01T01:00:00Z'), 'STU-1', 2026, assignmentKey,
+  ];
+}
+
+function withStubbedAssignments(mine, run) {
+  const originalGetMyAssignments = app.getMyAssignments;
+  const originalRequireMyAssignment = app.requireMyAssignment_;
+  app.getMyAssignments = () => mine;
+  app.requireMyAssignment_ = (key) => {
+    const found = mine.find((item) => item.assignmentKey === key);
+    if (!found) throw new Error('ASSIGNMENT_FORBIDDEN');
+    return found;
+  };
+  try {
+    return run();
+  } finally {
+    app.getMyAssignments = originalGetMyAssignments;
+    app.requireMyAssignment_ = originalRequireMyAssignment;
+  }
+}
+
+function searchRecordRows(mine, rows) {
+  const originalReadStudents = app.readCentralStudentsCached_;
+  app.readCentralStudentsCached_ = () => [];
+  try {
+    return app.readCentralFilteredPersonalRecords_(
+      [{ sheet: fakeSheet(app.RECORD_HEADERS, rows), archived: false }],
+      mine,
+      { limit: 50 },
+      { email: 'teacher@school.hs.kr', author: '교사A' },
+    );
+  } finally {
+    app.readCentralStudentsCached_ = originalReadStudents;
+  }
+}
+
+test(7, '활동기록 머리글 끝에 담당키가 있다', () => {
+  assert(
+    app.RECORD_HEADERS[15] === '담당키',
+    '활동기록에 담당키 열이 없습니다.',
+  );
+});
+
+test(8, '개인 저장소 머리글이 활동기록 머리글과 같다', () => {
+  assert(
+    app.PERSONAL_RECORD_HEADERS.join('') === app.RECORD_HEADERS.join(''),
+    '새로 만드는 개인 스프레드시트의 머리글이 활동기록 머리글과 다릅니다.',
+  );
+});
+
+test(9, '담당키가 있으면 학년·반이 달라도 그 담당으로 판정한다', () => {
+  const assignment = withStubbedAssignments(
+    [GROUP_ASSIGNMENT],
+    () => app.requireAssignmentForRecordSnapshot_(recordRow(7, 'A-GRP'), ''),
+  );
+  assert(
+    assignment.assignmentKey === 'A-GRP',
+    '그룹 기록을 수정·삭제할 수 없습니다. 담당 반 0과 학생 반이 달라 막힙니다.',
+  );
+});
+
+test(10, '담당키가 있어도 내 담당이 아니면 거부한다', () => {
+  let rejected = false;
+  withStubbedAssignments([GROUP_ASSIGNMENT], () => {
+    try {
+      app.requireAssignmentForRecordSnapshot_(recordRow(7, 'A-OTHER'), '');
+    } catch (error) {
+      rejected = true;
+    }
+  });
+  assert(rejected, '남의 담당키가 적힌 기록까지 통과합니다.');
+});
+
+test(11, '담당키가 빈 옛 기록은 학년·반·과목으로 판정한다', () => {
+  const assignment = withStubbedAssignments(
+    [CLASS_ASSIGNMENT],
+    () => app.requireAssignmentForRecordSnapshot_(recordRow(3, ''), ''),
+  );
+  assert(
+    assignment.assignmentKey === 'A-SUB',
+    '담당키가 없던 기존 기록을 더 이상 수정·삭제할 수 없습니다.',
+  );
+});
+
+test(12, '기록 검색이 담당키로 그룹 기록을 찾는다', () => {
+  assert(
+    searchRecordRows([GROUP_ASSIGNMENT], [recordRow(7, 'A-GRP')]).length === 1,
+    '그룹 기록이 기록 검색에서 누락됩니다.',
+  );
+});
+
+test(13, '기록 검색이 담당키 빈 옛 기록도 찾는다', () => {
+  assert(
+    searchRecordRows([CLASS_ASSIGNMENT], [recordRow(3, '')]).length === 1,
+    '담당키가 없던 기존 기록이 기록 검색에서 사라집니다.',
+  );
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -163,7 +293,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 6) {
-  console.error(`FAIL expected 6 tests, got ${tests.length}`);
+if (tests.length !== 13) {
+  console.error(`FAIL expected 13 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

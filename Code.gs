@@ -30,8 +30,11 @@ const LEGACY_RECORD_HEADERS = Object.freeze([
   '기록ID', '기록일시', '학년', '반', '번호', '이름', '학적상태',
   '구분', '역량', '과목', '내용메모', '작성자', '수정일시',
 ]);
+// 담당키는 v8.4 수강 그룹부터 채운다. 그룹 담당은 반이 0이고 기록에는 학생의
+// 실제 반이 남아서, 학년·반·과목 대조만으로는 어느 담당의 기록인지 알 수 없다.
+// 이전 기록은 이 칸이 비어 있고, 그때는 예전처럼 학년·반·과목으로 판정한다.
 const RECORD_HEADERS = Object.freeze([
-  ...LEGACY_RECORD_HEADERS, '학생ID', '학년도',
+  ...LEGACY_RECORD_HEADERS, '학생ID', '학년도', '담당키',
 ]);
 const LEGACY_DELETED_RECORD_HEADERS = Object.freeze([
   ...LEGACY_RECORD_HEADERS, '삭제일시', '삭제자', '삭제사유',
@@ -250,6 +253,7 @@ function saveRecord(payload) {
       now,
       normalized.student.studentId,
       normalized.student.schoolYear,
+      sanitizeSpreadsheetText_(normalized.assignment.assignmentKey),
     ]]);
     formatRecordRow_(context.recordSheet, nextRow);
 
@@ -592,6 +596,12 @@ function centralStudentToLegacyStudent_(student) {
 }
 
 function requireAssignmentForRecordSnapshot_(row, requestedAssignmentKey) {
+  // 담당키가 적힌 기록은 그 담당의 것으로 확정한다. 수강 그룹은 담당 반이 0인데
+  // 기록에는 학생의 실제 반이 남으므로, 아래 학년·반 대조로는 영영 맞지 않는다.
+  const recordedAssignmentKey = String(row[15] || '').trim();
+  if (recordedAssignmentKey) {
+    return requireMyAssignment_(recordedAssignmentKey);
+  }
   const assignments = getMyAssignments();
   const requested = String(requestedAssignmentKey || '').trim();
   const assignment = requested
@@ -641,12 +651,17 @@ function readCentralFilteredPersonalRecords_(
     values.forEach(function (row, index) {
       const display = displayValues[index];
       const studentKey = String(row[13] || '').trim();
-      const assignment = assignments.find(function (candidate) {
-        return candidate.schoolYear === Number(row[14])
-          && candidate.grade === Number(row[2])
-          && candidate.classNumber === Number(row[3])
-          && candidate.subject === String(display[9] || '').trim();
-      });
+      const recordedAssignmentKey = String(display[15] || '').trim();
+      const assignment = recordedAssignmentKey
+        ? assignments.find(function (candidate) {
+          return candidate.assignmentKey === recordedAssignmentKey;
+        })
+        : assignments.find(function (candidate) {
+          return candidate.schoolYear === Number(row[14])
+            && candidate.grade === Number(row[2])
+            && candidate.classNumber === Number(row[3])
+            && candidate.subject === String(display[9] || '').trim();
+        });
       if (
         !assignment
           || (criteria.studentId && criteria.studentId !== studentKey)
@@ -864,7 +879,7 @@ function initializeSettingsSheet_(sheet) {
 
 function initializeRecordSheet_(sheet) {
   initializeLogSheet_(sheet, RECORD_HEADERS, '#1a73e8');
-  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 260, 90];
+  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 260, 90, 260];
   widths.forEach(function (width, index) { sheet.setColumnWidth(index + 1, width); });
   formatLogColumns_(sheet, 2, 13, 9, 3);
 }

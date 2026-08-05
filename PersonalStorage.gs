@@ -33,9 +33,12 @@ const PERSONAL_DATABASE_SHEETS = Object.freeze({
   archive: '활동기록보관',
 });
 
+// Code.gs 의 RECORD_HEADERS 와 반드시 같아야 한다. 파일 로드 순서에 기대지 않으려고
+// 참조 대신 같은 값을 적어 두고, verify-v8.4-runtime.js 가 둘이 같은지 확인한다.
 const PERSONAL_RECORD_HEADERS = Object.freeze([
   '기록ID', '기록일시', '학년', '반', '번호', '이름', '학적상태',
   '구분', '역량', '과목', '내용메모', '작성자', '수정일시', '학생ID', '학년도',
+  '담당키',
 ]);
 
 const PERSONAL_COMPETENCY_HEADERS = Object.freeze([
