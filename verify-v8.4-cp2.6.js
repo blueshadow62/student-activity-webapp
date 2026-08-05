@@ -49,8 +49,10 @@ test(1, '체크포인트 2.5 회귀 91/91', () => {
   );
   assert(output.includes('RESULT 91/91'), '체크포인트 2.5 회귀가 통과하지 않았습니다.');
 });
-test(2, '앱 버전 cp2.6 이상', () => {
-  assert(/version:\s*'8\.4\.0-cp(?:2\.6|5)'/.test(code), '앱 버전이 cp2.6 이상이 아닙니다.');
+// 개발 중 체크포인트 표시(8.4.0-cp2.6 등)는 1.0.0 공개 릴리스에서 뗐다. 업데이트
+// 알림이 이 값을 릴리스 태그와 자리마다 숫자로 견주므로 순수 semver 여야 한다.
+test(2, '앱 버전이 semver 형식', () => {
+  assert(/version: '\d+\.\d+\.\d+'/.test(code), '앱 버전이 semver 형식이 아닙니다.');
 });
 test(3, '중앙 스키마 버전 2', () => {
   assert(central.includes("schemaVersion: '3'"), '중앙 스키마 버전이 3이 아닙니다.');

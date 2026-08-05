@@ -925,6 +925,69 @@ test(40, '설정값은 한 번에 받아 온다', () => {
   }
 });
 
+// --- 업데이트 알림 ---------------------------------------------------------
+
+// 버전 비교는 Index.html 안에 있어 vm 으로 못 불러온다. 함수 본문만 떼어 내
+// 실제로 실행한다. 글자 비교로 되돌아가면 1.10.0 이 1.9.0 보다 낮다고 나온다.
+const clientSource = fs.readFileSync(path.join(__dirname, 'Index.html'), 'utf8');
+
+function clientFunction(name) {
+  const marker = `function ${name}(`;
+  const start = clientSource.indexOf(marker);
+  assert(start >= 0, `${name} 를 찾을 수 없습니다.`);
+  let depth = 0;
+  for (let index = clientSource.indexOf('{', start); index < clientSource.length; index += 1) {
+    if (clientSource[index] === '{') depth += 1;
+    if (clientSource[index] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        // eslint-disable-next-line no-new-func
+        return new Function(`return (${clientSource.slice(start, index + 1)})`)();
+      }
+    }
+  }
+  throw new Error(`${name} 본문이 닫히지 않았습니다.`);
+}
+
+test(41, '버전 비교가 자리마다 숫자로 이뤄진다', () => {
+  const compare = clientFunction('compareVersions_');
+  assert(compare('1.10.0', '1.9.0') > 0, '1.10.0 을 1.9.0 보다 낮게 봅니다.');
+  assert(compare('2.0.0', '1.9.9') > 0, '앞자리가 큰 버전을 낮게 봅니다.');
+  assert(compare('1.0.0', '1.0.0') === 0, '같은 버전을 다르게 봅니다.');
+  assert(compare('1.0.0', '1.0.1') < 0, '더 낮은 버전을 최신으로 봅니다.');
+  assert(compare('1.0', '1.0.0') === 0, '자리가 빠진 버전을 다르게 봅니다.');
+});
+
+test(42, '현재 앱 버전이 비교 가능한 형식이다', () => {
+  const version = String(app.APP_CONFIG.version);
+  assert(
+    /^\d+\.\d+\.\d+$/.test(version),
+    `앱 버전 '${version}'은 릴리스 태그와 견줄 수 없는 형식입니다.`,
+  );
+});
+
+test(43, '업데이트 확인은 관리자 화면에서만 하고 실패해도 조용하다', () => {
+  const body = clientSource.slice(
+    clientSource.indexOf('async function checkForUpdate_'),
+    clientSource.indexOf('function compareVersions_'),
+  );
+  assert(body.includes('catch'), '확인 실패가 관리자 화면 오류로 번집니다.');
+  assert(
+    body.includes('RELEASE_REPOSITORY_URL'),
+    '릴리스 주소를 확인하지 않고 링크로 겁니다.',
+  );
+  // 교사 화면(renderPersonalBootstrap)에서는 부르지 않아야 한다. 학교 전체가
+  // 한 IP로 나가면 GitHub 호출 한도에 걸린다.
+  const personal = clientSource.slice(
+    clientSource.indexOf('function renderPersonalBootstrap'),
+    clientSource.indexOf('function renderPreviousYearNotice_'),
+  );
+  assert(
+    !personal.includes('checkForUpdate_'),
+    '교사 화면에서도 GitHub에 버전을 묻고 있습니다.',
+  );
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -937,7 +1000,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 40) {
-  console.error(`FAIL expected 40 tests, got ${tests.length}`);
+if (tests.length !== 43) {
+  console.error(`FAIL expected 43 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

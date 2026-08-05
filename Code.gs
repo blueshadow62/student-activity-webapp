@@ -3,7 +3,11 @@
 // 문의: https://github.com/blueshadow62/student-activity-webapp/issues
 
 const APP_CONFIG = Object.freeze({
-  version: '8.4.0-cp5',
+  // 첫 공개 릴리스. 이전 v8.x 는 공개된 적 없는 내부 개발 세대라 번호를 잇지
+  // 않았다. 앞으로 semver 를 따른다: 고침 1.0.x, 기능 추가 1.1.0, 관리자 작업이
+  // 필요한 변경 2.0.0. 업데이트 알림이 앞자리만 보고 "그냥 덮어써도 되는지"를
+  // 가릴 수 있어야 하므로 이 규칙을 지킨다.
+  version: '1.0.0',
   recordSheetName: '활동기록',
   archivedRecordSheetName: '활동기록보관',
   deletedRecordSheetName: '삭제기록',

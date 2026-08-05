@@ -272,6 +272,7 @@
                 <button id="resetSchoolInstallationButton" class="danger">설치 설정 초기화</button>
               </div></div>
             <div id="centralStatus" class="status"></div>
+            <p id="updateNotice" class="status hidden" style="margin-top:10px"></p>
           </div>
           <div class="grid grid-4">
             <div class="metric"><span>학생</span><strong id="studentCount">0</strong></div>
@@ -875,6 +876,63 @@
       $('photoCount').textContent = connection.counts.photos;
       $('assignmentCount').textContent = connection.counts.assignments;
       $('pendingRequestCount').textContent = dashboard.pendingAssignmentRequests || 0;
+      // 화면을 다시 그릴 때마다 GitHub에 묻지 않는다. 한 번 열 때 한 번이면 된다.
+      if (!state.updateChecked) {
+        state.updateChecked = true;
+        checkForUpdate_();
+      }
+    }
+
+    // 새 버전 확인은 브라우저에서 GitHub에 직접 묻는다. 서버(Apps Script)에서
+    // 부르면 '외부 서비스 연결' 권한을 매니페스트에 넣어야 하고, 그러면 이미 쓰고
+    // 있는 교사 전원이 동의 화면을 다시 보게 된다. 관리자 화면에서만 확인하는
+    // 것도 같은 이유다. 학교 전체가 한 IP로 나가면 호출 한도에 걸릴 수 있는데,
+    // 업데이트를 실제로 수행하는 사람은 관리자뿐이다.
+    const RELEASE_REPOSITORY_URL =
+      'https://github.com/blueshadow62/student-activity-webapp';
+    const RELEASE_FEED_URL =
+      'https://api.github.com/repos/blueshadow62/student-activity-webapp/releases/latest';
+
+    async function checkForUpdate_() {
+      // 저장소가 비공개거나, 아직 릴리스가 없거나, 학교 망이 막았거나, 호출 한도를
+      // 넘겼을 수 있다. 어느 쪽이든 조용히 넘어간다. 버전 확인 실패 때문에 관리자
+      // 화면에 오류가 뜨면 안 된다.
+      try {
+        const response = await fetch(RELEASE_FEED_URL, { cache:'no-store' });
+        if (!response.ok) return;
+        const release = await response.json();
+        const latest = String(release.tag_name || '').replace(/^v/i, '').trim();
+        const current = String((state.bootstrap && state.bootstrap.version) || '').trim();
+        if (!latest || !current || compareVersions_(latest, current) <= 0) return;
+        // 링크 주소는 바깥에서 받은 값이라 그대로 믿지 않는다. 우리 저장소를
+        // 가리킬 때만 링크로 걸고, 아니면 글자만 보여 준다.
+        const link = String(release.html_url || '');
+        const safeLink = link.indexOf(`${RELEASE_REPOSITORY_URL}/`) === 0 ? link : '';
+        const notice = $('updateNotice');
+        notice.innerHTML = `새 버전 <strong>${escapeHtml(latest)}</strong>이 나왔습니다.`
+          + ` 지금 쓰는 버전은 ${escapeHtml(current)}입니다.`
+          + (safeLink
+            ? ` <a href="${escapeHtml(safeLink)}" target="_blank" rel="noopener noreferrer">바뀐 내용과 올리는 방법 보기</a>`
+            : '');
+        notice.classList.remove('hidden');
+      } catch (error) {
+        // 확인에 실패했다는 사실은 알리지 않는다. 관리자가 할 수 있는 일이 없다.
+      }
+    }
+
+    // 1.10.0 이 1.9.0 보다 최신이다. 글자로 견주면 거꾸로 나오므로 자리마다
+    // 숫자로 견준다.
+    function compareVersions_(left, right) {
+      const leftParts = String(left).split('.');
+      const rightParts = String(right).split('.');
+      for (let index = 0; index < 3; index += 1) {
+        const a = Number(leftParts[index]);
+        const b = Number(rightParts[index]);
+        const safeA = Number.isFinite(a) ? a : 0;
+        const safeB = Number.isFinite(b) ? b : 0;
+        if (safeA !== safeB) return safeA - safeB;
+      }
+      return 0;
     }
 
     async function loadAdminDashboard() {

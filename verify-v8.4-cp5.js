@@ -46,8 +46,15 @@ test(1, '체크포인트 2.6 회귀 29/29', () => {
   );
   assert(output.includes('RESULT 29/29'), '체크포인트 2.6 회귀가 통과하지 않았습니다.');
 });
-test(2, '앱 버전 cp5', () => {
-  assert(code.includes("version: '8.4.0-cp5'"), '앱 버전이 cp5가 아닙니다.');
+// 업데이트 알림이 이 값을 GitHub 릴리스 태그와 자리마다 숫자로 비교한다.
+// 'cp5' 같은 꼬리가 붙으면 비교가 무너지므로 순수 semver 만 허용한다.
+test(2, '앱 버전이 semver 형식', () => {
+  const found = code.match(/version: '([^']+)'/);
+  assert(found, '앱 버전을 찾을 수 없습니다.');
+  assert(
+    /^\d+\.\d+\.\d+$/.test(found[1]),
+    `앱 버전 '${found[1]}'이 semver(1.0.0) 형식이 아닙니다.`,
+  );
 });
 test(3, '승인된 교사 목록은 관리자 전용', () => {
   assert(/^\s*requireAdmin_\(\);/.test(functionBody(admin, 'getApprovedTeachers')), '승인 교사 목록에 관리자 검사가 없습니다.');
