@@ -873,15 +873,25 @@ function readCentralGroupRows_(sheet, headers, suffix) {
   return rows;
 }
 
+// centralStudentBelongsToAssignment_ 가 학생 한 명마다 이 함수를 부른다. 그때마다
+// 시트 핸들을 다시 얻고 캐시를 다시 풀면 한 반(수백 명) 조회가 멈춘 것처럼 느려져
+// 화면이 계속 로딩 상태로 남는다. 한 번의 실행 안에서는 기억해 두고 다시 쓴다.
+let centralGroupNamesMemo_ = null;
+let centralGroupMembersMemo_ = null;
+
 function readCentralGroupNamesCached_() {
-  return new Map(readCentralGroupRows_(
-    getRequiredCentralGroupSheet_(),
-    CENTRAL_GROUP_HEADERS,
-    'group-names'
-  ));
+  if (!centralGroupNamesMemo_) {
+    centralGroupNamesMemo_ = new Map(readCentralGroupRows_(
+      getRequiredCentralGroupSheet_(),
+      CENTRAL_GROUP_HEADERS,
+      'group-names'
+    ));
+  }
+  return centralGroupNamesMemo_;
 }
 
 function readCentralGroupMembersCached_() {
+  if (centralGroupMembersMemo_) return centralGroupMembersMemo_;
   const result = new Map();
   readCentralGroupRows_(
     getRequiredCentralGroupMemberSheet_(),
@@ -892,10 +902,13 @@ function readCentralGroupMembersCached_() {
     if (!result.has(pair[0])) result.set(pair[0], new Set());
     result.get(pair[0]).add(pair[1]);
   });
+  centralGroupMembersMemo_ = result;
   return result;
 }
 
 function clearCentralGroupCache_(spreadsheet) {
+  centralGroupNamesMemo_ = null;
+  centralGroupMembersMemo_ = null;
   clearCentralReadCache_('group-names', spreadsheet);
   clearCentralReadCache_('group-members', spreadsheet);
 }

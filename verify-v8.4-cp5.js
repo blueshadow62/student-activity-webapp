@@ -880,9 +880,25 @@ test(60, '편성 화면은 담당 신청 탭에 있다', () => {
     body.includes('item.isGroup') && body.includes('loadGroupRoster_('),
     '승인된 수강 그룹을 골라 편성을 불러오지 않습니다.',
   );
+  // 목록에 수강 그룹만 담아야 학급 단위 수업이 선택지에 끼지 않는다.
   assert(
-    html.includes('data-group-key'),
-    '수강 그룹 선택 칩이 없습니다.',
+    html.includes('id="groupSelect"') && body.includes("$('groupSelect').innerHTML = groups.map("),
+    '편성할 수업을 고르는 드롭다운이 없습니다.',
+  );
+  assert(
+    !body.includes('groups.length < 2'),
+    '그룹이 하나면 선택 칸을 숨겨, 무엇을 편성하는지 알 수 없습니다.',
+  );
+});
+test(69, '편성 목록에 전체 선택 체크박스가 있다', () => {
+  assert(
+    html.includes('id="groupCandidateSelectAll"') && html.includes('id="groupMemberSelectAll"'),
+    '후보·그룹원 목록에 전체 선택이 없습니다.',
+  );
+  const body = functionBody(html, 'renderGroupRoster_');
+  assert(
+    body.includes("$('groupMemberSelectAll').checked = false"),
+    '목록을 다시 그린 뒤에도 전체 선택이 켜진 채로 남습니다.',
   );
 });
 test(61, '편성 목록에 학년을 보여준다', () => {
@@ -938,6 +954,55 @@ test(65, '교사 담당 표는 교사별로 접어서 보여 준다', () => {
   );
 });
 
+test(66, '신청 승인 화면이 그룹은 반 번호 대신 그룹명을 보여준다', () => {
+  const body = functionBody(html, 'loadAssignments');
+  assert(
+    body.includes('request.target'),
+    '관리자가 어느 수강 그룹을 승인하는지 모른 채 0반만 보고 승인하게 됩니다.',
+  );
+});
+test(67, '입력 창에 취소 버튼이 있다', () => {
+  const body = functionBody(html, 'showModal_');
+  assert(
+    /opts\.type === 'confirm' \|\| opts\.type === 'prompt'/.test(body),
+    '입력 창을 Esc 로만 닫을 수 있습니다.',
+  );
+  assert(
+    /close\(opts\.type === 'prompt' \? null : false\)/.test(body),
+    '입력 창의 취소가 빈 값이 아니라 취소로 전달되지 않습니다.',
+  );
+});
+test(68, '담당 삭제는 관리자 전용이며 그룹 자료까지 정리한다', () => {
+  assertAdminGuardIn_('deleteTeacherAssignment');
+  const body = functionBody(admin, 'deleteTeacherAssignment');
+  assert(body.includes('sheet.deleteRow('), '담당 행을 실제로 지우지 않습니다.');
+  assert(
+    body.includes('deleteCentralGroupRowsByKey_('),
+    '그룹 담당을 지워도 그룹명·편성 명단이 죽은 자료로 남습니다.',
+  );
+  const cleanup = functionBody(admin, 'deleteCentralGroupRowsByKey_');
+  assert(
+    cleanup.includes('getRequiredCentralGroupSheet_')
+      && cleanup.includes('getRequiredCentralGroupMemberSheet_')
+      && cleanup.includes('index -= 1'),
+    '그룹·그룹원 시트를 아래에서 위로 지우지 않습니다.',
+  );
+  assert(html.includes('data-delete-assignment='), '삭제 버튼이 없습니다.');
+  assert(
+    html.includes('deleteTeacherAssignment:()'),
+    '삭제 함수가 클라이언트 호출 목록에 없습니다.',
+  );
+  const client = functionBody(html, 'renderTeacherAssignmentGroups_');
+  assert(client.includes('showConfirm('), '삭제 전 확인 없이 지웁니다.');
+});
+
+function assertAdminGuardIn_(name) {
+  assert(
+    /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
+    `${name} 함수 시작 부분에 requireAdmin_()가 없습니다.`,
+  );
+}
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -950,7 +1015,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 65) {
-  console.error(`FAIL expected 65 tests, got ${tests.length}`);
+if (tests.length !== 69) {
+  console.error(`FAIL expected 69 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

@@ -903,6 +903,48 @@ function setTeacherAssignmentActive(assignmentKey, active) {
   });
 }
 
+// 담당 행 자체를 지운다. 비활성화는 이력을 남기지만 잘못 만든 행은 목록에 계속
+// 남아 헷갈린다. 교사의 개인 활동 기록은 각자 소유 파일에 있어 건드리지 않는다.
+// 중앙 자료 보기 권한은 여기서 회수하지 않는다. 다른 담당이 남아 있을 수 있어
+// 회수 여부는 `해지` 버튼에서 교사 단위로 판단한다.
+function deleteTeacherAssignment(assignmentKey) {
+  requireAdmin_();
+  const key = normalizeCentralKey_(assignmentKey, '담당키');
+  return withCentralWriteLock_(function () {
+    const sheet = getRequiredCentralAssignmentSheet_();
+    const current = readCentralTeacherAssignments_(sheet, true)
+      .find(function (assignment) {
+        return assignment.assignmentKey === key;
+      });
+    if (!current) throw new Error('담당 수업을 찾을 수 없습니다.');
+    const wasGroup = centralAssignmentIsGroup_(current);
+    sheet.deleteRow(current.rowNumber);
+    clearCentralTeacherAssignmentCache_(sheet.getParent());
+    if (wasGroup) deleteCentralGroupRowsByKey_(key);
+    return { ok: true, wasGroup: wasGroup };
+  });
+}
+
+// 그룹명과 편성 명단은 담당키로만 연결된다. 담당을 지우고 남겨 두면 다시 쓰일 일이
+// 없는 죽은 행이 되므로 함께 지운다.
+function deleteCentralGroupRowsByKey_(assignmentKey) {
+  [
+    getRequiredCentralGroupSheet_(),
+    getRequiredCentralGroupMemberSheet_(),
+  ].forEach(function (sheet) {
+    const rowCount = sheet.getLastRow() - 1;
+    if (rowCount <= 0) return;
+    const keys = sheet.getRange(2, 1, rowCount, 1).getDisplayValues();
+    // 아래에서 위로 지워야 남은 행의 번호가 밀리지 않는다.
+    for (let index = keys.length - 1; index >= 0; index -= 1) {
+      if (String(keys[index][0] || '').trim() === assignmentKey) {
+        sheet.deleteRow(index + 2);
+      }
+    }
+    clearCentralGroupCache_(sheet.getParent());
+  });
+}
+
 function normalizeTeacherAssignmentPayload_(payload) {
   const value = payload || {};
   const email = normalizeCentralEmail_(value.teacherEmail);

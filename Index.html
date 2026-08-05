@@ -124,6 +124,7 @@
     .table-wrap{overflow:auto;max-height:470px}.assignment-list{display:grid;gap:8px}
     .teacher-group td{background:var(--page-2);font-weight:600}
     .teacher-group{cursor:pointer}
+    .roster-all{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13px;color:var(--ink-soft)}
     .teacher-marker{display:inline-block;width:1em;color:var(--ink-soft)}
     .assignment{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
       border-radius:10px;padding:12px;background:var(--surface)}
@@ -377,12 +378,13 @@
           <section id="groupRosterPanel" class="card hidden">
             <div class="row between"><span class="picker-title">수강 그룹 학생 편성</span>
               <span id="groupMemberCount" class="small muted"></span></div>
-            <div id="groupPicker" class="hidden"><label>수강 그룹</label><div id="groupPickerButtons" class="picker-buttons"></div></div>
+            <div><label for="groupSelect">편성할 수업</label><select id="groupSelect"></select></div>
             <p class="small muted">체크한 뒤 가운데 버튼으로 옮기거나, 학생을 끌어다 놓으세요. 옮긴 뒤 <strong>편성 저장</strong>을 눌러야 반영됩니다.</p>
             <div class="roster">
               <div>
                 <label for="groupCandidateFilter">후보 학생</label>
                 <input id="groupCandidateFilter" placeholder="이름으로 거르기">
+                <label class="roster-all"><input id="groupCandidateSelectAll" type="checkbox"> 보이는 후보 전체 선택</label>
                 <ul id="groupCandidateList" class="roster-list"></ul>
               </div>
               <div class="roster-actions">
@@ -391,6 +393,7 @@
               </div>
               <div>
                 <label for="groupMemberList">그룹원</label>
+                <label class="roster-all"><input id="groupMemberSelectAll" type="checkbox"> 편성된 학생 전체 선택</label>
                 <ul id="groupMemberList" class="roster-list"></ul>
               </div>
             </div>
@@ -534,11 +537,18 @@
       $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
       $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
       $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
-      $('groupPickerButtons').addEventListener('click', event => {
-        const button = event.target.closest('[data-group-key]');
-        if (!button) return;
-        state.selectedGroupKey = button.dataset.groupKey;
+      $('groupSelect').addEventListener('change', event => {
+        state.selectedGroupKey = event.target.value;
         renderGroupRosterSection_();
+      });
+      // 거르기를 걸어 둔 상태면 그때 보이는 후보만 선택한다. 화면에 없는 학생까지
+      // 집어넣으면 무엇을 옮겼는지 확인할 방법이 없다.
+      [['groupCandidateSelectAll', 'groupCandidateList'],
+        ['groupMemberSelectAll', 'groupMemberList']].forEach(([boxId, listId]) => {
+        $(boxId).addEventListener('change', event => {
+          document.querySelectorAll(`#${listId} [data-roster-check]`)
+            .forEach(box => { box.checked = event.target.checked; });
+        });
       });
       $('groupSaveRoster').addEventListener('click', saveGroupRoster_);
       $('groupAddExternal').addEventListener('click', addExternalGroupStudent_);
@@ -977,7 +987,7 @@
         $('assignmentRequestRows').innerHTML = requests.map(request => `<tr>
           <td>${request.status === 'PENDING' ? `<input type="checkbox" data-assignment-request="${escapeHtml(request.requestKey)}" aria-label="담당 신청 선택">` : ''}</td>
           <td>${escapeHtml(request.teacherEmail)}</td><td>${request.schoolYear}</td>
-          <td>${request.grade}-${request.classNumber}</td><td>${escapeHtml(request.subject)}</td>
+          <td>${request.grade}학년 ${escapeHtml(request.target || `${request.classNumber}반`)}</td><td>${escapeHtml(request.subject)}</td>
           <td>${escapeHtml(request.statusLabel)}</td><td>${request.status === 'PENDING'
             ? `<button class="secondary" data-approve-request="${escapeHtml(request.requestKey)}">승인</button>
                <button class="danger" data-reject-request="${escapeHtml(request.requestKey)}">거부</button>`
@@ -1024,7 +1034,8 @@
           <td>${escapeHtml(a.subject)}</td>
           <td>${a.active ? '사용' : '비활성'}</td><td>
           <button class="ghost" data-edit-assignment="${escapeHtml(a.assignmentKey)}">수정</button>
-          <button class="secondary" data-toggle-assignment="${escapeHtml(a.assignmentKey)}">${a.active ? '비활성화' : '활성화'}</button></td></tr>`).join('');
+          <button class="secondary" data-toggle-assignment="${escapeHtml(a.assignmentKey)}">${a.active ? '비활성화' : '활성화'}</button>
+          <button class="danger" data-delete-assignment="${escapeHtml(a.assignmentKey)}">삭제</button></td></tr>`).join('');
         return `<tr class="teacher-group" data-teacher-toggle="${escapeHtml(teacherEmail)}">${headerCell}</tr>${detailRows}`;
       }).join('') || '<tr><td colspan="6" class="muted">등록된 담당이 없습니다.</td></tr>';
 
@@ -1049,6 +1060,19 @@
       document.querySelectorAll('[data-toggle-assignment]').forEach(button => button.addEventListener('click', async () => {
         const item = assignments.find(a => a.assignmentKey === button.dataset.toggleAssignment);
         await runAction(async () => { await callServer('setTeacherAssignmentActive', item.assignmentKey, !item.active); await loadAssignments(); });
+      }));
+      document.querySelectorAll('[data-delete-assignment]').forEach(button => button.addEventListener('click', async () => {
+        const item = assignments.find(a => a.assignmentKey === button.dataset.deleteAssignment);
+        const target = item.isGroup
+          ? `${item.grade}학년 ${item.groupName || '이름 없는 그룹'}`
+          : `${item.grade}-${item.classNumber}`;
+        const extra = item.isGroup ? ' 편성한 학생 명단도 함께 지워집니다.' : '';
+        if (!(await showConfirm(
+          `${item.teacherEmail}의 ${target} ${item.subject} 담당을 삭제할까요?${extra}`
+            + ' 이미 저장된 활동 기록은 교사 개인 파일에 그대로 남고,'
+            + ' 중앙 자료 보기 권한은 해지 버튼으로 따로 제거합니다.'
+        ))) return;
+        await runAction(async () => { await callServer('deleteTeacherAssignment', item.assignmentKey); await loadAssignments(); });
       }));
       document.querySelectorAll('[data-revoke-teacher]').forEach(button => {
         button.addEventListener('click', () => revokeApprovedTeachers_([button.dataset.revokeTeacher]));
@@ -1546,13 +1570,14 @@
       if (!groups.some(item => item.assignmentKey === state.selectedGroupKey)) {
         state.selectedGroupKey = groups[0].assignmentKey;
       }
-      // 그룹이 하나뿐이면 고를 것이 없으니 선택 줄을 숨긴다.
-      $('groupPicker').classList.toggle('hidden', groups.length < 2);
-      $('groupPickerButtons').innerHTML = groups.map(item =>
-        `<button class="chip ${item.assignmentKey === state.selectedGroupKey ? 'active' : ''}" `
-          + `data-group-key="${escapeHtml(item.assignmentKey)}">`
-          + `${escapeHtml(item.groupName || '이름 없는 그룹')}</button>`
+      // 그룹이 하나뿐이어도 감춘다면 지금 무엇을 편성하는지 알 수 없다. 항상 띄운다.
+      // 목록에는 수강 그룹만 담으므로 학급 단위 수업은 고를 수 없다.
+      $('groupSelect').innerHTML = groups.map(item =>
+        `<option value="${escapeHtml(item.assignmentKey)}"`
+          + `${item.assignmentKey === state.selectedGroupKey ? ' selected' : ''}>`
+          + `${escapeHtml(item.label)}</option>`
       ).join('');
+      $('groupSelect').value = state.selectedGroupKey;
       if (!state.groupRoster || state.groupRoster.assignmentKey !== state.selectedGroupKey) {
         loadGroupRoster_(state.selectedGroupKey);
       }
@@ -1591,6 +1616,9 @@
       $('groupMemberList').innerHTML = roster.candidates.filter(inGroup)
         .map(item).join('') || '<li class="muted">아직 편성한 학생이 없습니다.</li>';
       $('groupMemberCount').textContent = `${roster.memberKeys.size}명 / 최대 ${roster.maxMembers}명`;
+      // 목록을 다시 그리면 개별 체크가 모두 풀리므로 전체 선택도 함께 푼다.
+      $('groupCandidateSelectAll').checked = false;
+      $('groupMemberSelectAll').checked = false;
       bindGroupRosterDrag_();
     }
 
@@ -1744,7 +1772,17 @@
         });
         if (generation !== state.photoGeneration) return;
         state.students = students;
-        renderStudents();
+        // 수강 그룹은 편성 전이면 0명이 정상이라 원인을 알려 줘야 한다. 이름으로
+        // 거른 결과가 0명인 것과는 구분한다.
+        const picked = (state.bootstrap.assignments || [])
+          .find(item => item.assignmentKey === assignmentKey);
+        if (!students.length && picked && picked.isGroup && !$('studentQuery').value.trim()) {
+          renderStudentListMessage_(
+            '편성된 학생이 없습니다. 내 담당 수업 신청 탭에서 먼저 수강생을 편성해 주세요.'
+          );
+        } else {
+          renderStudents();
+        }
       } catch (error) {
         if (generation !== state.photoGeneration) return;
         renderStudentListMessage_(safeErrorMessage(error), true);
@@ -2110,12 +2148,16 @@
           }
         }
 
-        if (opts.type === 'confirm') {
+        // 입력창에도 취소를 둔다. Esc 로만 빠져나갈 수 있으면 그 방법을 모르는
+        // 사람은 아무 값이나 넣고 확인을 누르게 된다.
+        if (opts.type === 'confirm' || opts.type === 'prompt') {
           const cancelButton = document.createElement('button');
           cancelButton.type = 'button';
           cancelButton.className = 'ghost';
           cancelButton.textContent = '취소';
-          cancelButton.addEventListener('click', () => close(false));
+          cancelButton.addEventListener('click', () => {
+            close(opts.type === 'prompt' ? null : false);
+          });
           actions.append(cancelButton);
         }
         const okButton = document.createElement('button');
@@ -2204,6 +2246,7 @@
           saveTeacherAssignment:() => runner.saveTeacherAssignment(args[0]),
           saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
           setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
+          deleteTeacherAssignment:() => runner.deleteTeacherAssignment(args[0]),
           getAdminAssignmentRequests:() => runner.getAdminAssignmentRequests(args[0]),
           reviewAssignmentRequest:() => runner.reviewAssignmentRequest(args[0],args[1],args[2]),
           approveAssignmentRequestsBatch:() => runner.approveAssignmentRequestsBatch(args[0]),

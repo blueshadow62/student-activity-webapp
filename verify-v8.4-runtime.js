@@ -335,6 +335,34 @@ test(17, '폴더를 이름으로 찾을 때 예전 이름도 함께 본다', () 
   assert(legacyOnly.length === 1, '같은 이름을 두 번 찾습니다.');
 });
 
+// --- 그룹원 조회 횟수 --------------------------------------------------------
+
+test(18, '그룹원 명단은 한 실행에서 한 번만 읽는다', () => {
+  const originals = {
+    readCentralGroupRows_: app.readCentralGroupRows_,
+    clearCentralReadCache_: app.clearCentralReadCache_,
+    getRequiredCentralGroupMemberSheet_: app.getRequiredCentralGroupMemberSheet_,
+  };
+  let reads = 0;
+  app.readCentralGroupRows_ = () => { reads += 1; return [['A-GRP', 'STU-1']]; };
+  app.clearCentralReadCache_ = () => {};
+  app.getRequiredCentralGroupMemberSheet_ = () => ({ getParent: () => ({}) });
+  try {
+    app.clearCentralGroupCache_({});
+    // centralStudentBelongsToAssignment_ 가 학생 한 명마다 부르는 자리다.
+    for (let index = 0; index < 200; index += 1) app.readCentralGroupMembersCached_();
+    assert(
+      reads === 1,
+      `학생 수만큼 그룹원 시트를 다시 읽습니다(${reads}회). 조회가 멈춘 것처럼 느려집니다.`,
+    );
+    app.clearCentralGroupCache_({});
+    app.readCentralGroupMembersCached_();
+    assert(reads === 2, '편성을 저장한 뒤에도 옛 명단을 계속 씁니다.');
+  } finally {
+    Object.keys(originals).forEach((name) => { app[name] = originals[name]; });
+  }
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -347,7 +375,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 17) {
-  console.error(`FAIL expected 17 tests, got ${tests.length}`);
+if (tests.length !== 18) {
+  console.error(`FAIL expected 18 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
