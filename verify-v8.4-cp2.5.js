@@ -103,6 +103,8 @@ function createRoleHarness(initialEmail) {
     {
       getScriptProperties: () => ({
         getProperty: (key) => scriptProperties.get(key) || '',
+        // 설정값을 한 항목씩이 아니라 한 번에 받아 오는 경로도 흉내 낸다.
+        getProperties: () => Object.fromEntries(scriptProperties),
       }),
       getUserProperties: () => ({
         getProperty: () => '',
@@ -419,7 +421,10 @@ test(59, '이름·번호 스냅샷 저장', () => {
 });
 test(60, '중앙 학생 삭제 후 스냅샷 표시 가능', () => assert(has(functionBody(sources['Code.gs'], 'readCentralFilteredPersonalRecords_'), ': {') && has(functionBody(sources['Code.gs'], 'readCentralFilteredPersonalRecords_'), 'display[5]'), '스냅샷 대체 표시가 없습니다.'));
 test(61, '기록 검색·필터 개인 격리', () => assert(has(functionBody(sources['Code.gs'], 'searchRecords'), 'getPersonalRecordContext_'), '개인 기록 검색 라우팅이 없습니다.'));
-test(62, '보관 기록 개인 격리', () => assert(has(functionBody(sources['Code.gs'], 'archivePreviousSchoolYearRecords'), 'getAppSpreadsheet_'), '보관 기록이 개인 DB를 사용하지 않습니다.'));
+// 보관 시트로 옮기던 archivePreviousSchoolYearRecords 는 개인 DB가 학년도별 파일로
+// 갈리면서 옮길 대상이 없어져 제거했다. 지켜야 할 성질(보관 기록도 개인 DB에만
+// 있다)은 그대로라, 개인 기록 맥락이 보관 시트를 개인 파일에서 얻는지로 확인한다.
+test(62, '보관 기록 개인 격리', () => assert(has(functionBody(sources['Code.gs'], 'getPersonalRecordContext_'), 'getAppSpreadsheet_') && has(functionBody(sources['Code.gs'], 'getPersonalRecordContext_'), 'archivedRecordSheetName'), '보관 기록이 개인 DB를 사용하지 않습니다.'));
 
 test(63, '일반 사용자 학생 CSV 가져오기 제거', () => assert(!has(clientCode, 'previewStudentRosterCsv') && !has(clientCode, 'initializeSchoolDatabase'), '개인 CSV 흐름이 남아 있습니다.'));
 test(64, '관리자 중앙 CSV 가져오기 유지', () => {

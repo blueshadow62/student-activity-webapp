@@ -325,16 +325,14 @@ function deactivateCentralStudentsByYear(schoolYear) {
         `${year}학년도 학생을 찾을 수 없습니다.`
       );
     }
-    const now = new Date();
     const legacyRowNumbers = [];
-    students.forEach(function (student) {
-      if (student.schema === 'canonical') {
-        sheet.getRange(student.rowNumber, 8).setValue(false);
-        sheet.getRange(student.rowNumber, 10).setValue(now);
-      } else {
+    deactivateCentralRows_(sheet, students
+      .filter(function (student) {
+        if (student.schema === 'canonical') return true;
         legacyRowNumbers.push(student.rowNumber);
-      }
-    });
+        return false;
+      })
+      .map(function (student) { return student.rowNumber; }));
     // 행을 지우면 이후 행 번호가 당겨지므로 큰 번호부터 지운다.
     legacyRowNumbers
       .sort(function (a, b) { return b - a; })
@@ -417,16 +415,14 @@ function deactivatePreviousCentralStudents_(currentSchoolYear) {
     return student.schoolYear < currentSchoolYear;
   });
   if (!students.length) return 0;
-  const now = new Date();
   const legacyRowNumbers = [];
-  students.forEach(function (student) {
-    if (student.schema === 'canonical') {
-      sheet.getRange(student.rowNumber, 8).setValue(false);
-      sheet.getRange(student.rowNumber, 10).setValue(now);
-    } else {
+  deactivateCentralRows_(sheet, students
+    .filter(function (student) {
+      if (student.schema === 'canonical') return true;
       legacyRowNumbers.push(student.rowNumber);
-    }
-  });
+      return false;
+    })
+    .map(function (student) { return student.rowNumber; }));
   // 예전 시트에는 '사용' 열이 없어 끌 칸이 없다. 행을 지우면 이후 행 번호가
   // 당겨지므로 큰 번호부터 지운다.
   legacyRowNumbers
@@ -443,11 +439,9 @@ function deactivatePreviousCentralAssignments_(currentSchoolYear) {
       return assignment.schoolYear < currentSchoolYear;
     });
   if (!assignments.length) return 0;
-  const now = new Date();
-  assignments.forEach(function (assignment) {
-    sheet.getRange(assignment.rowNumber, 8).setValue(false);
-    sheet.getRange(assignment.rowNumber, 10).setValue(now);
-  });
+  deactivateCentralRows_(sheet, assignments.map(function (assignment) {
+    return assignment.rowNumber;
+  }));
   clearCentralTeacherAssignmentCache_(sheet.getParent());
   return assignments.length;
 }
@@ -730,17 +724,15 @@ function revokeApprovedTeachersAccess(teacherEmails) {
   const result = withCentralWriteLock_(function () {
     const sheet = getRequiredCentralAssignmentSheet_();
     const assignments = readCentralTeacherAssignments_(sheet, true);
-    const now = new Date();
     const rowsToDeactivate = assignments.filter(function (assignment) {
       return assignment.active && emails.includes(assignment.teacherEmail);
     });
     if (!rowsToDeactivate.length) {
       throw new Error('해지할 활성 담당이 있는 교사를 찾을 수 없습니다.');
     }
-    rowsToDeactivate.forEach(function (assignment) {
-      sheet.getRange(assignment.rowNumber, 8).setValue(false);
-      sheet.getRange(assignment.rowNumber, 10).setValue(now);
-    });
+    deactivateCentralRows_(sheet, rowsToDeactivate.map(function (assignment) {
+      return assignment.rowNumber;
+    }));
     clearCentralTeacherAssignmentCache_(sheet.getParent());
     const results = emails.map(function (email) {
       return { teacherEmail: email, ...revokeCentralAccessFromTeacher_(email) };

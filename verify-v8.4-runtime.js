@@ -831,6 +831,100 @@ test(36, '순서가 이미 맞으면 시트를 건드리지 않는다', () => {
   assert(!moved, '순서가 맞는데도 매번 시트를 옮깁니다.');
 });
 
+// --- 왕복 횟수 -------------------------------------------------------------
+
+// Apps Script 가 느린 이유는 계산이 아니라 구글 서버 왕복 횟수다. 행마다 setValue
+// 를 부르는 방식으로 되돌아가면 이 시험이 잡는다.
+function countingSheet(headers, rows) {
+  const sheet = writableSheet(headers, rows);
+  const originalGetRange = sheet.getRange;
+  sheet.calls = 0;
+  sheet.getRange = function (...args) {
+    const range = originalGetRange.apply(sheet, args);
+    return new Proxy(range, {
+      get(target, key) {
+        if (typeof target[key] === 'function') {
+          sheet.calls += 1;
+          return target[key].bind(target);
+        }
+        return target[key];
+      },
+    });
+  };
+  return sheet;
+}
+
+test(37, '학생 180명을 꺼도 왕복이 열 손가락 안이다', () => {
+  const rows = [];
+  for (let index = 0; index < 180; index += 1) {
+    rows.push(centralStudentRow(`S-${index}`, 2026, 3));
+  }
+  const sheet = countingSheet(app.CENTRAL_STUDENT_HEADERS, rows);
+  const changed = app.deactivateCentralRows_(
+    sheet, rows.map((row, index) => index + 2),
+  );
+  assert(changed === 180, `${changed}명만 껐습니다.`);
+  assert(
+    sheet.calls <= 10,
+    `왕복이 ${sheet.calls}번입니다. 행마다 따로 쓰고 있습니다.`,
+  );
+  assert(
+    sheet.grid.slice(1).every((row) => row[7] === false),
+    '꺼지지 않은 학생이 있습니다.',
+  );
+});
+
+test(38, '지정하지 않은 행의 사용 값은 그대로 둔다', () => {
+  const sheet = countingSheet(app.CENTRAL_STUDENT_HEADERS, [
+    centralStudentRow('S-1', 2026, 3),
+    centralStudentRow('S-2', 2027, 3),
+  ]);
+  app.deactivateCentralRows_(sheet, [2]);
+  assert(sheet.grid[1][7] === false, '지정한 행이 꺼지지 않았습니다.');
+  assert(sheet.grid[2][7] === true, '열을 통째로 되쓰면서 남의 행까지 껐습니다.');
+});
+
+test(39, '중앙 스프레드시트는 한 실행에서 한 번만 연다', () => {
+  const original = {
+    getCentralConfiguration_: app.getCentralConfiguration_,
+    isValidCentralDriveId_: app.isValidCentralDriveId_,
+    SpreadsheetApp: app.SpreadsheetApp,
+  };
+  let opens = 0;
+  app.getCentralConfiguration_ = () => ({ databaseId: 'FILE-1' });
+  app.isValidCentralDriveId_ = () => true;
+  app.SpreadsheetApp = { openById(id) { opens += 1; return { id }; } };
+  try {
+    app.getCentralDatabase_();
+    app.getCentralDatabase_();
+    app.getCentralDatabase_();
+    assert(opens === 1, `파일을 ${opens}번 열었습니다.`);
+    // 관리자가 중앙 자료를 바꾸면 기억한 것을 버리고 새로 열어야 한다.
+    app.getCentralConfiguration_ = () => ({ databaseId: 'FILE-2' });
+    assert(app.getCentralDatabase_().id === 'FILE-2', '바뀐 중앙 자료를 열지 않습니다.');
+  } finally {
+    Object.keys(original).forEach((name) => { app[name] = original[name]; });
+  }
+});
+
+test(40, '설정값은 한 번에 받아 온다', () => {
+  const original = app.PropertiesService;
+  let single = 0;
+  let bulk = 0;
+  app.PropertiesService = {
+    getScriptProperties: () => ({
+      getProperty() { single += 1; return ''; },
+      getProperties() { bulk += 1; return {}; },
+    }),
+  };
+  try {
+    app.getCentralConfiguration_();
+    assert(bulk === 1 && single === 0, `한 항목씩 ${single}번 읽고 있습니다.`);
+  } finally {
+    app.PropertiesService = original;
+  }
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -843,7 +937,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 36) {
-  console.error(`FAIL expected 36 tests, got ${tests.length}`);
+if (tests.length !== 40) {
+  console.error(`FAIL expected 40 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

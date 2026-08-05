@@ -65,10 +65,16 @@ test(6, '해지 대상 없으면 오류', () => {
 });
 test(7, '해지는 선택 교사의 담당만 비활성화', () => {
   const body = functionBody(admin, 'revokeApprovedTeachersAccess');
+  // 칸을 어떻게 쓰는지가 아니라 '고른 교사의 행만 끈다'는 성질을 본다. 열 단위
+  // 일괄 쓰기로 바꾼 뒤에도 성질은 같아야 한다.
   assert(
     body.includes('emails.includes(assignment.teacherEmail)')
-      && body.includes('.getRange(assignment.rowNumber, 8).setValue(false)'),
+      && body.includes('deactivateCentralRows_('),
     '해지 시 선택 교사 담당 비활성화 로직이 없습니다.',
+  );
+  assert(
+    !functionBody(central, 'deactivateCentralRows_').includes('deleteRow'),
+    '일괄 비활성화가 행을 지웁니다.',
   );
 });
 test(8, '해지는 신청·승인 이력을 삭제하지 않음', () => {
@@ -1015,7 +1021,7 @@ test(71, '새 학년도 정리는 확인을 받고 비활성화만 한다', () =
   assert(client.includes('showConfirm('), '확인 없이 지난 학년도 자료를 정리합니다.');
   const server = functionBody(admin, 'deactivatePreviousCentralStudents_');
   assert(
-    !server.includes('deleteRows(') && server.includes('setValue(false)'),
+    !server.includes('deleteRows(') && server.includes('deactivateCentralRows_('),
     '지난 학년도 학생을 비활성화하지 않고 통째로 지웁니다.',
   );
   assertAdminGuardIn_('getSchoolYearTransition');

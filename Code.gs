@@ -195,47 +195,6 @@ function searchStudents(options) {
   });
 }
 
-// 현재 사용자의 개인 기록만 보관 이동한다. 아직 화면 진입점이 없어
-// google.script.run 으로만 호출되며, 남의 자료에는 접근하지 않는다.
-function archivePreviousSchoolYearRecords() {
-  return withAppLock_(function () {
-    const spreadsheet = getAppSpreadsheet_();
-    const recordSheet = ensureRecordSheet_(spreadsheet);
-    const archiveSheet = ensureArchivedRecordSheet_(spreadsheet);
-    const rowCount = recordSheet.getLastRow() - 1;
-    const currentSchoolYear = getCurrentSchoolYear_();
-    if (rowCount <= 0) {
-      return { ok: true, archivedRows: 0, currentSchoolYear: currentSchoolYear };
-    }
-
-    const rows = recordSheet.getRange(2, 1, rowCount, RECORD_HEADERS.length).getValues();
-    const archivedRows = rows.filter(function (row) {
-      const schoolYear = Number(row[14]);
-      return Number.isInteger(schoolYear) && schoolYear < currentSchoolYear;
-    });
-    if (archivedRows.length === 0) {
-      return { ok: true, archivedRows: 0, currentSchoolYear: currentSchoolYear };
-    }
-    const activeRows = rows.filter(function (row) {
-      const schoolYear = Number(row[14]);
-      return !Number.isInteger(schoolYear) || schoolYear >= currentSchoolYear;
-    });
-    const archiveStartRow = archiveSheet.getLastRow() + 1;
-    archiveSheet
-      .getRange(archiveStartRow, 1, archivedRows.length, RECORD_HEADERS.length)
-      .setValues(archivedRows);
-    recordSheet.getRange(2, 1, rowCount, RECORD_HEADERS.length).clearContent();
-    if (activeRows.length > 0) {
-      recordSheet.getRange(2, 1, activeRows.length, RECORD_HEADERS.length).setValues(activeRows);
-    }
-    return {
-      ok: true,
-      archivedRows: archivedRows.length,
-      currentSchoolYear: currentSchoolYear,
-    };
-  });
-}
-
 function saveRecord(payload) {
   return withPersonalDatabaseLock_(function () {
     const context = getPersonalRecordContext_();

@@ -115,18 +115,21 @@ function requireAdmin_() {
   };
 }
 
+// getProperty 는 부를 때마다 왕복한다. 여기서만 여섯 번을 부르고 이 함수 자체가
+// 요청마다 여러 번 불리므로, 한 번에 전부 받아 온다. 저장된 값을 그때그때 읽는
+// 것은 그대로라 설치·초기화 중에 값이 바뀌어도 다음 호출이 새 값을 본다.
 function getCentralConfiguration_() {
-  const properties = PropertiesService.getScriptProperties();
+  const properties = PropertiesService.getScriptProperties().getProperties();
   const databaseId = String(
-    properties.getProperty(CENTRAL_CONFIG.databaseIdProperty)
-      || properties.getProperty(CENTRAL_CONFIG.legacyDatabaseIdProperty)
+    properties[CENTRAL_CONFIG.databaseIdProperty]
+      || properties[CENTRAL_CONFIG.legacyDatabaseIdProperty]
       || ''
   ).trim();
   const photoFolderId = String(
-    properties.getProperty(CENTRAL_CONFIG.photoFolderIdProperty) || ''
+    properties[CENTRAL_CONFIG.photoFolderIdProperty] || ''
   ).trim();
   const adminEmails = parseCentralEmailList_(
-    properties.getProperty(CENTRAL_CONFIG.adminEmailsProperty)
+    properties[CENTRAL_CONFIG.adminEmailsProperty]
   );
   return {
     databaseId: databaseId,
@@ -134,11 +137,11 @@ function getCentralConfiguration_() {
     adminEmails: adminEmails,
     staffGroupConfigured: Boolean(
       normalizeCentralEmail_(
-        properties.getProperty(CENTRAL_CONFIG.staffGroupEmailProperty)
+        properties[CENTRAL_CONFIG.staffGroupEmailProperty]
       )
     ),
     schemaVersion: String(
-      properties.getProperty(CENTRAL_CONFIG.schemaVersionProperty)
+      properties[CENTRAL_CONFIG.schemaVersionProperty]
         || CENTRAL_CONFIG.schemaVersion
     ).trim(),
   };
@@ -166,6 +169,11 @@ function isValidCentralDriveId_(value) {
   return /^[A-Za-z0-9_-]{10,}$/.test(String(value || '').trim());
 }
 
+// 시트 하나를 얻을 때마다 이 함수가 불려서, 한 요청에서 파일을 열 번 넘게 다시
+// 여는 일이 있었다. 한 실행 안에서는 기억해 두고 다시 쓴다. 파일 ID를 열쇠로
+// 삼았으므로 관리자가 중앙 자료를 바꾸면 저절로 다시 연다.
+let centralDatabaseMemo_ = null;
+
 function getCentralDatabase_(configuration) {
   const config = configuration || getCentralConfiguration_();
   if (!isValidCentralDriveId_(config.databaseId)) {
@@ -174,8 +182,13 @@ function getCentralDatabase_(configuration) {
       '관리자 중앙 데이터베이스가 설정되지 않았습니다.'
     );
   }
+  if (centralDatabaseMemo_ && centralDatabaseMemo_.id === config.databaseId) {
+    return centralDatabaseMemo_.spreadsheet;
+  }
   try {
-    return SpreadsheetApp.openById(config.databaseId);
+    const spreadsheet = SpreadsheetApp.openById(config.databaseId);
+    centralDatabaseMemo_ = { id: config.databaseId, spreadsheet: spreadsheet };
+    return spreadsheet;
   } catch (error) {
     throw createCentralError_(
       'CENTRAL_DATABASE_ACCESS_DENIED',
@@ -1129,6 +1142,32 @@ function getMyAssignmentsFromCentralSheet_(assignmentSheet) {
 
 // 비활성까지 센다. 관리자가 새 학년도 정리로 지난 담당을 꺼 버리면 오히려
 // 안내가 가장 필요한 시점에 근거가 사라지기 때문이다.
+// 행마다 setValue 를 부르면 학생 180명을 끄는 데 왕복이 360번 든다. 열을 통째로
+// 한 번 읽어 메모리에서 고치고 한 번 되쓰면 4번으로 끝난다. 건드리지 않는 행은
+// 읽은 값을 그대로 되쓰므로 값이 바뀌지 않는다.
+// 학생목록·교사담당 시트 모두 8열이 '사용', 10열이 '수정일시'다.
+function deactivateCentralRows_(sheet, rowNumbers) {
+  if (!rowNumbers.length) return 0;
+  const rowCount = sheet.getLastRow() - 1;
+  if (rowCount <= 0) return 0;
+  const activeRange = sheet.getRange(2, 8, rowCount, 1);
+  const updatedRange = sheet.getRange(2, 10, rowCount, 1);
+  const activeValues = activeRange.getValues();
+  const updatedValues = updatedRange.getValues();
+  const now = new Date();
+  let changed = 0;
+  rowNumbers.forEach(function (rowNumber) {
+    const index = rowNumber - 2;
+    if (index < 0 || index >= rowCount) return;
+    activeValues[index][0] = false;
+    updatedValues[index][0] = now;
+    changed += 1;
+  });
+  activeRange.setValues(activeValues);
+  updatedRange.setValues(updatedValues);
+  return changed;
+}
+
 function countMyPreviousAssignments_(assignmentSheet) {
   const email = getRequiredActiveUserEmail_();
   const currentSchoolYear = getCurrentSchoolYear_();
