@@ -57,7 +57,10 @@ function loadAppsScript(fileNames, constantNames) {
 }
 
 const app = loadAppsScript(
-  ['Code.gs', 'CentralData.gs', 'PersonalStorage.gs', 'AssignmentRequests.gs', 'AdminPortal.gs'],
+  [
+    'Code.gs', 'CentralData.gs', 'PersonalStorage.gs', 'AssignmentRequests.gs',
+    'AdminPortal.gs', 'CourseGroups.gs', 'PersonalRouting.gs',
+  ],
   [
     'APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS',
     'CENTRAL_STUDENT_HEADERS', 'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
@@ -699,6 +702,135 @@ test(30, '시트 전체 교체는 새 데이터 저장 후 남는 행을 지운�
   assert(!clearedAfterFailure, '새 데이터 쓰기 실패 뒤 기존 행을 지웠습니다.');
 });
 
+// --- 공동교육과정 학생 삭제 ------------------------------------------------
+
+function withExternalRemovalStubs(studentRows, groupMembers, body) {
+  const sheet = writableSheet(app.CENTRAL_STUDENT_HEADERS, studentRows);
+  const replaced = [];
+  const original = {
+    requireMyGroupAssignment_: app.requireMyGroupAssignment_,
+    normalizeCentralKey_: app.normalizeCentralKey_,
+    withCentralWriteLock_: app.withCentralWriteLock_,
+    readCentralGroupMembersCached_: app.readCentralGroupMembersCached_,
+    getRequiredCentralStudentSheet_: app.getRequiredCentralStudentSheet_,
+    replaceCentralGroupMembers_: app.replaceCentralGroupMembers_,
+    clearCentralStudentCache_: app.clearCentralStudentCache_,
+  };
+  app.requireMyGroupAssignment_ = () => GROUP_ASSIGNMENT;
+  app.normalizeCentralKey_ = (key) => key;
+  app.withCentralWriteLock_ = (callback) => callback();
+  app.readCentralGroupMembersCached_ = () => new Map(
+    Object.keys(groupMembers).map((key) => [key, new Set(groupMembers[key])]),
+  );
+  app.getRequiredCentralStudentSheet_ = () => sheet;
+  app.replaceCentralGroupMembers_ = (key, keys) => { replaced.push([key, keys]); };
+  app.clearCentralStudentCache_ = () => {};
+  try {
+    return body(sheet, replaced);
+  } finally {
+    Object.keys(original).forEach((name) => { app[name] = original[name]; });
+  }
+}
+
+function externalStudentRow(studentKey, name) {
+  return [studentKey, 2026, 2, 0, 99, name, '공동', true, '', ''];
+}
+
+function rejectsRemoval(studentRows, groupMembers) {
+  return withExternalRemovalStubs(studentRows, groupMembers, (sheet) => {
+    let rejected = false;
+    try {
+      app.removeExternalStudentFromMyGroup('A-GRP', 'STU-X');
+    } catch (error) {
+      rejected = true;
+    }
+    return rejected && sheet.grid[1][7] === true;
+  });
+}
+
+test(31, '내 그룹의 공동교육과정 학생을 삭제한다', () => {
+  withExternalRemovalStubs(
+    [externalStudentRow('STU-X', '진현정')],
+    { 'A-GRP': ['STU-X', 'STU-Y'] },
+    (sheet, replaced) => {
+      const result = app.removeExternalStudentFromMyGroup('A-GRP', 'STU-X');
+      assert(result.name === '진현정', '삭제한 학생 이름이 돌아오지 않습니다.');
+      assert(sheet.grid[1][7] === false, '학생이 중앙 명단에서 꺼지지 않았습니다.');
+      assert(
+        replaced.length === 1 && replaced[0][1].join() === 'STU-Y',
+        '편성 명단에서 그 학생만 빠지지 않았습니다.',
+      );
+    },
+  );
+});
+
+test(32, '우리 학교 학생은 교사가 삭제하지 못한다', () => {
+  assert(
+    rejectsRemoval(
+      // 반 3, 학적상태 재학 = 우리 학교 학생
+      [['STU-X', 2026, 2, 3, 12, '홍길동', '재학', true, '', '']],
+      { 'A-GRP': ['STU-X'] },
+    ),
+    '교사가 우리 학교 학생을 중앙 명단에서 지울 수 있습니다.',
+  );
+});
+
+test(33, '다른 그룹에도 편성된 학생은 삭제하지 못한다', () => {
+  assert(
+    rejectsRemoval(
+      [externalStudentRow('STU-X', '진현정')],
+      { 'A-GRP': ['STU-X'], 'A-OTHER': ['STU-X'] },
+    ),
+    '다른 교사의 그룹에 있는 학생까지 지웁니다.',
+  );
+});
+
+test(34, '내 그룹에 없는 학생은 삭제하지 못한다', () => {
+  assert(
+    rejectsRemoval(
+      [externalStudentRow('STU-X', '진현정')],
+      { 'A-OTHER': ['STU-X'] },
+    ),
+    '내 그룹에 편성되지 않은 학생까지 지웁니다.',
+  );
+});
+
+// --- 개인 스프레드시트 시트 순서 --------------------------------------------
+
+function fakeSpreadsheet(sheetNames) {
+  const order = sheetNames.slice();
+  let active = null;
+  return {
+    order,
+    getSheetByName(name) {
+      if (!order.includes(name)) return null;
+      return { getName: () => name, getIndex: () => order.indexOf(name) + 1 };
+    },
+    setActiveSheet(sheet) { active = sheet.getName(); },
+    moveActiveSheet(position) {
+      order.splice(order.indexOf(active), 1);
+      order.splice(position - 1, 0, active);
+    },
+  };
+}
+
+test(35, '개인 파일 시트를 활동기록·보관·설정·삭제 순으로 놓는다', () => {
+  const spreadsheet = fakeSpreadsheet(['설정', '활동기록', '활동기록보관', '삭제기록']);
+  app.orderPersonalSheets_(spreadsheet);
+  assert(
+    spreadsheet.order.join() === '활동기록,활동기록보관,설정,삭제기록',
+    `시트 순서가 ${spreadsheet.order.join()} 입니다.`,
+  );
+});
+
+test(36, '순서가 이미 맞으면 시트를 건드리지 않는다', () => {
+  const spreadsheet = fakeSpreadsheet(['활동기록', '활동기록보관', '설정', '삭제기록']);
+  let moved = false;
+  spreadsheet.moveActiveSheet = () => { moved = true; };
+  app.orderPersonalSheets_(spreadsheet);
+  assert(!moved, '순서가 맞는데도 매번 시트를 옮깁니다.');
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -711,7 +843,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 30) {
-  console.error(`FAIL expected 30 tests, got ${tests.length}`);
+if (tests.length !== 36) {
+  console.error(`FAIL expected 36 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

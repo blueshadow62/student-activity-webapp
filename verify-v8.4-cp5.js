@@ -1035,6 +1035,57 @@ test(72, '학년도가 넘어가 담당이 끊긴 교사에게 이유를 알린�
   );
 });
 
+test(73, '공동교육과정 학생 삭제는 편성 화면에서 교사가 할 수 있다', () => {
+  assert(html.includes('id="groupRemoveExternal"'), '삭제 버튼이 없습니다.');
+  assert(
+    html.includes('removeExternalStudentFromMyGroup:()'),
+    '삭제 함수가 클라이언트 호출 목록에 없습니다.',
+  );
+  const client = functionBody(html, 'removeExternalGroupStudents_');
+  assert(client.includes('showConfirm('), '확인 없이 학생을 지웁니다.');
+  assert(
+    client.includes("student.status !== '공동'"),
+    '화면에서 공동교육과정 학생인지 보지 않고 보냅니다.',
+  );
+});
+
+test(74, '공동교육과정 학생 삭제는 범위를 서버에서 다시 잠근다', () => {
+  const server = functionBody(groups, 'removeExternalStudentFromMyGroup');
+  assert(
+    server.includes('requireMyGroupAssignment_('),
+    '내 수강 그룹인지 확인하지 않습니다.',
+  );
+  assert(
+    server.includes("student.status !== '공동'")
+      && server.includes('externalClassNumber'),
+    '서버가 공동교육과정 학생인지 다시 확인하지 않습니다.',
+  );
+  assert(
+    server.includes('centralStudentIsInOtherGroup_('),
+    '다른 그룹에도 편성된 학생인지 확인하지 않습니다.',
+  );
+  assert(
+    !server.includes('deleteRow('),
+    '학생 행을 되돌릴 수 없게 지웁니다. 사용 열만 꺼야 합니다.',
+  );
+});
+
+test(75, '개인 파일 시트를 보는 순서대로 놓는다', () => {
+  const routing = fs.readFileSync(path.join(__dirname, 'PersonalRouting.gs'), 'utf8');
+  const body = functionBody(routing, 'orderPersonalSheets_');
+  assert(
+    body.indexOf('recordSheetName') < body.indexOf('archivedRecordSheetName')
+      && body.indexOf('archivedRecordSheetName') < body.indexOf('settingsSheetName')
+      && body.indexOf('settingsSheetName') < body.indexOf('deletedRecordSheetName'),
+    '활동기록·활동기록보관·설정·삭제기록 순서가 아닙니다.',
+  );
+  assert(
+    functionBody(routing, 'ensurePersonalApplicationSchema_')
+      .includes('orderPersonalSheets_('),
+    '시트 정렬이 스키마 준비 과정에서 호출되지 않습니다.',
+  );
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1054,7 +1105,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 72) {
-  console.error(`FAIL expected 72 tests, got ${tests.length}`);
+if (tests.length !== 75) {
+  console.error(`FAIL expected 75 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

@@ -53,17 +53,38 @@ function ensurePersonalApplicationSchema_(spreadsheet, forceValidation) {
   const hasAllSheets = requiredNames.every(function (sheetName) {
     return Boolean(spreadsheet.getSheetByName(sheetName));
   });
-  if (hasAllSheets && !forceValidation) {
-    return spreadsheet;
+  if (!hasAllSheets || forceValidation) {
+    ensureSettingsSheet_(spreadsheet);
+    ensureRecordSheet_(spreadsheet);
+    ensureArchivedRecordSheet_(spreadsheet);
+    ensureDeletedRecordSheet_(spreadsheet);
+    updatePersonalApplicationMetadata_(spreadsheet);
+    clearAppCaches_(spreadsheet);
   }
-
-  ensureSettingsSheet_(spreadsheet);
-  ensureRecordSheet_(spreadsheet);
-  ensureArchivedRecordSheet_(spreadsheet);
-  ensureDeletedRecordSheet_(spreadsheet);
-  updatePersonalApplicationMetadata_(spreadsheet);
-  clearAppCaches_(spreadsheet);
+  orderPersonalSheets_(spreadsheet);
   return spreadsheet;
+}
+
+// 탭은 만들어진 순서대로 놓인다. 그래서 교사가 파일을 직접 열면 설정 시트가
+// 먼저 보이는데, 실제로 찾는 건 활동기록이다. 보는 순서대로 맞춰 둔다.
+// 이미 순서가 맞으면 시트를 건드리지 않는다.
+function orderPersonalSheets_(spreadsheet) {
+  const sheets = [
+    APP_CONFIG.recordSheetName,
+    APP_CONFIG.archivedRecordSheetName,
+    APP_CONFIG.settingsSheetName,
+    APP_CONFIG.deletedRecordSheetName,
+  ].map(function (sheetName) {
+    return spreadsheet.getSheetByName(sheetName);
+  }).filter(Boolean);
+  const ordered = sheets.every(function (sheet, index) {
+    return index === 0 || sheets[index - 1].getIndex() < sheet.getIndex();
+  });
+  if (ordered) return;
+  sheets.forEach(function (sheet, index) {
+    spreadsheet.setActiveSheet(sheet);
+    spreadsheet.moveActiveSheet(index + 1);
+  });
 }
 
 function updatePersonalApplicationMetadata_(spreadsheet) {

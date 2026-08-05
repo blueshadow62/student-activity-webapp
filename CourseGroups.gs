@@ -126,6 +126,65 @@ function addExternalStudentToMyGroup(assignmentKey, payload) {
   });
 }
 
+// 공동교육과정 학생은 교사가 직접 넣은 자료라 잘못 넣었을 때 교사가 직접
+// 걷어낼 수 있어야 한다. 범위는 넣을 때와 똑같이 좁게 잠근다. 행을 지우지 않고
+// '사용'만 끄는 것은 관리자 deleteCentralStudent 와 같은 방식이다. 이미 남긴
+// 활동기록은 학생 행을 보지 않으므로 그대로 남는다.
+function removeExternalStudentFromMyGroup(assignmentKey, studentKey) {
+  const assignment = requireMyGroupAssignment_(assignmentKey);
+  const key = normalizeCentralKey_(studentKey, '학생키');
+  return withCentralWriteLock_(function () {
+    const members = readCentralGroupMembersCached_().get(assignment.assignmentKey);
+    if (!members || !members.has(key)) {
+      throw createCentralError_(
+        'STUDENT_NOT_IN_GROUP',
+        '내 수강 그룹에 편성된 학생만 삭제할 수 있습니다.'
+      );
+    }
+    const sheet = getRequiredCentralStudentSheet_();
+    const student = readCentralStudents_(sheet, false).find(function (candidate) {
+      return candidate.studentKey === key;
+    });
+    if (!student) {
+      throw createCentralError_('STUDENT_NOT_FOUND', '학생을 찾을 수 없습니다.');
+    }
+    if (
+      student.status !== '공동'
+        || Number(student.classNumber) !== CENTRAL_CONFIG.externalClassNumber
+    ) {
+      throw createCentralError_(
+        'STUDENT_NOT_EXTERNAL',
+        '공동교육과정으로 추가한 학생만 삭제할 수 있습니다. '
+        + '우리 학교 학생은 편성에서 빼기만 하고 관리자에게 요청해 주세요.'
+      );
+    }
+    // 다른 수강 그룹에도 편성돼 있으면 그쪽 교사의 명단이 소리 없이 비어 버린다.
+    if (centralStudentIsInOtherGroup_(assignment.assignmentKey, key)) {
+      throw createCentralError_(
+        'STUDENT_SHARED_BY_GROUP',
+        '이 학생은 다른 수강 그룹에도 편성돼 있어 삭제할 수 없습니다. '
+        + '내 그룹에서 빼기만 해 주세요.'
+      );
+    }
+    replaceCentralGroupMembers_(
+      assignment.assignmentKey,
+      Array.from(members).filter(function (memberKey) { return memberKey !== key; })
+    );
+    sheet.getRange(student.rowNumber, 8).setValue(false);
+    sheet.getRange(student.rowNumber, 10).setValue(new Date());
+    clearCentralStudentCache_();
+    return { ok: true, studentKey: key, name: student.name };
+  });
+}
+
+function centralStudentIsInOtherGroup_(assignmentKey, studentKey) {
+  let found = false;
+  readCentralGroupMembersCached_().forEach(function (members, key) {
+    if (key !== assignmentKey && members.has(studentKey)) found = true;
+  });
+  return found;
+}
+
 // 99번부터 거꾸로 내려가며 비어 있는 첫 번호를 고른다. 실제 학생 번호는 앞에서
 // 부터 채워지므로 뒤에서부터 잡으면 부딪힐 일이 거의 없다.
 function nextExternalStudentNumber_(taken) {
