@@ -147,6 +147,7 @@ Google 계정 없이 코드만 확인해 볼 수 있습니다.
 
 ```bash
 node verify-v8.4.js
+node verify-v8.4-runtime.js
 ```
 
 ## 문제가 생기면

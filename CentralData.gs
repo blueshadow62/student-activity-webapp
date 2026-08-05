@@ -935,7 +935,12 @@ function isValidCentralStudent_(student) {
       && student.schoolYear <= 2100
       && APP_CONFIG.allowedGrades.includes(student.grade)
       && Number.isInteger(student.classNumber)
-      && student.classNumber > 0
+      // 공동교육과정 타교생은 우리 학교 어느 반도 아니라서 반을 0으로 쓴다.
+      // 쓰는 쪽(normalizeCentralStudentPayload_)과 짝을 맞춰야 조회에서
+      // 사라지지 않는다.
+      && (student.classNumber > 0
+        || (student.status === '공동'
+          && student.classNumber === CENTRAL_CONFIG.externalClassNumber))
       && Number.isInteger(student.studentNumber)
       && student.studentNumber > 0
       && student.studentNumber <= APP_CONFIG.maxStudentNumber
@@ -1021,7 +1026,12 @@ function readCentralTeacherAssignments_(sheet, includeInactive) {
       && Number.isInteger(assignment.schoolYear)
       && APP_CONFIG.allowedGrades.includes(assignment.grade)
       && Number.isInteger(assignment.classNumber)
-      && assignment.classNumber > 0
+      // 수강 그룹 담당도 반을 0으로 쓴다. 쓰는 쪽
+      // (normalizeTeacherAssignmentPayload_)과 짝을 맞추지 않으면 승인이
+      // 성공해도 담당 목록에서 통째로 사라진다.
+      && (assignment.classNumber > 0
+        || (centralAssignmentIsGroup_(assignment)
+          && assignment.classNumber === CENTRAL_CONFIG.externalClassNumber))
       && assignment.subject
       && (includeInactive || assignment.active);
   }).sort(compareCentralAssignments_);
