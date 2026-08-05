@@ -57,7 +57,7 @@ function loadAppsScript(fileNames, constantNames) {
 }
 
 const app = loadAppsScript(
-  ['Code.gs', 'CentralData.gs', 'PersonalStorage.gs'],
+  ['Code.gs', 'CentralData.gs', 'PersonalStorage.gs', 'AssignmentRequests.gs', 'AdminPortal.gs'],
   [
     'APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS',
     'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
@@ -363,6 +363,80 @@ test(18, '그룹원 명단은 한 실행에서 한 번만 읽는다', () => {
   }
 });
 
+// --- 담당 신청 허용 범위 -----------------------------------------------------
+
+function savePolicy(payload) {
+  const originals = {
+    requireAdmin_: app.requireAdmin_,
+    PropertiesService: app.PropertiesService,
+  };
+  const store = new Map();
+  app.requireAdmin_ = () => {};
+  app.PropertiesService = {
+    getScriptProperties: () => ({
+      getProperty: (key) => store.get(key) || '',
+      setProperty: (key, value) => { store.set(key, value); },
+      deleteProperty: (key) => { store.delete(key); },
+    }),
+  };
+  try {
+    return { result: app.saveAssignmentRequestPolicy(payload), store };
+  } finally {
+    Object.keys(originals).forEach((name) => { app[name] = originals[name]; });
+  }
+}
+
+function policyRejects(payload) {
+  try {
+    savePolicy(payload);
+    return '';
+  } catch (error) {
+    return error.message;
+  }
+}
+
+test(19, '학교 도메인은 허용 목록으로 저장된다', () => {
+  const { result, store } = savePolicy({ restricted: true, allowList: '@school.hs.kr' });
+  assert(result.restricted && result.allowList === '@school.hs.kr', '도메인이 저장되지 않습니다.');
+  assert(
+    store.get('ALLOWED_TEACHER_EMAILS') === '@school.hs.kr',
+    'requireAllowedTeacherEmail_ 가 읽는 속성에 저장되지 않습니다.',
+  );
+});
+
+test(20, '공용 메일 도메인은 통째로 허용하지 못한다', () => {
+  ['@gmail.com', '@naver.com', '@daum.net'].forEach((domain) => {
+    assert(
+      policyRejects({ restricted: true, allowList: domain }),
+      `${domain} 을 통째로 허용하면 제한이 아니라 전 세계에 열어 주는 것입니다.`,
+    );
+  });
+  // 개별 이메일은 사람이 특정되므로 공용 메일이어도 막지 않는다.
+  assert(
+    !policyRejects({ restricted: true, allowList: 'kim@gmail.com' }),
+    '개별 이메일 지정까지 막고 있습니다.',
+  );
+});
+
+test(21, '제한을 끄면 속성을 지운다', () => {
+  const { store } = savePolicy({ restricted: false, allowList: '@school.hs.kr' });
+  assert(
+    !store.has('ALLOWED_TEACHER_EMAILS'),
+    '제한을 꺼도 옛 목록이 남아 교사가 계속 막힙니다.',
+  );
+});
+
+test(22, '빈 목록으로 제한을 켤 수 없다', () => {
+  assert(
+    policyRejects({ restricted: true, allowList: '   ' }),
+    '빈 목록으로 제한을 켜면 아무도 신청할 수 없게 됩니다.',
+  );
+  assert(
+    policyRejects({ restricted: true, allowList: '@school' }),
+    '점 없는 도메인이 통과합니다.',
+  );
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -375,7 +449,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 18) {
-  console.error(`FAIL expected 18 tests, got ${tests.length}`);
+if (tests.length !== 22) {
+  console.error(`FAIL expected 22 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

@@ -125,6 +125,8 @@
     .teacher-group td{background:var(--page-2);font-weight:600}
     .teacher-group{cursor:pointer}
     .roster-all{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13px;color:var(--ink-soft)}
+    .policy-option{display:flex;gap:8px;align-items:flex-start;margin:10px 0}
+    .policy-option input{margin-top:3px}
     .teacher-marker{display:inline-block;width:1em;color:var(--ink-soft)}
     .assignment{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
       border-radius:10px;padding:12px;background:var(--surface)}
@@ -336,6 +338,20 @@
             <th><input id="selectAllAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"></th>
             <th>교사</th><th>학년도</th><th>학년-반</th><th>과목</th><th>상태</th><th>관리</th>
           </tr></thead><tbody id="assignmentRequestRows"></tbody></table></div>
+          <div class="card">
+            <div class="row between"><h2>담당 신청 허용 범위</h2>
+              <button id="saveAssignmentPolicyButton" class="primary">허용 범위 저장</button></div>
+            <label class="policy-option"><input type="radio" name="assignmentPolicy" value="open" checked>
+              <span><strong>제한 없음</strong><br><span class="small muted">로그인한 Google 계정 누구나 신청할 수 있습니다. 관리자 승인이 관문 역할을 합니다.</span></span></label>
+            <label class="policy-option"><input type="radio" name="assignmentPolicy" value="restricted">
+              <span><strong>특정 도메인·계정만</strong><br><span class="small muted">쉼표로 여러 개를 넣을 수 있습니다. 예: <code>@school.hs.kr</code>, <code>kim@gmail.com</code></span></span></label>
+            <div class="row" style="margin-top:8px">
+              <input id="assignmentPolicyAllowList" placeholder="@school.hs.kr" style="flex:1">
+              <button id="useAdminDomainButton" class="ghost hidden">내 도메인 넣기</button>
+            </div>
+            <p class="small muted" style="margin-top:8px">교사들이 개인 Gmail로 로그인한다면 켜지 마세요. 전원 신청이 막힙니다. 잘못 켜도 관리자 화면은 그대로 열리므로 여기서 다시 끌 수 있습니다.</p>
+            <p id="assignmentPolicyHint" class="small muted"></p>
+          </div>
         </div>
       </section>
 
@@ -552,6 +568,27 @@
       });
       $('groupSaveRoster').addEventListener('click', saveGroupRoster_);
       $('groupAddExternal').addEventListener('click', addExternalGroupStudent_);
+      document.querySelectorAll('[name="assignmentPolicy"]').forEach(radio => {
+        radio.addEventListener('change', renderAssignmentPolicyMode_);
+      });
+      $('useAdminDomainButton').addEventListener('click', () => {
+        document.querySelector('[name="assignmentPolicy"][value="restricted"]').checked = true;
+        renderAssignmentPolicyMode_();
+        $('assignmentPolicyAllowList').value = state.adminDomain || '';
+      });
+      $('saveAssignmentPolicyButton').addEventListener('click', async () => {
+        const restricted = assignmentPolicyRestricted_();
+        await runAction(async () => {
+          await callServer('saveAssignmentRequestPolicy', {
+            restricted: restricted,
+            allowList: $('assignmentPolicyAllowList').value,
+          });
+          await loadAssignments();
+          await showAlert(restricted
+            ? '허용 범위를 저장했습니다. 목록 밖 계정은 이제 담당 신청을 할 수 없습니다.'
+            : '제한을 껐습니다. 로그인한 Google 계정 누구나 담당 신청을 할 수 있습니다.');
+        });
+      });
       $('refreshMyAssignmentRequestsButton').addEventListener('click', () => loadApp(state.mode));
       $('cancelSelectedMyAssignmentRequestsButton').addEventListener('click', cancelSelectedMyAssignmentRequests_);
       $('selectAllMyAssignmentRequests').addEventListener('change', event => {
@@ -977,11 +1014,13 @@
 
     async function loadAssignments() {
       await runAction(async () => {
-        const [assignments, requests, approvedTeachers] = await Promise.all([
+        const [assignments, requests, approvedTeachers, policy] = await Promise.all([
           callServer('getAdminTeacherAssignments', {}),
           callServer('getAdminAssignmentRequests', {}),
           callServer('getApprovedTeachers'),
+          callServer('getAssignmentRequestPolicy'),
         ]);
+        renderAssignmentPolicy_(policy);
         $('assignmentCount').textContent = assignments.length;
         renderTeacherAssignmentGroups_(assignments, approvedTeachers);
         $('assignmentRequestRows').innerHTML = requests.map(request => `<tr>
@@ -1001,6 +1040,33 @@
           button.addEventListener('click', () => reviewAssignmentRequest_(button.dataset.rejectRequest, 'REJECTED'));
         });
       });
+    }
+
+    // 검사 자체는 서버의 requireAllowedTeacherEmail_ 가 이미 한다. 이 화면은 그
+    // 함수가 읽는 Script Property 를 관리자가 손으로 편집하지 않게 해 줄 뿐이다.
+    function renderAssignmentPolicy_(policy) {
+      state.adminDomain = policy.adminDomain || '';
+      document.querySelectorAll('[name="assignmentPolicy"]').forEach(radio => {
+        radio.checked = radio.value === (policy.restricted ? 'restricted' : 'open');
+      });
+      $('assignmentPolicyAllowList').value = policy.allowList || '';
+      // 관리자가 개인 메일이면 그 도메인은 제한 효과가 없으므로 권하지 않는다.
+      $('useAdminDomainButton').classList.toggle('hidden', !policy.adminDomainUsable);
+      $('useAdminDomainButton').textContent = `내 도메인 넣기 (${policy.adminDomain})`;
+      renderAssignmentPolicyMode_();
+    }
+
+    function assignmentPolicyRestricted_() {
+      const picked = document.querySelector('[name="assignmentPolicy"]:checked');
+      return Boolean(picked) && picked.value === 'restricted';
+    }
+
+    function renderAssignmentPolicyMode_() {
+      const restricted = assignmentPolicyRestricted_();
+      $('assignmentPolicyAllowList').disabled = !restricted;
+      $('assignmentPolicyHint').textContent = restricted
+        ? '이 목록에 없는 계정은 담당 신청 단계에서 막힙니다. 이미 승인된 담당은 그대로 유지됩니다.'
+        : '';
     }
 
     // 교사별로 묶어서 각 교사의 반 목록을 그 아래 나열하고, 활성 담당이
@@ -2246,6 +2312,8 @@
           saveTeacherAssignment:() => runner.saveTeacherAssignment(args[0]),
           saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
           setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
+          getAssignmentRequestPolicy:() => runner.getAssignmentRequestPolicy(),
+          saveAssignmentRequestPolicy:() => runner.saveAssignmentRequestPolicy(args[0]),
           deleteTeacherAssignment:() => runner.deleteTeacherAssignment(args[0]),
           getAdminAssignmentRequests:() => runner.getAdminAssignmentRequests(args[0]),
           reviewAssignmentRequest:() => runner.reviewAssignmentRequest(args[0],args[1],args[2]),

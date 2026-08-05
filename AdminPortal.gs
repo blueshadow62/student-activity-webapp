@@ -925,6 +925,83 @@ function deleteTeacherAssignment(assignmentKey) {
   });
 }
 
+// 아무나 주소를 만들 수 있는 공용 메일. 이런 도메인을 통째로 허용하면 제한이 아니라
+// 전 세계에 열어 주는 셈이 된다. 개별 이메일 지정은 사람이 특정되므로 막지 않는다.
+const CENTRAL_PUBLIC_EMAIL_DOMAINS = Object.freeze([
+  'gmail.com', 'googlemail.com', 'naver.com', 'daum.net', 'hanmail.net',
+  'nate.com', 'kakao.com', 'outlook.com', 'hotmail.com', 'live.com',
+  'msn.com', 'yahoo.com', 'yahoo.co.kr', 'icloud.com', 'me.com',
+  'proton.me', 'protonmail.com',
+]);
+
+function centralEmailDomain_(email) {
+  const normalized = normalizeCentralEmail_(email);
+  const index = normalized.indexOf('@');
+  return index >= 0 ? normalized.slice(index) : '';
+}
+
+function isPublicCentralEmailDomain_(domain) {
+  return CENTRAL_PUBLIC_EMAIL_DOMAINS.includes(
+    String(domain || '').replace(/^@/, '').toLowerCase()
+  );
+}
+
+function getAssignmentRequestPolicy() {
+  requireAdmin_();
+  const entries = parseCentralEmailList_(
+    PropertiesService.getScriptProperties().getProperty(
+      CENTRAL_ASSIGNMENT_REQUEST_CONFIG.allowedTeacherEmailsProperty
+    )
+  );
+  const adminDomain = centralEmailDomain_(getRequiredActiveUserEmail_());
+  return {
+    restricted: entries.length > 0,
+    allowList: entries.join(', '),
+    adminDomain: adminDomain,
+    // 관리자가 개인 메일 계정이면 그 도메인을 넣어 봐야 제한 효과가 없으므로
+    // 화면에서 '내 도메인 넣기'를 권하지 않는다.
+    adminDomainUsable: Boolean(adminDomain) && !isPublicCentralEmailDomain_(adminDomain),
+  };
+}
+
+// 검사 자체는 requireAllowedTeacherEmail_ 가 이미 하고 있다. 이 함수는 그 함수가
+// 읽는 Script Property 를 관리자가 화면에서 채울 수 있게 해 줄 뿐이다.
+function saveAssignmentRequestPolicy(payload) {
+  requireAdmin_();
+  const value = payload || {};
+  const properties = PropertiesService.getScriptProperties();
+  const key = CENTRAL_ASSIGNMENT_REQUEST_CONFIG.allowedTeacherEmailsProperty;
+  if (!value.restricted) {
+    properties.deleteProperty(key);
+    return { ok: true, restricted: false, allowList: '' };
+  }
+  const entries = parseCentralEmailList_(value.allowList);
+  if (!entries.length) {
+    throw new Error('허용할 도메인이나 이메일을 하나 이상 입력해 주세요.');
+  }
+  entries.forEach(function (entry) {
+    if (entry.charAt(0) === '@') {
+      if (isPublicCentralEmailDomain_(entry)) {
+        throw new Error(
+          `${entry}는 누구나 만들 수 있는 주소라 제한 효과가 없습니다. `
+            + '학교가 관리하는 도메인을 넣거나, 개별 이메일을 하나씩 넣어 주세요.'
+        );
+      }
+      if (!/^@[^@\s]+\.[^@\s]+$/.test(entry)) {
+        throw new Error(`${entry} 형식을 확인해 주세요. 예: @school.hs.kr`);
+      }
+      return;
+    }
+    if (!isValidCentralEmail_(entry)) {
+      throw new Error(
+        `${entry} 형식을 확인해 주세요. 이메일이거나 @도메인이어야 합니다.`
+      );
+    }
+  });
+  properties.setProperty(key, entries.join(', '));
+  return { ok: true, restricted: true, allowList: entries.join(', ') };
+}
+
 // 그룹명과 편성 명단은 담당키로만 연결된다. 담당을 지우고 남겨 두면 다시 쓰일 일이
 // 없는 죽은 행이 되므로 함께 지운다.
 function deleteCentralGroupRowsByKey_(assignmentKey) {
