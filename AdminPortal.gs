@@ -750,6 +750,11 @@ function saveTeacherAssignment(payload) {
       1,
       CENTRAL_TEACHER_ASSIGNMENT_HEADERS.length
     ).setValues([row]);
+    // 그룹명은 교사담당 시트가 아니라 수강그룹 시트에 있다. 신청 승인 경로처럼
+    // 여기서도 남겨야 관리자가 만든 그룹이 '이름 없는 그룹'이 되지 않는다.
+    if (centralAssignmentIsGroup_(normalized)) {
+      upsertCentralGroupName_(key, normalized.groupName);
+    }
     clearCentralTeacherAssignmentCache_(sheet.getParent());
     return {
       ok: true,
@@ -810,6 +815,11 @@ function saveTeacherAssignmentsBatch(payload) {
       created.length,
       CENTRAL_TEACHER_ASSIGNMENT_HEADERS.length
     ).setValues(created.map(function (item) { return item.row; }));
+    created.forEach(function (item) {
+      if (centralAssignmentIsGroup_(item.normalized)) {
+        upsertCentralGroupName_(item.key, item.normalized.groupName);
+      }
+    });
     clearCentralTeacherAssignmentCache_(sheet.getParent());
     return {
       ok: true,

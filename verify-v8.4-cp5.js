@@ -861,9 +861,45 @@ test(59, '그룹 담당은 반 번호 대신 그룹명을 보여준다', () => {
     '수업 선택 화면이 그룹 담당을 0반으로 표시합니다.',
   );
   assert(
-    body.includes('groupRosterPanel'),
-    '그룹 담당을 골라도 편성 화면이 나타나지 않습니다.',
+    !body.includes('groupRosterPanel'),
+    '편성 화면이 아직 활동 기록 탭에 붙어 있습니다.',
   );
+});
+test(60, '편성 화면은 담당 신청 탭에 있다', () => {
+  const requestPanel = html.slice(
+    html.indexOf('data-personal-panel="request"'),
+    html.indexOf('data-personal-panel="activity"'),
+  );
+  assert(
+    requestPanel.includes('id="groupRosterPanel"'),
+    '편성 화면이 담당 신청 탭 안에 없습니다.',
+  );
+  const body = functionBody(html, 'renderGroupRosterSection_');
+  assert(body, 'renderGroupRosterSection_ 함수가 없습니다.');
+  assert(
+    body.includes('item.isGroup') && body.includes('loadGroupRoster_('),
+    '승인된 수강 그룹을 골라 편성을 불러오지 않습니다.',
+  );
+  assert(
+    html.includes('data-group-key'),
+    '수강 그룹 선택 칩이 없습니다.',
+  );
+});
+test(61, '편성 목록에 학년을 보여준다', () => {
+  const body = functionBody(html, 'renderGroupRoster_');
+  assert(
+    body.includes('student.grade') && body.includes('학년'),
+    '편성 목록이 학년 없이 반·번호만 보여 줍니다.',
+  );
+});
+test(62, '관리자가 만든 수강 그룹도 이름을 저장한다', () => {
+  ['saveTeacherAssignment', 'saveTeacherAssignmentsBatch'].forEach((name) => {
+    const body = functionBody(admin, name);
+    assert(
+      body.includes('centralAssignmentIsGroup_') && body.includes('upsertCentralGroupName_('),
+      `${name} 이 그룹명을 수강그룹 시트에 남기지 않아 '이름 없는 그룹'이 됩니다.`,
+    );
+  });
 });
 
 let passed = 0;
@@ -878,7 +914,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 59) {
-  console.error(`FAIL expected 59 tests, got ${tests.length}`);
+if (tests.length !== 62) {
+  console.error(`FAIL expected 62 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

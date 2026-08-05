@@ -372,6 +372,31 @@
             <div class="row" style="margin-top:14px"><input id="selectAllMyAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"><span class="small muted">전체 선택</span></div>
             <div id="myAssignmentRequestRows" style="margin-top:8px"></div>
           </div>
+          <section id="groupRosterPanel" class="card hidden">
+            <div class="row between"><span class="picker-title">수강 그룹 학생 편성</span>
+              <span id="groupMemberCount" class="small muted"></span></div>
+            <div id="groupPicker" class="hidden"><label>수강 그룹</label><div id="groupPickerButtons" class="picker-buttons"></div></div>
+            <p class="small muted">체크한 뒤 가운데 버튼으로 옮기거나, 학생을 끌어다 놓으세요. 옮긴 뒤 <strong>편성 저장</strong>을 눌러야 반영됩니다.</p>
+            <div class="roster">
+              <div>
+                <label for="groupCandidateFilter">후보 학생</label>
+                <input id="groupCandidateFilter" placeholder="이름으로 거르기">
+                <ul id="groupCandidateList" class="roster-list"></ul>
+              </div>
+              <div class="roster-actions">
+                <button id="groupAddSelected" class="secondary" aria-label="선택한 학생을 그룹에 넣기">▶</button>
+                <button id="groupRemoveSelected" class="ghost" aria-label="선택한 학생을 그룹에서 빼기">◀</button>
+              </div>
+              <div>
+                <label for="groupMemberList">그룹원</label>
+                <ul id="groupMemberList" class="roster-list"></ul>
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button id="groupAddExternal" class="ghost">공동교육과정 학생 추가</button>
+              <button id="groupSaveRoster" class="primary">편성 저장</button>
+            </div>
+          </section>
         </div>
         <div class="hidden" data-personal-panel="activity">
           <div id="activityArea" class="hidden">
@@ -391,30 +416,6 @@
                 </div>
               </div>
             </div>
-            <section id="groupRosterPanel" class="card hidden">
-              <div class="row between"><span class="picker-title">학생 편성</span>
-                <span id="groupMemberCount" class="small muted"></span></div>
-              <p class="small muted">체크한 뒤 가운데 버튼으로 옮기거나, 학생을 끌어다 놓으세요. 옮긴 뒤 <strong>편성 저장</strong>을 눌러야 반영됩니다.</p>
-              <div class="roster">
-                <div>
-                  <label for="groupCandidateFilter">후보 학생</label>
-                  <input id="groupCandidateFilter" placeholder="이름으로 거르기">
-                  <ul id="groupCandidateList" class="roster-list"></ul>
-                </div>
-                <div class="roster-actions">
-                  <button id="groupAddSelected" class="secondary" aria-label="선택한 학생을 그룹에 넣기">▶</button>
-                  <button id="groupRemoveSelected" class="ghost" aria-label="선택한 학생을 그룹에서 빼기">◀</button>
-                </div>
-                <div>
-                  <label for="groupMemberList">그룹원</label>
-                  <ul id="groupMemberList" class="roster-list"></ul>
-                </div>
-              </div>
-              <div class="row" style="margin-top:12px">
-                <button id="groupAddExternal" class="ghost">공동교육과정 학생 추가</button>
-                <button id="groupSaveRoster" class="primary">편성 저장</button>
-              </div>
-            </section>
             <div id="studentGrid" class="grid students card"></div>
             <div id="recordEditor" class="card hidden">
               <h2 id="selectedStudentLabel">학생 선택</h2>
@@ -531,6 +532,12 @@
       $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
       $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
       $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
+      $('groupPickerButtons').addEventListener('click', event => {
+        const button = event.target.closest('[data-group-key]');
+        if (!button) return;
+        state.selectedGroupKey = button.dataset.groupKey;
+        renderGroupRosterSection_();
+      });
       $('groupSaveRoster').addEventListener('click', saveGroupRoster_);
       $('groupAddExternal').addEventListener('click', addExternalGroupStudent_);
       $('refreshMyAssignmentRequestsButton').addEventListener('click', () => loadApp(state.mode));
@@ -1153,6 +1160,7 @@
       }
       const assignments = b.assignments || [];
       $('noAssignments').classList.toggle('hidden', assignments.length > 0);
+      renderGroupRosterSection_();
       // 활동 기록 저장은 개인 데이터베이스가 있어야 하므로 둘 다 갖춰야 연다.
       $('personalActivityTab').disabled = assignments.length === 0 || !storageReady;
       // 저장소가 안 갖춰졌으면 만들기/복구가 최우선이니 그 탭부터 연다.
@@ -1489,12 +1497,31 @@
         : '반 또는 수강 그룹을 선택해 주세요.';
       $('loadStudentsButton').disabled = !state.selectedAssignmentKey;
       $('toggleStudentPhotosButton').disabled = !state.selectedAssignmentKey;
-      const showRoster = Boolean(selected && selected.isGroup);
-      $('groupRosterPanel').classList.toggle('hidden', !showRoster);
-      if (!showRoster) {
+    }
+
+    // 편성은 담당 신청 탭에 둔다. 활동 기록 탭의 수업 선택기는 기록할 수업을 고르는
+    // 곳이지 명단을 고치는 곳이 아니다. 두 군데에 두면 어느 쪽이 최신인지 헷갈린다.
+    function renderGroupRosterSection_() {
+      const groups = (state.bootstrap && state.bootstrap.assignments || [])
+        .filter(item => item.isGroup);
+      $('groupRosterPanel').classList.toggle('hidden', groups.length === 0);
+      if (!groups.length) {
+        state.selectedGroupKey = null;
         state.groupRoster = null;
-      } else if (!state.groupRoster || state.groupRoster.assignmentKey !== selected.assignmentKey) {
-        loadGroupRoster_(selected.assignmentKey);
+        return;
+      }
+      if (!groups.some(item => item.assignmentKey === state.selectedGroupKey)) {
+        state.selectedGroupKey = groups[0].assignmentKey;
+      }
+      // 그룹이 하나뿐이면 고를 것이 없으니 선택 줄을 숨긴다.
+      $('groupPicker').classList.toggle('hidden', groups.length < 2);
+      $('groupPickerButtons').innerHTML = groups.map(item =>
+        `<button class="chip ${item.assignmentKey === state.selectedGroupKey ? 'active' : ''}" `
+          + `data-group-key="${escapeHtml(item.assignmentKey)}">`
+          + `${escapeHtml(item.groupName || '이름 없는 그룹')}</button>`
+      ).join('');
+      if (!state.groupRoster || state.groupRoster.assignmentKey !== state.selectedGroupKey) {
+        loadGroupRoster_(state.selectedGroupKey);
       }
     }
 
@@ -1521,7 +1548,7 @@
       const item = student => `<li class="roster-item" draggable="true"
         data-student-key="${escapeHtml(student.studentKey)}">
         <label><input type="checkbox" data-roster-check="${escapeHtml(student.studentKey)}">
-        <span>${student.classNumber === 0 ? '공동' : `${student.classNumber}반`} ${student.studentNumber}번 ${escapeHtml(student.name)}</span>
+        <span>${student.grade}학년 ${student.classNumber === 0 ? '공동' : `${student.classNumber}반`} ${student.studentNumber}번 ${escapeHtml(student.name)}</span>
         ${student.status === '재학' ? '' : `<span class="badge">${escapeHtml(student.status)}</span>`}
         </label></li>`;
       $('groupCandidateList').innerHTML = roster.candidates
