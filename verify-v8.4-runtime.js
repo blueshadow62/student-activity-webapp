@@ -281,6 +281,60 @@ test(13, '기록 검색이 담당키 빈 옛 기록도 찾는다', () => {
   );
 });
 
+// --- 개인 데이터 폴더 이름 --------------------------------------------------
+
+// getSchoolInstallationState_ 는 InstallationSetup.gs 에 있고 Script Properties 를
+// 읽는다. 여기서는 학교명만 필요하므로 갈아 끼운다.
+function withSchoolName(schoolName, run) {
+  const original = app.getSchoolInstallationState_;
+  app.getSchoolInstallationState_ = () => ({ schoolName });
+  try {
+    return run();
+  } finally {
+    app.getSchoolInstallationState_ = original;
+  }
+}
+
+test(14, '개인 폴더 이름이 파일명과 같은 규칙을 쓴다', () => {
+  const folderName = withSchoolName('동아공고', () => app.personalAppFolderName_());
+  assert(
+    folderName === '동아공고_학생 활동 기록 데이터',
+    `개인 폴더 이름이 '학교명_학생 활동 기록 데이터'가 아닙니다: ${folderName}`,
+  );
+  const fileName = withSchoolName('동아공고', () => app.personalDatabaseName_(2026));
+  assert(
+    fileName.startsWith(folderName),
+    '파일명이 폴더명과 같은 규칙으로 시작하지 않습니다.',
+  );
+});
+
+test(15, '개인 폴더 이름에 연도를 붙이지 않는다', () => {
+  const folderName = withSchoolName('동아공고', () => app.personalAppFolderName_());
+  assert(
+    !/\d{4}/.test(folderName),
+    '한 폴더에 여러 학년도 파일이 들어가는데 폴더 이름에 연도가 붙었습니다.',
+  );
+});
+
+test(16, '학교명이 없으면 예전 폴더 이름을 그대로 쓴다', () => {
+  const folderName = withSchoolName('', () => app.personalAppFolderName_());
+  assert(
+    folderName === '학생 활동 기록 웹앱 데이터',
+    '설치 전에는 예전 폴더 이름을 유지해야 합니다.',
+  );
+});
+
+test(17, '폴더를 이름으로 찾을 때 예전 이름도 함께 본다', () => {
+  const names = withSchoolName('동아공고', () => app.personalAppFolderNames_());
+  assert(
+    names.includes('동아공고_학생 활동 기록 데이터')
+      && names.includes('학생 활동 기록 웹앱 데이터'),
+    '예전 이름을 함께 찾지 않아 기존 교사의 폴더가 고아가 됩니다.',
+  );
+  const legacyOnly = withSchoolName('', () => app.personalAppFolderNames_());
+  assert(legacyOnly.length === 1, '같은 이름을 두 번 찾습니다.');
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -293,7 +347,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 13) {
-  console.error(`FAIL expected 13 tests, got ${tests.length}`);
+if (tests.length !== 17) {
+  console.error(`FAIL expected 17 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

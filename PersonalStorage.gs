@@ -6,7 +6,10 @@ const PERSONAL_STORAGE_CONFIG = Object.freeze({
   appId: 'student-activity-webapp',
   schemaVersion: '1',
   storageMode: 'USER_OWNED_PERSONAL_DRIVE',
-  appFolderName: '학생 활동 기록 웹앱 데이터',
+  // 폴더 이름은 파일명과 같은 규칙(`학교명_학생 활동 기록 데이터`)을 쓴다. 다만 한
+  // 폴더에 여러 학년도 파일이 함께 들어가므로 연도는 붙이지 않는다.
+  appFolderBaseName: '학생 활동 기록 데이터',
+  legacyAppFolderName: '학생 활동 기록 웹앱 데이터',
   databaseNamePrefix: '학생 활동 기록 데이터_',
   appFolderIdProperty: 'PERSONAL_APP_FOLDER_ID',
   databaseIdPropertyPrefix: 'PERSONAL_DATABASE_FILE_ID_',
@@ -392,7 +395,7 @@ function readCachedPersonalContext_(schoolYear) {
       'READY',
       schoolYear,
       buildReadyPersonalResource_(
-        folder, 'REUSED', PERSONAL_STORAGE_CONFIG.appFolderName
+        folder, 'REUSED', personalAppFolderName_()
       ),
       buildReadyPersonalResource_(
         spreadsheet,
@@ -461,7 +464,7 @@ function getOrCreatePersonalAppFolder_(properties, userEmail) {
       return buildReadyPersonalResource_(
         storedFolder,
         'REUSED',
-        PERSONAL_STORAGE_CONFIG.appFolderName
+        personalAppFolderName_()
       );
     } catch (error) {
       return buildPersonalResourceIssue_(
@@ -472,10 +475,19 @@ function getOrCreatePersonalAppFolder_(properties, userEmail) {
   }
 
   const rootFolder = DriveApp.getRootFolder();
-  const candidates = collectOwnedPersonalFolders_(
-    rootFolder.getFoldersByName(PERSONAL_STORAGE_CONFIG.appFolderName),
-    userEmail
-  );
+  const seenFolderIds = new Set();
+  const candidates = [];
+  personalAppFolderNames_().forEach(function (folderName) {
+    collectOwnedPersonalFolders_(
+      rootFolder.getFoldersByName(folderName),
+      userEmail
+    ).forEach(function (folder) {
+      const folderId = folder.getId();
+      if (seenFolderIds.has(folderId)) return;
+      seenFolderIds.add(folderId);
+      candidates.push(folder);
+    });
+  });
   if (candidates.length > 1) {
     return buildPersonalResourceIssue_(
       'MULTIPLE_APP_FOLDERS',
@@ -490,12 +502,12 @@ function getOrCreatePersonalAppFolder_(properties, userEmail) {
     return buildReadyPersonalResource_(
       candidates[0],
       'RECONNECTED',
-      PERSONAL_STORAGE_CONFIG.appFolderName
+      personalAppFolderName_()
     );
   }
 
   const folder = rootFolder.createFolder(
-    PERSONAL_STORAGE_CONFIG.appFolderName
+    personalAppFolderName_()
   );
   if (!isPersonalDriveItemOwnedBy_(folder, userEmail)) {
     throw createPersonalStorageError_(
@@ -510,7 +522,7 @@ function getOrCreatePersonalAppFolder_(properties, userEmail) {
   return buildReadyPersonalResource_(
     folder,
     'CREATED',
-    PERSONAL_STORAGE_CONFIG.appFolderName
+    personalAppFolderName_()
   );
 }
 
@@ -1212,7 +1224,7 @@ function buildPublicPersonalStorageState_(context) {
     schoolYear: context.schoolYear || getPersonalCurrentSchoolYear_(),
     appFolder: publicPersonalResource_(
       context.appFolder,
-      PERSONAL_STORAGE_CONFIG.appFolderName
+      personalAppFolderName_()
     ),
     database: publicPersonalResource_(
       context.database,
@@ -1245,7 +1257,7 @@ function buildPersonalStorageFailure_(state, message) {
     schoolYear: getPersonalCurrentSchoolYear_(),
     appFolder: publicPersonalResource_(
       null,
-      PERSONAL_STORAGE_CONFIG.appFolderName
+      personalAppFolderName_()
     ),
     database: publicPersonalResource_(
       null,
@@ -1400,6 +1412,23 @@ function personalDatabaseName_(schoolYear) {
   const schoolName = getSchoolInstallationState_().schoolName;
   const prefix = schoolName ? `${schoolName}_` : '';
   return `${prefix}${PERSONAL_STORAGE_CONFIG.databaseNamePrefix}${schoolYear}`;
+}
+
+// 학교명이 없으면(설치 전 등) 예전 이름을 그대로 쓴다. 이름이 두 갈래로
+// 갈리더라도 이미 연결된 폴더는 저장된 폴더 ID로만 찾으므로 영향이 없다.
+function personalAppFolderName_() {
+  const schoolName = getSchoolInstallationState_().schoolName;
+  if (!schoolName) return PERSONAL_STORAGE_CONFIG.legacyAppFolderName;
+  return `${schoolName}_${PERSONAL_STORAGE_CONFIG.appFolderBaseName}`;
+}
+
+// 폴더 ID를 잃었을 때만 이름으로 찾는다. 이때 새 이름만 보면 예전 이름으로 만들어진
+// 기존 교사의 폴더를 못 찾아 빈 폴더를 또 만들고, 그동안 쌓인 기록이 고아가 된다.
+function personalAppFolderNames_() {
+  const current = personalAppFolderName_();
+  return current === PERSONAL_STORAGE_CONFIG.legacyAppFolderName
+    ? [current]
+    : [current, PERSONAL_STORAGE_CONFIG.legacyAppFolderName];
 }
 
 function retirePersonalDatabaseName_(file, schoolYear) {
