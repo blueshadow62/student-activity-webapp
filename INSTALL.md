@@ -141,6 +141,13 @@ clasp을 쓰지 않으려면 [script.google.com](https://script.google.com)에�
 개별 보기 권한을 주는 방식이라 생기는 구조적 한계이며, 학교에 배포하기 전에 이
 점을 알고 계셔야 합니다.
 
+## 설치가 끝났다면
+
+사용법은 새로 만들지 말고 이미 있는 문서를 그대로 안내합니다.
+
+- 관리자: [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
+- 교사: [USER_GUIDE.md](USER_GUIDE.md)
+
 ## 코드 검사
 
 Google 계정 없이 코드만 확인해 볼 수 있습니다.
