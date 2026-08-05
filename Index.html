@@ -268,6 +268,7 @@
           <div class="card">
             <div class="row between"><h2>중앙 자료 연결 상태</h2>
               <div class="row">
+                <button id="startSchoolYearButton" class="secondary">새 학년도 시작하기</button>
                 <button id="initializeCentralButton" class="secondary">중앙 시트 점검·생성</button>
                 <button id="resetSchoolInstallationButton" class="danger">설치 설정 초기화</button>
               </div></div>
@@ -278,6 +279,18 @@
             <div class="metric"><span>사진 연결</span><strong id="photoCount">0</strong></div>
             <div class="metric"><span>담당 설정</span><strong id="assignmentCount">0</strong></div>
             <div class="metric"><span>승인 대기 신청</span><strong id="pendingRequestCount">0</strong></div>
+          </div>
+          <div id="schoolYearPanel" class="card hidden">
+            <div class="row between"><h2 id="schoolYearTitle">새 학년도 시작</h2>
+              <button id="closeSchoolYearButton" class="ghost">닫기</button></div>
+            <div id="schoolYearSummary" class="status"></div>
+            <p class="small muted">학년도는 3월 1일에 저절로 바뀝니다. 이 화면은 준비 상태를 확인하고 지난 학년도 자료를 정리하는 곳입니다.</p>
+            <label class="policy-option"><input id="deactivatePreviousStudents" type="checkbox" checked>
+              <span id="deactivatePreviousStudentsLabel">지난 학년도 학생 명단 비활성화</span></label>
+            <label class="policy-option"><input id="deactivatePreviousAssignments" type="checkbox" checked>
+              <span id="deactivatePreviousAssignmentsLabel">지난 학년도 담당 설정 비활성화</span></label>
+            <div class="row"><button id="runSchoolYearButton" class="primary">선택한 자료 정리하기</button></div>
+            <p class="small muted">비활성화만 합니다. 자료는 지워지지 않고 목록에서만 빠지므로 되돌릴 수 있습니다. 교사 개인 기록은 각자의 Drive에 있어 이 화면에서 건드리지 않습니다.</p>
           </div>
         </div>
 
@@ -369,6 +382,7 @@
         <div class="hidden" data-personal-panel="request">
           <div id="noAssignments" class="card hidden">
             <h2>등록된 담당 수업이 없습니다</h2>
+            <p id="previousYearNotice" class="hidden"></p>
             <p>담당 수업 승인을 요청하거나 관리자에게 등록을 요청하세요.</p>
           </div>
           <div id="assignmentRequestCard" class="card hidden">
@@ -519,6 +533,11 @@
       document.querySelectorAll('[data-personal-tab]').forEach(button => {
         button.addEventListener('click', () => showPersonalTab(button.dataset.personalTab));
       });
+      $('startSchoolYearButton').addEventListener('click', openSchoolYearPanel_);
+      $('closeSchoolYearButton').addEventListener('click', () => {
+        $('schoolYearPanel').classList.add('hidden');
+      });
+      $('runSchoolYearButton').addEventListener('click', runSchoolYearTransition_);
       $('initializeCentralButton').addEventListener('click', initializeCentral);
       $('resetSchoolInstallationButton').addEventListener('click', resetSchoolInstallation);
       $('provisionSchoolButton').addEventListener('click', provisionSchool);
@@ -657,6 +676,7 @@
         const status = await callServer('getPersonalCentralStatus');
         state.bootstrap.central = status.central;
         state.bootstrap.assignments = status.assignments;
+        state.bootstrap.previousAssignmentCount = status.previousAssignmentCount || 0;
       } catch (error) {
         state.bootstrap.central = {
           ready: false,
@@ -664,6 +684,7 @@
             + '관리자에게 중앙 자료 공유 및 접근 권한을 확인해 달라고 요청하세요.',
         };
         state.bootstrap.assignments = [];
+        state.bootstrap.previousAssignmentCount = 0;
       }
       renderPersonalBootstrap();
     }
@@ -857,6 +878,73 @@
 
     async function loadAdminDashboard() {
       await runAction(async () => {
+        const dashboard = await callServer('getAdminDashboard');
+        state.bootstrap.dashboard = dashboard;
+        renderAdminDashboard(dashboard);
+      });
+    }
+
+    async function openSchoolYearPanel_() {
+      await runAction(async () => {
+        const info = await callServer('getSchoolYearTransition');
+        state.schoolYearTransition = info;
+        renderSchoolYearPanel_(info);
+        $('schoolYearPanel').classList.remove('hidden');
+        $('schoolYearPanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+      });
+    }
+
+    function renderSchoolYearPanel_(info) {
+      const ready = info.currentStudentCount > 0 && info.currentAssignmentCount > 0;
+      $('schoolYearTitle').textContent = `${info.currentSchoolYear}학년도 시작`;
+      $('schoolYearSummary').className = `status ${ready ? 'ok' : ''}`.trim();
+      $('schoolYearSummary').innerHTML =
+        `${info.currentSchoolYear}학년도 학생 <strong>${info.currentStudentCount}명</strong> ·`
+        + ` 담당 <strong>${info.currentAssignmentCount}건</strong><br>`
+        + (ready
+          ? '새 학년도 준비가 되었습니다.'
+          : '학생 명단을 올리고 교사 담당을 등록해야 교사들이 기록을 시작할 수 있습니다.');
+      // 정리할 게 없으면 체크해 봐야 아무 일도 일어나지 않으니 미리 끈다.
+      setSchoolYearOption_(
+        'deactivatePreviousStudents', info.previousStudentCount,
+        `지난 학년도 학생 명단 비활성화 (${info.previousStudentCount}명)`
+      );
+      setSchoolYearOption_(
+        'deactivatePreviousAssignments', info.previousAssignmentCount,
+        `지난 학년도 담당 설정 비활성화 (${info.previousAssignmentCount}건)`
+      );
+      $('runSchoolYearButton').disabled =
+        info.previousStudentCount === 0 && info.previousAssignmentCount === 0;
+    }
+
+    function setSchoolYearOption_(id, count, label) {
+      const input = $(id);
+      input.checked = count > 0;
+      input.disabled = count === 0;
+      $(`${id}Label`).textContent = count > 0 ? label : `${label} · 정리할 자료 없음`;
+    }
+
+    async function runSchoolYearTransition_() {
+      const deactivateStudents = $('deactivatePreviousStudents').checked;
+      const deactivateAssignments = $('deactivatePreviousAssignments').checked;
+      if (!deactivateStudents && !deactivateAssignments) {
+        await showAlert('정리할 항목을 하나 이상 선택해 주세요.');
+        return;
+      }
+      if (!(await showConfirm(
+        '선택한 지난 학년도 자료를 비활성화할까요?\n'
+        + '삭제가 아니라 목록에서만 빠지며, 학생 관리·교사 관리 화면에서 다시 켤 수 있습니다.'
+      ))) return;
+      await runAction(async () => {
+        const result = await callServer('runSchoolYearTransition', {
+          deactivateStudents, deactivateAssignments,
+        });
+        await showAlert(
+          `학생 ${result.studentCount}명, 담당 ${result.assignmentCount}건을 비활성화했습니다.`
+        );
+        const info = await callServer('getSchoolYearTransition');
+        state.schoolYearTransition = info;
+        renderSchoolYearPanel_(info);
         const dashboard = await callServer('getAdminDashboard');
         state.bootstrap.dashboard = dashboard;
         renderAdminDashboard(dashboard);
@@ -1283,6 +1371,7 @@
       }
       const assignments = b.assignments || [];
       $('noAssignments').classList.toggle('hidden', assignments.length > 0);
+      renderPreviousYearNotice_(assignments.length, b.previousAssignmentCount || 0);
       renderGroupRosterSection_();
       // 활동 기록 저장은 개인 데이터베이스가 있어야 하므로 둘 다 갖춰야 연다.
       $('personalActivityTab').disabled = assignments.length === 0 || !storageReady;
@@ -1551,6 +1640,21 @@
       renderAssignmentPicker_();
       if (!state.selectedAssignmentKey && !state.students.length) {
         renderStudentListMessage_('과목을 선택해 주세요.');
+      }
+    }
+
+    // 담당 없음 화면은 '아직 신청 안 한 사람'과 '학년도가 넘어가 끊긴 사람'에게
+    // 똑같이 보인다. 후자는 원인을 알 길이 없으므로 따로 짚어 준다.
+    function renderPreviousYearNotice_(assignmentCount, previousAssignmentCount) {
+      const notice = $('previousYearNotice');
+      const show = assignmentCount === 0 && previousAssignmentCount > 0;
+      notice.classList.toggle('hidden', !show);
+      if (show) {
+        const year = (state.bootstrap && state.bootstrap.currentSchoolYear) || '';
+        notice.innerHTML = `<strong>${year}학년도가 시작되었습니다.</strong> `
+          + '담당 수업은 학년도마다 새로 등록해야 합니다. '
+          + '아래에서 올해 담당 수업을 다시 신청해 주세요. '
+          + '지난 학년도 기록은 그대로 남아 있습니다.';
       }
     }
 
@@ -2313,6 +2417,8 @@
           saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
           setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
           getAssignmentRequestPolicy:() => runner.getAssignmentRequestPolicy(),
+          getSchoolYearTransition:() => runner.getSchoolYearTransition(),
+          runSchoolYearTransition:() => runner.runSchoolYearTransition(args[0]),
           saveAssignmentRequestPolicy:() => runner.saveAssignmentRequestPolicy(args[0]),
           deleteTeacherAssignment:() => runner.deleteTeacherAssignment(args[0]),
           getAdminAssignmentRequests:() => runner.getAdminAssignmentRequests(args[0]),

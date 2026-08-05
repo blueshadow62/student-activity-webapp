@@ -356,6 +356,102 @@ function resetCentralStudentList() {
   });
 }
 
+// 학년도는 getCurrentSchoolYear_ 가 3월 1일에 저절로 넘긴다. 그래서 이 화면이
+// 하는 일은 학년도를 바꾸는 게 아니라, 넘어간 뒤에 남은 지난 학년도 자료를
+// 정리하고 새 학년도 준비가 됐는지 한눈에 보여 주는 것이다.
+function getSchoolYearTransition() {
+  requireAdmin_();
+  const currentSchoolYear = getCurrentSchoolYear_();
+  const students = readCentralStudents_(getRequiredCentralStudentSheet_(), false);
+  const assignments = readCentralTeacherAssignments_(
+    getRequiredCentralAssignmentSheet_(),
+    false
+  );
+  // 한 해를 건너뛰고 정리하면 2년 전 자료도 남는다. '작년'이 아니라 '현재보다
+  // 이전 전부'를 세야 그런 경우까지 한 번에 걷힌다.
+  function countBefore(list) {
+    return list.filter(function (item) {
+      return item.schoolYear < currentSchoolYear;
+    }).length;
+  }
+  function countCurrent(list) {
+    return list.filter(function (item) {
+      return item.schoolYear === currentSchoolYear;
+    }).length;
+  }
+  return {
+    ok: true,
+    currentSchoolYear: currentSchoolYear,
+    currentStudentCount: countCurrent(students),
+    currentAssignmentCount: countCurrent(assignments),
+    previousStudentCount: countBefore(students),
+    previousAssignmentCount: countBefore(assignments),
+  };
+}
+
+function runSchoolYearTransition(payload) {
+  requireAdmin_();
+  const options = payload || {};
+  const deactivateStudents = Boolean(options.deactivateStudents);
+  const deactivateAssignments = Boolean(options.deactivateAssignments);
+  if (!deactivateStudents && !deactivateAssignments) {
+    throw new Error('정리할 항목을 하나 이상 선택해 주세요.');
+  }
+  return withCentralWriteLock_(function () {
+    const currentSchoolYear = getCurrentSchoolYear_();
+    return {
+      ok: true,
+      currentSchoolYear: currentSchoolYear,
+      studentCount: deactivateStudents
+        ? deactivatePreviousCentralStudents_(currentSchoolYear) : 0,
+      assignmentCount: deactivateAssignments
+        ? deactivatePreviousCentralAssignments_(currentSchoolYear) : 0,
+    };
+  });
+}
+
+// 활성인 것만 세고 바꾸므로 두 번 눌러도 결과가 같다.
+function deactivatePreviousCentralStudents_(currentSchoolYear) {
+  const sheet = getRequiredCentralStudentSheet_();
+  const students = readCentralStudents_(sheet, false).filter(function (student) {
+    return student.schoolYear < currentSchoolYear;
+  });
+  if (!students.length) return 0;
+  const now = new Date();
+  const legacyRowNumbers = [];
+  students.forEach(function (student) {
+    if (student.schema === 'canonical') {
+      sheet.getRange(student.rowNumber, 8).setValue(false);
+      sheet.getRange(student.rowNumber, 10).setValue(now);
+    } else {
+      legacyRowNumbers.push(student.rowNumber);
+    }
+  });
+  // 예전 시트에는 '사용' 열이 없어 끌 칸이 없다. 행을 지우면 이후 행 번호가
+  // 당겨지므로 큰 번호부터 지운다.
+  legacyRowNumbers
+    .sort(function (a, b) { return b - a; })
+    .forEach(function (rowNumber) { sheet.deleteRow(rowNumber); });
+  clearCentralStudentCache_();
+  return students.length;
+}
+
+function deactivatePreviousCentralAssignments_(currentSchoolYear) {
+  const sheet = getRequiredCentralAssignmentSheet_();
+  const assignments = readCentralTeacherAssignments_(sheet, false)
+    .filter(function (assignment) {
+      return assignment.schoolYear < currentSchoolYear;
+    });
+  if (!assignments.length) return 0;
+  const now = new Date();
+  assignments.forEach(function (assignment) {
+    sheet.getRange(assignment.rowNumber, 8).setValue(false);
+    sheet.getRange(assignment.rowNumber, 10).setValue(now);
+  });
+  clearCentralTeacherAssignmentCache_(sheet.getParent());
+  return assignments.length;
+}
+
 function normalizeCentralStudentPayload_(payload, current) {
   const value = payload || {};
   const student = {

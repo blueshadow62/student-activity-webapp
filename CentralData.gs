@@ -1127,6 +1127,18 @@ function getMyAssignmentsFromCentralSheet_(assignmentSheet) {
     .map(toPublicCentralAssignment_);
 }
 
+// 비활성까지 센다. 관리자가 새 학년도 정리로 지난 담당을 꺼 버리면 오히려
+// 안내가 가장 필요한 시점에 근거가 사라지기 때문이다.
+function countMyPreviousAssignments_(assignmentSheet) {
+  const email = getRequiredActiveUserEmail_();
+  const currentSchoolYear = getCurrentSchoolYear_();
+  return readCentralTeacherAssignmentsCached_(true, assignmentSheet)
+    .filter(function (assignment) {
+      return assignment.teacherEmail === email
+        && assignment.schoolYear < currentSchoolYear;
+    }).length;
+}
+
 function requireMyAssignment_(assignmentKey) {
   const key = normalizeCentralKey_(assignmentKey, '담당키');
   const email = getRequiredActiveUserEmail_();

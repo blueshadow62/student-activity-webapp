@@ -996,6 +996,45 @@ test(68, '담당 삭제는 관리자 전용이며 그룹 자료까지 정리한�
   assert(client.includes('showConfirm('), '삭제 전 확인 없이 지웁니다.');
 });
 
+test(70, '새 학년도 시작 버튼과 정리 항목 체크박스가 있다', () => {
+  assert(html.includes('id="startSchoolYearButton"'), '새 학년도 시작 버튼이 없습니다.');
+  assert(
+    html.includes('id="deactivatePreviousStudents"')
+      && html.includes('id="deactivatePreviousAssignments"'),
+    '정리 항목을 고르는 체크박스가 없습니다.',
+  );
+  assert(
+    html.includes('getSchoolYearTransition:()')
+      && html.includes('runSchoolYearTransition:()'),
+    '새 학년도 함수가 클라이언트 호출 목록에 없습니다.',
+  );
+});
+
+test(71, '새 학년도 정리는 확인을 받고 비활성화만 한다', () => {
+  const client = functionBody(html, 'runSchoolYearTransition_');
+  assert(client.includes('showConfirm('), '확인 없이 지난 학년도 자료를 정리합니다.');
+  const server = functionBody(admin, 'deactivatePreviousCentralStudents_');
+  assert(
+    !server.includes('deleteRows(') && server.includes('setValue(false)'),
+    '지난 학년도 학생을 비활성화하지 않고 통째로 지웁니다.',
+  );
+  assertAdminGuardIn_('getSchoolYearTransition');
+  assertAdminGuardIn_('runSchoolYearTransition');
+});
+
+test(72, '학년도가 넘어가 담당이 끊긴 교사에게 이유를 알린다', () => {
+  assert(html.includes('id="previousYearNotice"'), '안내 문구 자리가 없습니다.');
+  const client = functionBody(html, 'renderPreviousYearNotice_');
+  assert(
+    client.includes('previousAssignmentCount > 0'),
+    '지난 담당이 있었는지 보지 않고 안내를 띄웁니다.',
+  );
+  assert(
+    functionBody(code, 'getPersonalCentralStatus').includes('countMyPreviousAssignments_'),
+    '서버가 지난 담당 수를 내려 주지 않습니다.',
+  );
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1015,7 +1054,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 69) {
-  console.error(`FAIL expected 69 tests, got ${tests.length}`);
+if (tests.length !== 72) {
+  console.error(`FAIL expected 72 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

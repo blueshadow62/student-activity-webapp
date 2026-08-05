@@ -60,7 +60,7 @@ const app = loadAppsScript(
   ['Code.gs', 'CentralData.gs', 'PersonalStorage.gs', 'AssignmentRequests.gs', 'AdminPortal.gs'],
   [
     'APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS',
-    'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
+    'CENTRAL_STUDENT_HEADERS', 'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
   ],
 );
 
@@ -437,6 +437,162 @@ test(22, '빈 목록으로 제한을 켤 수 없다', () => {
   );
 });
 
+// fakeSheet 는 읽기 전용이다. 새 학년도 정리는 칸을 실제로 바꾸므로 쓰기와
+// 행 삭제까지 흉내 내는 시트가 따로 필요하다.
+function writableSheet(headers, rows) {
+  const grid = [headers.slice()].concat(rows.map((row) => row.slice()));
+  return {
+    grid,
+    getParent: () => ({}),
+    getLastRow: () => grid.length,
+    getLastColumn: () => headers.length,
+    deleteRow(rowNumber) { grid.splice(rowNumber - 1, 1); },
+    getRange(startRow, startColumn, numRows, numColumns) {
+      const rowCount = numRows == null ? 1 : numRows;
+      const columnCount = numColumns == null ? 1 : numColumns;
+      const block = () => grid
+        .slice(startRow - 1, startRow - 1 + rowCount)
+        .map((row) => row.slice(startColumn - 1, startColumn - 1 + columnCount));
+      return {
+        getValues: block,
+        getDisplayValues: () => block().map((row) => row.map(
+          (cell) => (cell instanceof Date ? cell.toISOString() : String(cell ?? '')),
+        )),
+        setValue(value) { grid[startRow - 1][startColumn - 1] = value; },
+        setValues(values) {
+          values.forEach((row, rowIndex) => row.forEach((cell, columnIndex) => {
+            grid[startRow - 1 + rowIndex][startColumn - 1 + columnIndex] = cell;
+          }));
+        },
+      };
+    },
+  };
+}
+
+function centralStudentRow(studentKey, schoolYear, classNumber) {
+  return [studentKey, schoolYear, 1, classNumber, 5, '홍길동', '재학', true, '', ''];
+}
+
+function centralAssignmentRow(assignmentKey, schoolYear) {
+  return [
+    assignmentKey, 'kim@school.hs.kr', schoolYear, 1, 3, '국어', '교과', true, '', '',
+  ];
+}
+
+// 정리 함수는 시트·캐시 전역을 직접 부른다. 그 전역만 갈아 끼우고 진짜 함수를
+// 그대로 호출해야 '체크한 것만 끈다'는 동작을 실제로 확인할 수 있다.
+function withSchoolYearStubs(students, assignments, body) {
+  const studentSheet = writableSheet(app.CENTRAL_STUDENT_HEADERS, students);
+  const assignmentSheet = writableSheet(
+    app.CENTRAL_TEACHER_ASSIGNMENT_HEADERS, assignments,
+  );
+  const original = {
+    getRequiredCentralStudentSheet_: app.getRequiredCentralStudentSheet_,
+    getRequiredCentralAssignmentSheet_: app.getRequiredCentralAssignmentSheet_,
+    clearCentralStudentCache_: app.clearCentralStudentCache_,
+    clearCentralTeacherAssignmentCache_: app.clearCentralTeacherAssignmentCache_,
+    getCurrentSchoolYear_: app.getCurrentSchoolYear_,
+    requireAdmin_: app.requireAdmin_,
+    withCentralWriteLock_: app.withCentralWriteLock_,
+  };
+  app.getRequiredCentralStudentSheet_ = () => studentSheet;
+  app.getRequiredCentralAssignmentSheet_ = () => assignmentSheet;
+  app.clearCentralStudentCache_ = () => {};
+  app.clearCentralTeacherAssignmentCache_ = () => {};
+  app.getCurrentSchoolYear_ = () => 2027;
+  app.requireAdmin_ = () => {};
+  app.withCentralWriteLock_ = (callback) => callback();
+  try {
+    return body(studentSheet, assignmentSheet);
+  } finally {
+    Object.keys(original).forEach((name) => { app[name] = original[name]; });
+  }
+}
+
+// '사용' 열은 8번째다.
+function activeFlags(sheet) {
+  return sheet.grid.slice(1).map((row) => row[7]);
+}
+
+test(23, '지난 학년도 학생만 비활성화한다', () => {
+  withSchoolYearStubs(
+    [
+      centralStudentRow('S-2026', 2026, 3),
+      centralStudentRow('S-2027', 2027, 3),
+    ],
+    [],
+    (studentSheet) => {
+      const count = app.deactivatePreviousCentralStudents_(2027);
+      assert(count === 1, `지난 학년도 학생을 ${count}명으로 셌습니다.`);
+      assert(activeFlags(studentSheet)[0] === false, '지난 학년도 학생이 켜진 채입니다.');
+      assert(activeFlags(studentSheet)[1] === true, '올해 학생까지 꺼 버렸습니다.');
+    },
+  );
+});
+
+test(24, '지난 학년도 담당만 비활성화한다', () => {
+  withSchoolYearStubs(
+    [],
+    [
+      centralAssignmentRow('A-2026', 2026),
+      centralAssignmentRow('A-2027', 2027),
+    ],
+    (studentSheet, assignmentSheet) => {
+      const count = app.deactivatePreviousCentralAssignments_(2027);
+      assert(count === 1, `지난 학년도 담당을 ${count}건으로 셌습니다.`);
+      assert(activeFlags(assignmentSheet)[0] === false, '지난 학년도 담당이 켜진 채입니다.');
+      assert(activeFlags(assignmentSheet)[1] === true, '올해 담당까지 꺼 버렸습니다.');
+    },
+  );
+});
+
+test(25, '체크하지 않은 항목은 건드리지 않는다', () => {
+  withSchoolYearStubs(
+    [centralStudentRow('S-2026', 2026, 3)],
+    [centralAssignmentRow('A-2026', 2026)],
+    (studentSheet, assignmentSheet) => {
+      const result = app.runSchoolYearTransition({
+        deactivateStudents: true, deactivateAssignments: false,
+      });
+      assert(result.studentCount === 1, '학생 정리 건수가 맞지 않습니다.');
+      assert(result.assignmentCount === 0, '담당 정리 건수가 맞지 않습니다.');
+      assert(activeFlags(studentSheet)[0] === false, '학생이 꺼지지 않았습니다.');
+      assert(
+        activeFlags(assignmentSheet)[0] === true,
+        '체크하지 않은 담당까지 꺼 버렸습니다.',
+      );
+    },
+  );
+});
+
+test(26, '이미 정리된 뒤 다시 눌러도 결과가 같다', () => {
+  withSchoolYearStubs(
+    [centralStudentRow('S-2026', 2026, 3)],
+    [],
+    () => {
+      assert(app.deactivatePreviousCentralStudents_(2027) === 1, '첫 정리가 안 됩니다.');
+      assert(
+        app.deactivatePreviousCentralStudents_(2027) === 0,
+        '이미 꺼진 학생을 다시 세고 있습니다.',
+      );
+    },
+  );
+});
+
+test(27, '아무것도 고르지 않으면 정리를 막는다', () => {
+  withSchoolYearStubs([], [], () => {
+    let rejected = false;
+    try {
+      app.runSchoolYearTransition({
+        deactivateStudents: false, deactivateAssignments: false,
+      });
+    } catch (error) {
+      rejected = true;
+    }
+    assert(rejected, '아무것도 고르지 않았는데 정리가 실행됩니다.');
+  });
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -449,7 +605,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 22) {
-  console.error(`FAIL expected 22 tests, got ${tests.length}`);
+if (tests.length !== 27) {
+  console.error(`FAIL expected 27 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

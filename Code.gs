@@ -163,11 +163,19 @@ function buildPersonalModeBootstrap_(role) {
 function getPersonalCentralStatus() {
   const centralContext = getCentralConnectionContext_(false);
   const central = centralContext.state;
-  const result = { central: central, assignments: [] };
+  const result = { central: central, assignments: [], previousAssignmentCount: 0 };
   if (central.ready && centralContext.schema) {
     result.assignments = getMyAssignmentsFromCentralSheet_(
       centralContext.schema.assignmentSheet
     );
+    // 3월 1일에 학년도가 저절로 넘어가면 지난 담당은 한꺼번에 끊긴다. 화면에는
+    // '담당 없음'만 떠서 원인을 알 수 없으므로, 지난 담당이 있었다는 걸 알려
+    // 다시 신청하라고 안내한다.
+    if (!result.assignments.length) {
+      result.previousAssignmentCount = countMyPreviousAssignments_(
+        centralContext.schema.assignmentSheet
+      );
+    }
   }
   return result;
 }
