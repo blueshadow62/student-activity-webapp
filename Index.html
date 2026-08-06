@@ -402,6 +402,7 @@
               <div><label for="requestSubject">담당 과목</label><input id="requestSubject" maxlength="50" placeholder="예: 문학"></div>
               <div id="requestClassesField"><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
               <div id="requestGroupNameField" class="hidden"><label for="requestGroupName">수강 그룹 이름</label><input id="requestGroupName" maxlength="50" placeholder="예: 심화국어 A"></div>
+              <div id="requestGroupGradesField" class="hidden"><label for="requestGroupGrades">함께 듣는 다른 학년(선택)</label><input id="requestGroupGrades" placeholder="예: 3"></div>
             </div>
             <button id="submitAssignmentRequestButton" class="primary" style="margin-top:12px">담당 수업 승인 신청</button>
             <div class="row" style="margin-top:14px"><input id="selectAllMyAssignmentRequests" type="checkbox" aria-label="승인 대기 신청 전체 선택"><span class="small muted">전체 선택</span></div>
@@ -1260,7 +1261,7 @@
           : `<td></td><td colspan="5">${marker}<strong>${escapeHtml(teacherEmail)}</strong> · 수업 ${rows.length}개 · 활성 담당 없음${retryButton}</td>`;
         const detailRows = rows.map(a => `<tr class="hidden" data-teacher-rows="${escapeHtml(teacherEmail)}">
           <td></td><td>${a.schoolYear}</td>
-          <td>${a.isGroup ? `${a.grade}학년 ${escapeHtml(a.groupName || '이름 없는 그룹')}` : `${a.grade}-${a.classNumber}`}</td>
+          <td>${a.isGroup ? `${(a.grades || [a.grade]).join('·')}학년 ${escapeHtml(a.groupName || '이름 없는 그룹')}` : `${a.grade}-${a.classNumber}`}</td>
           <td>${escapeHtml(a.subject)}</td>
           <td>${a.active ? '사용' : '비활성'}</td><td>
           <button class="ghost" data-edit-assignment="${escapeHtml(a.assignmentKey)}">수정</button>
@@ -1378,9 +1379,16 @@
       const isGroup = Boolean(item && item.isGroup);
       let groupName = '';
       let classNumbers = '';
+      let additionalGrades = '';
       if (isGroup) {
         groupName = await showPrompt('수강 그룹 이름', item.groupName || '');
         if (groupName == null) return;
+        const existingExtra = (item.grades || [])
+          .filter(g => g !== Number(grade)).join(', ');
+        additionalGrades = await showPrompt(
+          '함께 듣는 다른 학년(선택, 쉼표로 여러 개)', existingExtra
+        );
+        if (additionalGrades == null) return;
       } else {
         classNumbers = await showPrompt(
           item ? '담당 반' : '담당 반(여러 반은 쉼표로 구분)',
@@ -1396,6 +1404,7 @@
             classNumber: isGroup ? 0 : classNumbers,
             assignmentType:item.assignmentType,
             groupName,
+            additionalGrades,
             active:item.active,
           });
         } else {
@@ -1644,11 +1653,13 @@
         grade:$('requestGrade').value,
         subject:$('requestSubject').value,
         classNumbers: isGroup ? '' : $('requestClasses').value,
+        additionalGrades: isGroup ? $('requestGroupGrades').value : '',
       };
       await runAction(async () => {
         const result = await callServer('submitMyAssignmentRequest', payload);
         $('requestClasses').value = '';
         $('requestGroupName').value = '';
+        $('requestGroupGrades').value = '';
         // 목록을 먼저 갱신해야 확인을 누른 직후 바로 최신 상태가 보인다.
         // alert 를 먼저 띄우면 확인을 누르는 동안 목록 갱신이 미뤄져,
         // 확인 후에도 잠깐 목록이 그대로인 것처럼 보인다.
@@ -1664,6 +1675,7 @@
     function renderAssignmentRequestType_() {
       const isGroup = $('requestAssignmentType').value === '그룹';
       $('requestGroupNameField').classList.toggle('hidden', !isGroup);
+      $('requestGroupGradesField').classList.toggle('hidden', !isGroup);
       $('requestClassesField').classList.toggle('hidden', isGroup);
     }
 

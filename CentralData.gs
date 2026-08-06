@@ -891,6 +891,7 @@ function readCentralGroupRows_(sheet, headers, suffix) {
 // 화면이 계속 로딩 상태로 남는다. 한 번의 실행 안에서는 기억해 두고 다시 쓴다.
 let centralGroupNamesMemo_ = null;
 let centralGroupMembersMemo_ = null;
+let centralGroupGradesMemo_ = null;
 
 function readCentralGroupNamesCached_() {
   if (!centralGroupNamesMemo_) {
@@ -919,11 +920,78 @@ function readCentralGroupMembersCached_() {
   return result;
 }
 
+// 고교학점제 수강 그룹은 여러 학년이 함께 듣는 경우가 흔한데, 담당 한 건에는
+// 학년 칸이 하나뿐이다(교사담당 시트 열 순서를 바꾸면 기존 학교의 시트와
+// 어긋난다). 그래서 첫 학년만 그 칸에 두고, 나머지 학년은 수강그룹 시트의
+// 5번째 칸에 '·'로 이어 적는다. 기존에 만들어진 학교의 수강그룹 시트는 이
+// 칸이 없는데, centralHeadersMatch_ 는 시트에 선언보다 열이 남는 것만 보므로
+// 검증에는 걸리지 않는다 — 그냥 비어 있는 칸으로 취급된다.
+function readCentralGroupGradesCached_() {
+  if (centralGroupGradesMemo_) return centralGroupGradesMemo_;
+  const sheet = getRequiredCentralGroupSheet_();
+  const cache = CacheService.getScriptCache();
+  const key = centralCacheKey_(sheet.getParent(), 'group-grades');
+  let rows = null;
+  const cached = cache.get(key);
+  if (cached) {
+    try {
+      rows = JSON.parse(cached);
+    } catch (error) {
+      rows = null;
+    }
+  }
+  if (!rows) {
+    rows = [];
+    const rowCount = sheet.getLastRow() - 1;
+    if (rowCount > 0 && sheet.getLastColumn() >= 5) {
+      sheet.getRange(2, 1, rowCount, 5).getDisplayValues().forEach(function (row) {
+        const assignmentKey = String(row[0] || '').trim();
+        const extra = String(row[4] || '').trim();
+        if (assignmentKey && extra) rows.push([assignmentKey, extra]);
+      });
+    }
+    const json = JSON.stringify(rows);
+    if (json.length <= 90000) {
+      try {
+        cache.put(key, json, CENTRAL_CONFIG.cacheSeconds);
+      } catch (error) {
+        // 캐시 실패해도 원본 결과를 그대로 쓴다.
+      }
+    }
+  }
+  centralGroupGradesMemo_ = new Map(rows.map(function (pair) {
+    return [pair[0], pair[1].split('·').map(Number).filter(function (grade) {
+      return APP_CONFIG.allowedGrades.includes(grade);
+    })];
+  }));
+  return centralGroupGradesMemo_;
+}
+
+// 담당의 기본 학년에, 그룹이면 수강그룹 시트에 적힌 추가 학년까지 합친다.
+// 조회에 실패해도(시트 접근권 없음 등) 기본 학년만으로 동작해야 하므로 조용히
+// 넘어간다.
+function centralAssignmentGrades_(assignment) {
+  const grades = [Number(assignment.grade)];
+  if (centralAssignmentIsGroup_(assignment)) {
+    try {
+      (readCentralGroupGradesCached_().get(assignment.assignmentKey) || [])
+        .forEach(function (grade) {
+          if (!grades.includes(grade)) grades.push(grade);
+        });
+    } catch (error) {
+      // 기본 학년만으로도 조회는 계속 동작해야 한다.
+    }
+  }
+  return grades.sort(function (left, right) { return left - right; });
+}
+
 function clearCentralGroupCache_(spreadsheet) {
   centralGroupNamesMemo_ = null;
   centralGroupMembersMemo_ = null;
+  centralGroupGradesMemo_ = null;
   clearCentralReadCache_('group-names', spreadsheet);
   clearCentralReadCache_('group-members', spreadsheet);
+  clearCentralReadCache_('group-grades', spreadsheet);
 }
 
 function clearCentralReadCache_(suffix, spreadsheet) {
@@ -1107,10 +1175,18 @@ function toPublicCentralAssignment_(assignment) {
   const groupName = isGroup
     ? centralGroupNameFor_(assignment.assignmentKey)
     : '';
+  // 학급 단위는 학년이 항상 하나뿐이라 [assignment.grade] 그대로다. 그룹만
+  // centralAssignmentGrades_ 로 추가 학년까지 합쳐서 화면에 '2·3학년'처럼
+  // 보여준다.
+  const grades = isGroup
+    ? centralAssignmentGrades_(assignment)
+    : [assignment.grade];
+  const gradeLabel = `${grades.join('·')}학년`;
   return {
     assignmentKey: assignment.assignmentKey,
     schoolYear: assignment.schoolYear,
     grade: assignment.grade,
+    grades: grades,
     classNumber: assignment.classNumber,
     subject: assignment.subject,
     assignmentType: assignment.assignmentType,
@@ -1118,9 +1194,9 @@ function toPublicCentralAssignment_(assignment) {
     groupName: groupName,
     // 그룹 담당의 반은 0으로만 기록되므로 화면에 반 번호를 보여줄 이유가 없다.
     label: isGroup
-      ? `${assignment.schoolYear}학년도 ${assignment.grade}학년 `
+      ? `${assignment.schoolYear}학년도 ${gradeLabel} `
         + `${groupName || '이름 없는 그룹'} ${assignment.subject}`
-      : `${assignment.schoolYear}학년도 ${assignment.grade}학년 `
+      : `${assignment.schoolYear}학년도 ${gradeLabel} `
         + `${assignment.classNumber}반 ${assignment.subject}`,
   };
 }

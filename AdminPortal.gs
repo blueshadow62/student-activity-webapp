@@ -851,10 +851,13 @@ function saveTeacherAssignment(payload) {
       1,
       CENTRAL_TEACHER_ASSIGNMENT_HEADERS.length
     ).setValues([row]);
-    // 그룹명은 교사담당 시트가 아니라 수강그룹 시트에 있다. 신청 승인 경로처럼
-    // 여기서도 남겨야 관리자가 만든 그룹이 '이름 없는 그룹'이 되지 않는다.
+    // 그룹명·추가 학년은 교사담당 시트가 아니라 수강그룹 시트에 있다. 신청
+    // 승인 경로처럼 여기서도 남겨야 관리자가 만든 그룹이 '이름 없는 그룹'이
+    // 되지 않는다. 기본 학년(normalized.grade)과 겹치는 값은 뺀다.
     if (centralAssignmentIsGroup_(normalized)) {
-      upsertCentralGroupName_(key, normalized.groupName);
+      const additionalGrades = normalizeCentralGroupGradeList_(payload && payload.additionalGrades)
+        .filter(function (grade) { return grade !== normalized.grade; });
+      upsertCentralGroupName_(key, normalized.groupName, additionalGrades);
     }
     clearCentralTeacherAssignmentCache_(sheet.getParent());
     return {

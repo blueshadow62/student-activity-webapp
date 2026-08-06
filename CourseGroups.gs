@@ -36,11 +36,36 @@ function getMyGroupRoster(assignmentKey) {
 }
 
 function centralGroupCandidateStudents_(assignment) {
+  const grades = centralAssignmentGrades_(assignment);
   return readCentralStudentsCached_().filter(function (student) {
     return student.active
       && Number(student.schoolYear) === Number(assignment.schoolYear)
-      && Number(student.grade) === Number(assignment.grade);
+      && grades.includes(Number(student.grade));
   });
+}
+
+// 반은 1~99 라 자유롭게 여러 개를 받지만(normalizeCentralClassNumberList_),
+// 학년은 학교급 안에서 1~3으로 정해져 있다. 고교학점제 수강 그룹은 여러
+// 학년이 함께 듣는 경우가 흔해 반처럼 쉼표로 여러 학년을 받는다. 학급 단위
+// 담당은 학년이 하나뿐이라 이 함수를 쓰지 않는다.
+function normalizeCentralGroupGradeList_(value) {
+  const raw = (Array.isArray(value)
+    ? value
+    : String(value || '').split(/[\s,;]+/))
+    .filter(function (item) { return String(item || '').trim(); });
+  if (!raw.length) return [];
+  const parsed = raw.map(function (item) { return Number(item); });
+  if (
+    parsed.some(function (item) {
+      return !APP_CONFIG.allowedGrades.includes(item);
+    })
+  ) {
+    throw new Error(
+      `함께 듣는 학년은 ${APP_CONFIG.allowedGrades.join(', ')}학년 중에서 입력해 주세요.`
+    );
+  }
+  return Array.from(new Set(parsed))
+    .sort(function (left, right) { return left - right; });
 }
 
 // 명단을 통째로 교체한다. 화면에서 여러 번 옮긴 뒤 한 번만 저장하므로 부분

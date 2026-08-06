@@ -88,6 +88,7 @@ function submitMyAssignmentRequest(payload) {
         subject: normalized.subject,
         assignmentType: requestType.assignmentType,
         groupName: requestType.groupName,
+        additionalGrades: requestType.additionalGrades || [],
         status: CENTRAL_ASSIGNMENT_REQUEST_STATUS.pending,
         requestedAt: requestedAt,
         processedAt: '',
@@ -299,6 +300,7 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
             approvedGroups.push({
               assignmentKey: assignmentKey,
               groupName: normalized.groupName,
+              additionalGrades: request.additionalGrades || [],
             });
           }
         }
@@ -324,7 +326,9 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
     }
     // 담당 행을 쓴 뒤에 그룹 이름을 남긴다. 담당 행이 없으면 가리킬 대상이 없다.
     approvedGroups.forEach(function (group) {
-      upsertCentralGroupName_(group.assignmentKey, group.groupName);
+      upsertCentralGroupName_(
+        group.assignmentKey, group.groupName, group.additionalGrades
+      );
     });
     const auditSheet = getRequiredCentralAssignmentRequestSheet_();
     auditSheet.getRange(
@@ -407,17 +411,30 @@ function normalizeAssignmentRequestType_(value) {
       `수강 그룹 이름은 ${CENTRAL_CONFIG.maxGroupNameLength}자 이내로 입력해 주세요.`
     );
   }
+  // 기본 학년(value.grade)은 교사담당 시트 자체에 그대로 남는다. 여기서는
+  // 그 학년과 겹치는 값을 빼고, 함께 듣는 '나머지' 학년만 돌려준다 — 그래야
+  // upsertCentralGroupName_ 이 적는 추가 학년 칸에 기본 학년이 중복으로
+  // 끼지 않는다.
+  const primaryGrade = Number(value && value.grade);
+  const additionalGrades = normalizeCentralGroupGradeList_(
+    value && value.additionalGrades
+  ).filter(function (grade) { return grade !== primaryGrade; });
   return {
     assignmentType: CENTRAL_ASSIGNMENT_TYPES.group,
     groupName: groupName,
     classNumbers: [CENTRAL_CONFIG.externalClassNumber],
+    additionalGrades: additionalGrades,
   };
 }
 
-// 승인으로 담당 행이 새로 생겼을 때 그룹 이름을 기록한다. 담당키가 이미 있으면
-// 이름만 갱신하고 생성일시는 보존한다.
-function upsertCentralGroupName_(assignmentKey, groupName) {
+// 승인으로 담당 행이 새로 생겼을 때 그룹 이름(과, 있다면 기본 학년 외에 함께
+// 듣는 추가 학년)을 기록한다. 담당키가 이미 있으면 이름·추가 학년만 갱신하고
+// 생성일시는 보존한다. 추가 학년은 CENTRAL_GROUP_HEADERS 가 선언하지 않는
+// 5번째 칸에 적는다 — 그 열을 시트 검증에 넣으면 이미 배포된 학교의 기존
+// 수강그룹 시트(4칸)가 전부 CENTRAL_SCHEMA_INVALID 로 막히기 때문이다.
+function upsertCentralGroupName_(assignmentKey, groupName, additionalGrades) {
   const sheet = getRequiredCentralGroupSheet_();
+  const gradesText = (additionalGrades || []).join('·');
   const rowCount = sheet.getLastRow() - 1;
   const keys = rowCount > 0
     ? sheet.getRange(2, 1, rowCount, 1).getDisplayValues()
@@ -426,14 +443,15 @@ function upsertCentralGroupName_(assignmentKey, groupName) {
     return String(row[0] || '').trim() === assignmentKey;
   });
   const now = new Date();
+  const rowNumber = index >= 0 ? index + 2 : sheet.getLastRow() + 1;
   if (index >= 0) {
-    sheet.getRange(index + 2, 2, 1, 3).setValues([[
+    sheet.getRange(rowNumber, 2, 1, 3).setValues([[
       sanitizeSpreadsheetText_(groupName),
-      sheet.getRange(index + 2, 3).getValue() || now,
+      sheet.getRange(rowNumber, 3).getValue() || now,
       now,
     ]]);
   } else {
-    sheet.getRange(sheet.getLastRow() + 1, 1, 1, CENTRAL_GROUP_HEADERS.length)
+    sheet.getRange(rowNumber, 1, 1, CENTRAL_GROUP_HEADERS.length)
       .setValues([[
         assignmentKey,
         sanitizeSpreadsheetText_(groupName),
@@ -441,6 +459,8 @@ function upsertCentralGroupName_(assignmentKey, groupName) {
         now,
       ]]);
   }
+  sheet.getRange(1, 5).setValue('추가학년');
+  sheet.getRange(rowNumber, 5).setValue(gradesText);
   clearCentralGroupCache_(sheet.getParent());
 }
 

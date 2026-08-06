@@ -64,6 +64,7 @@ const app = loadAppsScript(
   [
     'APP_CONFIG', 'CENTRAL_CONFIG', 'CENTRAL_TEACHER_ASSIGNMENT_HEADERS',
     'CENTRAL_STUDENT_HEADERS', 'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
+    'CENTRAL_GROUP_HEADERS',
   ],
 );
 // formatDateTime_ 이 부르는데 빈 Session·Utilities 스텁에는 없다.
@@ -461,14 +462,27 @@ function writableSheet(headers, rows) {
         .map((row) => row.slice(startColumn - 1, startColumn - 1 + columnCount));
       return {
         getValues: block,
+        getValue: () => { const row = block()[0]; return row ? row[0] : ''; },
         getDisplayValues: () => block().map((row) => row.map(
           (cell) => (cell instanceof Date ? cell.toISOString() : String(cell ?? '')),
         )),
-        setValue(value) { grid[startRow - 1][startColumn - 1] = value; },
+        // 실제 시트는 기존 데이터보다 뒤쪽 행에 써도 그냥 자란다. 새 행을
+        // append 하는 코드(예: upsertCentralGroupName_ 의 새 그룹 추가)를
+        // 시험하려면 흉내도 똑같이 자라야 한다.
+        growTo(rowIndex) {
+          while (grid.length <= rowIndex) grid.push([]);
+        },
+        setValue(value) {
+          this.growTo(startRow - 1);
+          grid[startRow - 1][startColumn - 1] = value;
+        },
         setValues(values) {
-          values.forEach((row, rowIndex) => row.forEach((cell, columnIndex) => {
-            grid[startRow - 1 + rowIndex][startColumn - 1 + columnIndex] = cell;
-          }));
+          values.forEach((row, rowIndex) => {
+            this.growTo(startRow - 1 + rowIndex);
+            row.forEach((cell, columnIndex) => {
+              grid[startRow - 1 + rowIndex][startColumn - 1 + columnIndex] = cell;
+            });
+          });
         },
       };
     },
@@ -1051,6 +1065,155 @@ test(48, '대기·거부 신청은 현재 상태를 확인하지 않는다', () 
   assert(label === '승인 대기', `대기 신청인데 라벨이 '${label}'입니다.`);
 });
 
+// --- 수강 그룹 다학년 편성 ---------------------------------------------------
+
+test(49, '함께 듣는 학년 목록을 정리한다', () => {
+  assert(
+    app.normalizeCentralGroupGradeList_('').length === 0,
+    '비워 두면 빈 목록이어야 하는데 아닙니다.',
+  );
+  assert(
+    app.normalizeCentralGroupGradeList_('3, 2, 3').join(',') === '2,3',
+    '중복 제거·오름차순 정렬이 되지 않습니다.',
+  );
+  let rejected = false;
+  try {
+    app.normalizeCentralGroupGradeList_('4');
+  } catch (error) {
+    rejected = true;
+  }
+  assert(rejected, '존재하지 않는 학년(4)을 받아들입니다.');
+});
+
+test(50, '학급 단위 담당은 학년이 하나뿐이다', () => {
+  const grades = app.centralAssignmentGrades_({
+    grade: 2, assignmentType: '교과', assignmentKey: 'A-SUB',
+  });
+  assert(grades.join(',') === '2', `학급 단위인데 학년이 [${grades}]입니다.`);
+});
+
+test(51, '수강 그룹은 기본 학년에 추가 학년을 합친다', () => {
+  const original = app.readCentralGroupGradesCached_;
+  app.readCentralGroupGradesCached_ = () => new Map([['A-GRP', [3]]]);
+  try {
+    const grades = app.centralAssignmentGrades_({
+      grade: 2, assignmentType: '그룹', assignmentKey: 'A-GRP',
+    });
+    assert(grades.join(',') === '2,3', `합쳐진 학년이 [${grades}]입니다.`);
+  } finally {
+    app.readCentralGroupGradesCached_ = original;
+  }
+});
+
+test(52, '추가 학년 조회가 실패해도 기본 학년만으로 동작한다', () => {
+  const original = app.readCentralGroupGradesCached_;
+  app.readCentralGroupGradesCached_ = () => { throw new Error('SHEET_ERROR'); };
+  try {
+    const grades = app.centralAssignmentGrades_({
+      grade: 2, assignmentType: '그룹', assignmentKey: 'A-GRP',
+    });
+    assert(grades.join(',') === '2', `조회 실패 시에도 학년이 [${grades}]입니다.`);
+  } finally {
+    app.readCentralGroupGradesCached_ = original;
+  }
+});
+
+test(53, '편성 후보가 추가 학년 학생까지 포함한다', () => {
+  const original = {
+    readCentralStudentsCached_: app.readCentralStudentsCached_,
+    readCentralGroupGradesCached_: app.readCentralGroupGradesCached_,
+  };
+  app.readCentralStudentsCached_ = () => [
+    { active: true, schoolYear: 2026, grade: 2, studentKey: 'S-2' },
+    { active: true, schoolYear: 2026, grade: 3, studentKey: 'S-3' },
+    { active: true, schoolYear: 2026, grade: 1, studentKey: 'S-1' },
+  ];
+  app.readCentralGroupGradesCached_ = () => new Map([['A-GRP', [3]]]);
+  try {
+    const keys = app.centralGroupCandidateStudents_({
+      schoolYear: 2026, grade: 2, assignmentType: '그룹', assignmentKey: 'A-GRP',
+    }).map((student) => student.studentKey);
+    assert(keys.includes('S-2') && keys.includes('S-3'), `2·3학년이 모두 후보여야 하는데 [${keys}]입니다.`);
+    assert(!keys.includes('S-1'), `1학년까지 후보에 들어옵니다: [${keys}]`);
+  } finally {
+    app.readCentralStudentsCached_ = original.readCentralStudentsCached_;
+    app.readCentralGroupGradesCached_ = original.readCentralGroupGradesCached_;
+  }
+});
+
+test(54, '그룹명·추가 학년 저장이 5번째 칸에 · 로 이어 적는다', () => {
+  const sheet = writableSheet(
+    ['담당키', '그룹명', '생성일시', '수정일시', '추가학년'], [],
+  );
+  const original = {
+    getRequiredCentralGroupSheet_: app.getRequiredCentralGroupSheet_,
+    clearCentralGroupCache_: app.clearCentralGroupCache_,
+  };
+  app.getRequiredCentralGroupSheet_ = () => sheet;
+  app.clearCentralGroupCache_ = () => {};
+  try {
+    app.upsertCentralGroupName_('A-GRP', '심화국어', [2, 3]);
+    assert(sheet.grid[1][0] === 'A-GRP', '담당키가 저장되지 않습니다.');
+    assert(sheet.grid[1][1] === '심화국어', '그룹명이 저장되지 않습니다.');
+    assert(sheet.grid[1][4] === '2·3', `추가 학년이 '${sheet.grid[1][4]}'로 저장됩니다.`);
+    assert(sheet.grid[0][4] === '추가학년', '5번째 칸 머리글이 없습니다.');
+    // 다시 저장하면(수정) 같은 행을 덮어써야지 새 행을 만들면 안 된다.
+    app.upsertCentralGroupName_('A-GRP', '심화국어 A', [3]);
+    assert(sheet.grid.length === 2, '수정인데 새 행이 추가됩니다.');
+    assert(sheet.grid[1][4] === '3', `수정 후 추가 학년이 '${sheet.grid[1][4]}'입니다.`);
+  } finally {
+    app.getRequiredCentralGroupSheet_ = original.getRequiredCentralGroupSheet_;
+    app.clearCentralGroupCache_ = original.clearCentralGroupCache_;
+  }
+});
+
+test(55, '추가 학년을 지정하지 않아도 그대로 동작한다(하위 호환)', () => {
+  const sheet = writableSheet(
+    ['담당키', '그룹명', '생성일시', '수정일시', '추가학년'], [],
+  );
+  const original = {
+    getRequiredCentralGroupSheet_: app.getRequiredCentralGroupSheet_,
+    clearCentralGroupCache_: app.clearCentralGroupCache_,
+  };
+  app.getRequiredCentralGroupSheet_ = () => sheet;
+  app.clearCentralGroupCache_ = () => {};
+  try {
+    app.upsertCentralGroupName_('A-SUB-GRP', '단일학년그룹');
+    assert(sheet.grid[1][4] === '', `추가 학년을 안 줬는데 '${sheet.grid[1][4]}'가 저장됩니다.`);
+  } finally {
+    app.getRequiredCentralGroupSheet_ = original.getRequiredCentralGroupSheet_;
+    app.clearCentralGroupCache_ = original.clearCentralGroupCache_;
+  }
+});
+
+test(56, '학생 조회 화면 라벨이 여러 학년을 함께 보여준다', () => {
+  const original = app.centralGroupNameFor_;
+  app.centralGroupNameFor_ = () => '심화국어';
+  const gradesOriginal = app.centralAssignmentGrades_;
+  app.centralAssignmentGrades_ = () => [2, 3];
+  try {
+    const label = app.toPublicCentralAssignment_({
+      schoolYear: 2026, grade: 2, classNumber: 0, subject: '심화국어',
+      assignmentType: '그룹', assignmentKey: 'A-GRP',
+    }).label;
+    assert(label.includes('2·3학년'), `라벨에 여러 학년이 안 보입니다: '${label}'`);
+  } finally {
+    app.centralGroupNameFor_ = original;
+    app.centralAssignmentGrades_ = gradesOriginal;
+  }
+});
+
+test(57, '추가 학년 칸이 없는 기존 학교의 수강그룹 시트도 계속 유효하다', () => {
+  // 5번째 칸을 CENTRAL_GROUP_HEADERS 에 넣으면 검증 기준이 5칸이 되어, 배포된
+  // 지 오래된 학교의 4칸짜리 수강그룹 시트가 전부 CENTRAL_SCHEMA_INVALID 로
+  // 막힌다. 그런 실수를 하지 않았는지 여기서 직접 확인한다.
+  const legacySheet = writableSheet(['담당키', '그룹명', '생성일시', '수정일시'], []);
+  assert(
+    app.centralHeadersMatch_(legacySheet, app.CENTRAL_GROUP_HEADERS),
+    '추가 학년 칸이 없는 기존 수강그룹 시트가 더 이상 유효하지 않다고 판정합니다.',
+  );
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1063,7 +1226,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 48) {
-  console.error(`FAIL expected 48 tests, got ${tests.length}`);
+if (tests.length !== 57) {
+  console.error(`FAIL expected 57 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

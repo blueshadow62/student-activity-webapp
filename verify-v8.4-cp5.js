@@ -1138,6 +1138,51 @@ test(78, '신청 이력이 담당 삭제·비활성화 상태를 함께 확인�
   );
 });
 
+test(79, '수강 그룹이 여러 학년을 함께 받을 수 있다', () => {
+  assert(
+    html.includes('id="requestGroupGradesField"')
+      && html.includes('id="requestGroupGrades"'),
+    '신청 화면에 추가 학년 입력칸이 없습니다.',
+  );
+  const submitBody = functionBody(html, 'submitAssignmentRequest');
+  assert(
+    submitBody.includes('additionalGrades'),
+    '신청 화면이 추가 학년을 서버로 보내지 않습니다.',
+  );
+  const editBody = functionBody(html, 'editAssignment');
+  assert(
+    editBody.includes('additionalGrades'),
+    '관리자 수정 화면이 추가 학년을 다루지 않습니다.',
+  );
+  assert(
+    functionBody(requests, 'normalizeAssignmentRequestType_')
+      .includes('normalizeCentralGroupGradeList_'),
+    '신청 접수가 추가 학년을 검증하지 않습니다.',
+  );
+  assert(
+    functionBody(admin, 'saveTeacherAssignment').includes('normalizeCentralGroupGradeList_'),
+    '관리자 직접 수정이 추가 학년을 저장하지 않습니다.',
+  );
+});
+
+test(80, '편성 후보가 담당의 모든 학년을 본다', () => {
+  const body = functionBody(groups, 'centralGroupCandidateStudents_');
+  assert(
+    body.includes('centralAssignmentGrades_'),
+    '편성 후보 조회가 여러 학년을 보지 않고 담당의 기본 학년만 봅니다.',
+  );
+});
+
+test(81, '추가 학년 칸은 기존 4칸 수강그룹 시트 검증을 넓히지 않는다', () => {
+  // CENTRAL_GROUP_HEADERS 가 5칸이 되면 이미 배포된 학교의 4칸짜리 수강그룹
+  // 시트가 전부 CENTRAL_SCHEMA_INVALID 로 막힌다. 이 검사가 실패하면 그
+  // 사고가 난 것이다.
+  const match = central.match(/const CENTRAL_GROUP_HEADERS = Object\.freeze\(\[([^\]]*)\]/);
+  assert(match, 'CENTRAL_GROUP_HEADERS 선언을 찾을 수 없습니다.');
+  const count = match[1].split(',').map((item) => item.trim()).filter(Boolean).length;
+  assert(count === 4, `CENTRAL_GROUP_HEADERS 가 ${count}칸입니다. 4칸이어야 기존 학교 시트가 계속 유효합니다.`);
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1157,7 +1202,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 78) {
-  console.error(`FAIL expected 78 tests, got ${tests.length}`);
+if (tests.length !== 81) {
+  console.error(`FAIL expected 81 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
