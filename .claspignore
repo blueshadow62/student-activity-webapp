@@ -1,3 +1,4 @@
 **/*.md
 verify-*.js
 .clasp.json
+GUIDE.html

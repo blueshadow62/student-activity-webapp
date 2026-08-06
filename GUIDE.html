@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학생 활동 기록 웹앱 — 사용 설명서</title>
+<meta name="description" content="관리자용·교사용 사용 설명서 (ADMIN_GUIDE.md · USER_GUIDE.md의 브라우저용 버전)">
+<style>
+  :root{
+    --paper:#F3F5F8; --surface:#FFFFFF; --surface-2:#EEF1F5;
+    --ink:#1B2430; --ink-soft:#57626F; --ink-faint:#8A94A3;
+    --line:#DEE3E9; --line-strong:#C7CFD8;
+    --admin:#2A5D8F; --admin-soft:#E4EDF6; --admin-line:#BFD4E9;
+    --teacher:#3E7C59; --teacher-soft:#E5F0E9; --teacher-line:#BEDAC9;
+    --warn:#8A5A12; --warn-soft:#FBF0DD; --warn-line:#E9CE9C;
+    --danger:#9C3327; --danger-soft:#FAE7E4; --danger-line:#E9BBB2;
+    --accent: var(--admin); --accent-soft: var(--admin-soft); --accent-line: var(--admin-line);
+    --code-bg:#EAEDF2; --code-ink:#3A4452;
+    --shadow: 0 1px 2px rgba(27,36,48,.06), 0 8px 24px -12px rgba(27,36,48,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181F; --surface:#1B212B; --surface-2:#212832;
+      --ink:#E7EBF1; --ink-soft:#A9B3C1; --ink-faint:#6E7889;
+      --line:#2B333F; --line-strong:#3A4453;
+      --admin:#7FB1E0; --admin-soft:#1D2C3B; --admin-line:#2F4A63;
+      --teacher:#8FCBA5; --teacher-soft:#1B2C22; --teacher-line:#2C4736;
+      --warn:#E3B15E; --warn-soft:#332512; --warn-line:#5B441F;
+      --danger:#E68F82; --danger-soft:#331C18; --danger-line:#5C332B;
+      --accent: var(--admin); --accent-soft: var(--admin-soft); --accent-line: var(--admin-line);
+      --code-bg:#242C38; --code-ink:#C7D0DC;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181F; --surface:#1B212B; --surface-2:#212832;
+    --ink:#E7EBF1; --ink-soft:#A9B3C1; --ink-faint:#6E7889;
+    --line:#2B333F; --line-strong:#3A4453;
+    --admin:#7FB1E0; --admin-soft:#1D2C3B; --admin-line:#2F4A63;
+    --teacher:#8FCBA5; --teacher-soft:#1B2C22; --teacher-line:#2C4736;
+    --warn:#E3B15E; --warn-soft:#332512; --warn-line:#5B441F;
+    --danger:#E68F82; --danger-soft:#331C18; --danger-line:#5C332B;
+    --accent: var(--admin); --accent-soft: var(--admin-soft); --accent-line: var(--admin-line);
+    --code-bg:#242C38; --code-ink:#C7D0DC;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.55);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F8; --surface:#FFFFFF; --surface-2:#EEF1F5;
+    --ink:#1B2430; --ink-soft:#57626F; --ink-faint:#8A94A3;
+    --line:#DEE3E9; --line-strong:#C7CFD8;
+    --admin:#2A5D8F; --admin-soft:#E4EDF6; --admin-line:#BFD4E9;
+    --teacher:#3E7C59; --teacher-soft:#E5F0E9; --teacher-line:#BEDAC9;
+    --warn:#8A5A12; --warn-soft:#FBF0DD; --warn-line:#E9CE9C;
+    --danger:#9C3327; --danger-soft:#FAE7E4; --danger-line:#E9BBB2;
+    --accent: var(--admin); --accent-soft: var(--admin-soft); --accent-line: var(--admin-line);
+    --code-bg:#EAEDF2; --code-ink:#3A4452;
+    --shadow: 0 1px 2px rgba(27,36,48,.06), 0 8px 24px -12px rgba(27,36,48,.18);
+  }
+  body.role-teacher{
+    --accent: var(--teacher); --accent-soft: var(--teacher-soft); --accent-line: var(--teacher-line);
+  }
+
+  *{box-sizing:border-box}
+  html{ background:var(--paper); }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:15.5px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  }
+  .font-display{ font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif; }
+
+  a{ color:var(--accent); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px; border-radius:2px;
+  }
+  code{
+    font-family: ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+    font-size:.88em; background:var(--code-bg); color:var(--code-ink);
+    padding:.1em .42em; border-radius:4px;
+  }
+  pre code{ display:block; padding:.85em 1em; overflow-x:auto; line-height:1.55; }
+  strong{ font-weight:700; color:var(--ink); }
+
+  /* ---------- shell ---------- */
+  .shell{
+    display:grid; grid-template-columns:272px minmax(0,1fr);
+    max-width:1180px; margin:0 auto;
+  }
+  .rail{
+    position:sticky; top:0; align-self:start; height:100vh;
+    padding:28px 20px 28px 28px; overflow-y:auto;
+    border-right:1px solid var(--line);
+  }
+  .brand{ margin-bottom:22px; }
+  .brand .kicker{
+    font-family: ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+    font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+    display:block; margin-bottom:6px;
+  }
+  .brand h1{
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+    font-size:1.28rem; margin:0; line-height:1.35; letter-spacing:-.01em;
+    text-wrap:balance;
+  }
+
+  .switch{
+    display:grid; grid-template-columns:1fr 1fr; gap:6px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    padding:4px; margin-bottom:24px;
+  }
+  .switch button{
+    font:inherit; font-size:.86rem; font-weight:600; color:var(--ink-soft);
+    background:transparent; border:0; border-radius:7px; padding:9px 8px; cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .switch button .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px;
+    background:currentColor; opacity:.55; vertical-align:1px;
+  }
+  .switch button[aria-pressed="true"]{
+    background:var(--surface); color:var(--ink); box-shadow:var(--shadow);
+  }
+  .switch button[aria-pressed="true"].is-admin{ color:var(--admin); }
+  .switch button[aria-pressed="true"].is-teacher{ color:var(--teacher); }
+
+  nav.toc{ display:flex; flex-direction:column; gap:2px; }
+  nav.toc .toc-h2{
+    font-size:.86rem; font-weight:600; color:var(--ink);
+    padding:7px 10px; border-radius:7px; display:block;
+    border-left:2px solid transparent;
+  }
+  nav.toc .toc-h3{
+    font-size:.8rem; color:var(--ink-soft);
+    padding:5px 10px 5px 22px; border-radius:7px; display:block;
+    border-left:2px solid transparent;
+  }
+  nav.toc a:hover{ background:var(--surface-2); text-decoration:none; }
+  nav.toc a.is-active{ background:var(--accent-soft); border-left-color:var(--accent); color:var(--accent); }
+  nav.toc a.is-active.toc-h3{ color:var(--accent); }
+
+  .rail-foot{
+    margin-top:22px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:.78rem; color:var(--ink-faint); line-height:1.6;
+  }
+  .rail-foot code{ font-size:.86em; }
+  .rail-foot a{ color:var(--ink-soft); }
+
+  main{ padding:44px 56px 120px; min-width:0; }
+  .doc{ max-width:684px; }
+  .doc.is-hidden{ display:none; }
+
+  .pill{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.72rem; font-weight:700; letter-spacing:.03em;
+    padding:4px 10px 4px 8px; border-radius:999px; margin-bottom:16px;
+    background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line);
+  }
+  .pill .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  .doc > h1{
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+    font-size:2rem; line-height:1.28; margin:0 0 14px; letter-spacing:-.015em;
+    text-wrap:balance;
+  }
+  .lede{ color:var(--ink-soft); font-size:1.03rem; margin:0 0 8px; max-width:60ch; }
+  .cross-link{
+    display:inline-flex; align-items:center; gap:6px; margin:10px 0 8px;
+    font-size:.9rem; color:var(--ink-soft);
+  }
+  .cross-link button{
+    font:inherit; font-weight:700; color:var(--accent); background:none; border:0;
+    padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px;
+  }
+
+  section.doc-section{
+    padding-top:36px; margin-top:36px; border-top:1px solid var(--line); scroll-margin-top:24px;
+  }
+  section.doc-section:first-of-type{ border-top:0; margin-top:28px; padding-top:0; }
+
+  h2{
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+    font-size:1.4rem; margin:0 0 14px; letter-spacing:-.01em; text-wrap:balance;
+  }
+  h3{
+    font-size:1.05rem; margin:26px 0 10px; color:var(--ink); scroll-margin-top:24px;
+  }
+  p{ margin:0 0 14px; }
+  ul, ol{ margin:0 0 16px; padding-left:1.35em; }
+  li{ margin:0 0 8px; }
+  li::marker{ color:var(--ink-faint); }
+
+  ol.steps{ list-style:none; padding-left:0; counter-reset:step; }
+  ol.steps > li{
+    counter-increment:step; position:relative; padding-left:34px; margin-bottom:14px;
+  }
+  ol.steps > li::before{
+    content:counter(step); position:absolute; left:0; top:.05em;
+    width:22px; height:22px; border-radius:50%;
+    background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line);
+    font-size:.72rem; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+
+  .table-scroll{ overflow-x:auto; margin:0 0 18px; border:1px solid var(--line); border-radius:10px; }
+  table{ border-collapse:collapse; width:100%; min-width:420px; background:var(--surface); }
+  th, td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top; font-size:.92rem; }
+  thead th{
+    font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint);
+    font-weight:600; background:var(--surface-2); white-space:nowrap;
+  }
+  tbody tr:last-child td{ border-bottom:0; }
+
+  .callout{
+    border:1px solid var(--line); border-left:3px solid var(--ink-faint);
+    background:var(--surface); border-radius:0 10px 10px 0;
+    padding:13px 16px; margin:0 0 18px;
+  }
+  .callout p:last-child{ margin-bottom:0; }
+  .callout .callout-label{
+    display:block; font-size:.68rem; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; margin-bottom:5px;
+  }
+  .callout.warn{ border-left-color:var(--warn); background:var(--warn-soft); }
+  .callout.warn .callout-label{ color:var(--warn); }
+  .callout.danger{ border-left-color:var(--danger); background:var(--danger-soft); }
+  .callout.danger .callout-label{ color:var(--danger); }
+
+  .qa-list{ display:flex; flex-direction:column; gap:16px; margin-top:4px; }
+  .qa{ padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+  .qa .q{
+    margin:0 0 6px; font-weight:700; color:var(--ink);
+  }
+  .qa .q::before{ content:"Q. "; color:var(--accent); }
+  .qa .a{ margin:0; color:var(--ink-soft); }
+  .qa .a::before{ content:"A. "; color:var(--ink-faint); font-weight:700; }
+
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+
+  @media (max-width:900px){
+    .shell{ grid-template-columns:1fr; }
+    .rail{ position:relative; top:auto; height:auto; border-right:0; border-bottom:1px solid var(--line); padding:20px 20px 16px; }
+    nav.toc{ display:none; }
+    main{ padding:32px 20px 100px; }
+  }
+  @media (prefers-reduced-motion:no-preference){
+    html{ scroll-behavior:smooth; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <span class="kicker">학생 활동 기록 웹앱</span>
+      <h1 class="font-display">사용 설명서</h1>
+    </div>
+
+    <div class="switch" role="tablist" aria-label="설명서 선택">
+      <button type="button" id="tabAdmin" class="is-admin" role="tab" aria-pressed="true" aria-controls="doc-admin">
+        <span class="dot"></span>관리자용
+      </button>
+      <button type="button" id="tabTeacher" class="is-teacher" role="tab" aria-pressed="false" aria-controls="doc-teacher">
+        <span class="dot"></span>교사용
+      </button>
+    </div>
+
+    <nav class="toc" id="toc" aria-label="목차"></nav>
+
+    <div class="rail-foot">
+      브라우저로 보기 편하게 만든 버전입니다. 원문은
+      <a href="ADMIN_GUIDE.md">ADMIN_GUIDE.md</a> ·
+      <a href="USER_GUIDE.md">USER_GUIDE.md</a>입니다.
+    </div>
+  </aside>
+
+  <main>
+    <!-- ============================================================ -->
+    <!-- 관리자용                                                       -->
+    <!-- ============================================================ -->
+    <article class="doc" id="doc-admin" data-role="admin">
+      <span class="pill"><span class="dot"></span>관리자용</span>
+      <h1 class="font-display">관리자용 사용 설명서</h1>
+      <p class="lede">학교 관리자(교사 담당 승인, 학생 명단 관리)를 위한 화면별 안내입니다.
+        설치 방법은 <a href="INSTALL.md">INSTALL.md</a>, 구조·설정값은
+        <a href="README.md">README.md</a>를 보십시오. 이 문서는 <strong>로그인한 뒤 화면에서
+        실제로 무엇을 누르는지</strong>만 다룹니다.</p>
+      <p class="cross-link">교사(일반 이용자)용 안내가 필요하신가요?
+        <button type="button" data-switch-to="teacher">교사용 설명서 보기 →</button></p>
+
+      <section class="doc-section" id="admin-처음-접속하면">
+        <h2>처음 접속하면</h2>
+        <p>Google 계정으로 웹앱 주소(<code>/exec</code>)에 접속하면 관리자 이메일로 등록된
+          계정은 자동으로 <strong>관리자 포털</strong>이 열립니다. 아직 학교 설치가 끝나지
+          않았다면 먼저 설치 화면이 뜹니다.</p>
+
+        <h3>학교 설치 화면 (최초 1회)</h3>
+        <ol class="steps">
+          <li><strong>학교명</strong>을 입력합니다. 이후 개인 저장소 폴더·파일 이름에 그대로
+            붙습니다 (<code>학교명_학생 활동 기록 데이터</code>).</li>
+          <li>둘 중 하나를 고릅니다.
+            <ul>
+              <li><strong>새 중앙 자료 만들기</strong> — 지금 로그인한 관리자 계정의 Drive에
+                중앙 스프레드시트와 사진 폴더를 새로 만듭니다. 학교에서 처음 쓰는 경우입니다.</li>
+              <li><strong>기존 중앙 자료 다시 연결하기</strong> — 이미 있는 중앙 스프레드시트·
+                사진 폴더의 URL(또는 ID)을 붙여 넣어 연결합니다. 관리자 계정으로 열 수 있는
+                파일인지 서버가 먼저 확인하며, 기존 파일을 삭제·이동하지 않습니다.</li>
+            </ul>
+          </li>
+        </ol>
+        <p>설치가 끝나면 관리자 포털의 네 탭(<strong>연결 상태 · 학생 관리 · 사진 관리 ·
+          교사 관리</strong>)이 열립니다.</p>
+      </section>
+
+      <section class="doc-section" id="admin-연결-상태-탭">
+        <h2>연결 상태 탭</h2>
+        <p>가장 먼저 보이는 화면입니다. 중앙 자료가 정상인지, 학생·사진·담당·신청이 몇 건인지
+          한눈에 보여 줍니다.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>버튼</th><th>하는 일</th></tr></thead>
+            <tbody>
+              <tr><td><strong>새 학년도 시작하기</strong></td><td>아래 <a href="#admin-새-학년도-전환">새 학년도 전환</a> 참고</td></tr>
+              <tr><td><strong>중앙 시트 점검·생성</strong></td><td>시트 머리글이 손상됐거나 새로 만든 시트가 있을 때 다시 확인·생성합니다. 기존 학생 데이터는 지우지 않습니다</td></tr>
+              <tr><td><strong>설치 설정 초기화</strong></td><td>되돌릴 수 있지만 자주 누를 버튼은 아닙니다. 아래 <a href="#admin-설치-설정-초기화">설치 설정 초기화</a> 참고</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>카드 안에 새 버전이 나왔다는 알림이 뜰 수 있습니다 —
+          <a href="#admin-업데이트-확인">업데이트 확인</a>을 보십시오.</p>
+      </section>
+
+      <section class="doc-section" id="admin-학생-관리-탭">
+        <h2>학생 관리 탭</h2>
+        <p>중앙 학생 명단을 관리합니다. 여기서 등록해야 교사가 해당 학생을 조회·기록할 수
+          있습니다.</p>
+
+        <h3 id="admin-csv로-한-번에-올리기">CSV로 한 번에 올리기</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>순서</th><th>버튼</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>처음이라면 <strong>빈 양식 받기</strong>로 열 이름만 있는 CSV를 내려받습니다</td></tr>
+              <tr><td>2</td><td>엑셀 등으로 열어 학생을 채웁니다 (아래 열 형식 그대로)</td></tr>
+              <tr><td>3</td><td>파일 선택으로 CSV를 고른 뒤 <strong>CSV 미리보기·가져오기</strong>를 누릅니다</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>CSV 열 순서는 반드시 다음과 같아야 합니다.</p>
+        <pre><code>학년, 반, 번호, 이름, 학적상태</code></pre>
+        <ul>
+          <li><strong>학적상태</strong>는 <code>재학</code>, <code>위탁</code>, <code>전학</code>,
+            <code>자퇴</code>, <code>공동</code> 중 하나입니다. <code>위탁</code>(우리 학교에서
+            밖으로 나간 학생)·<code>전학</code>·<code>자퇴</code>는 명단에는 보이지만 기록
+            대상에서는 빠집니다.</li>
+          <li>가져오기는 <strong>지정한 학년도의 명단을 CSV 내용으로 통째로 대체</strong>합니다.
+            다른 학년도 행은 건드리지 않지만, 그 학년도 안에서 CSV에 없는 학생은 삭제됩니다.
+            일부 학생만 추가·수정하려는 목적이라면 CSV 전체가 아니라 표에서 <strong>학생
+            추가</strong>나 개별 수정을 쓰십시오.</li>
+          <li>학년·반·번호가 같은 기존 학생은 자료가 이어집니다(학생키가 유지되어 이미 쌓인
+            활동 기록과 계속 연결됩니다).</li>
+        </ul>
+        <div class="callout danger">
+          <span class="callout-label">주의 — 학생이 사라질 수 있음</span>
+          <p>반드시 먼저 <strong>CSV 내보내기</strong>로 지금 명단을 받아 확인한 뒤, 그 파일을
+            고쳐서 다시 올리는 방식을 권합니다(양식과 열 구성이 같습니다). 무엇이 빠졌는지
+            모른 채 다른 출처의 CSV를 올리면 그 학년도 학생이 의도치 않게 없어질 수 있습니다.</p>
+        </div>
+        <div class="callout warn">
+          <span class="callout-label">CSV를 올린 뒤 잊지 말 것</span>
+          <p>사진 관리 탭에서 <strong>중앙 폴더 동기화</strong>를 다시 눌러야 합니다. 명단을
+            새로 올리면 학생 행이 새로 만들어지거나 바뀌어서, 이미 연결돼 있던 사진도 다시
+            동기화하기 전까지는 끊긴 것처럼 보입니다.</p>
+        </div>
+
+        <h3>개별 관리</h3>
+        <ul>
+          <li><strong>학생 추가</strong>로 한 명씩 입력할 수 있습니다.</li>
+          <li>표의 각 행에서 수정·비활성화·삭제가 가능합니다. 비활성화는 되돌릴 수 있지만
+            (<code>비활성 포함</code> 체크로 다시 확인), 삭제는 되돌릴 수 없습니다.</li>
+          <li><strong>학년도 일괄 비활성화</strong>는 지정한 학년도 학생 전원을 한 번에 끕니다.
+            새 학년도 정리는 이 버튼 대신 <a href="#admin-새-학년도-전환">연결 상태 탭의 새 학년도
+            시작하기</a>를 쓰는 편이 낫습니다 — 학생과 담당을 함께 처리하고 확인 절차가
+            있습니다.</li>
+          <li><strong>전체 학생목록 초기화</strong>는 명단을 통째로 영구 삭제합니다. 배포 직후
+            연습용 데이터를 지울 때만 쓰십시오.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section" id="admin-사진-관리-탭">
+        <h2>사진 관리 탭</h2>
+        <p>증명사진은 교사 화면이 아니라 <strong>관리자가 중앙 Drive 사진 폴더에 직접
+          올립니다.</strong></p>
+        <ul>
+          <li>파일명은 <code>학년(1자리) + 반(1자리) + 번호(2자리)</code>입니다. 예: 1학년
+            2반 3번 → <code>1203.jpg</code>.</li>
+          <li>형식은 JPG·PNG·WebP, 용량은 <strong>512KB 이하</strong>여야 합니다(초과하면
+            동기화는 되지만 교사 화면에 표시되지 않습니다).</li>
+          <li>화면에는 78×105px(3:4 비율)로 나타나며, 선명하게 보이려면 그 2배인
+            156×210px 정도를 권장합니다.</li>
+          <li>폴더에 파일을 올리거나 바꾼 뒤 <strong>중앙 폴더 동기화</strong>를 눌러야
+            반영됩니다. <strong>현황 조회</strong>로 몇 명이 연결됐는지 확인할 수 있습니다.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section" id="admin-교사-관리-탭">
+        <h2>교사 관리 탭</h2>
+
+        <h3>담당 신청 승인</h3>
+        <p><code>교사 담당 신청</code> 표에 대기 중인 신청이 뜹니다. 체크 후 <strong>선택
+          항목 일괄 승인</strong>을 누르면 그 즉시 해당 교사 계정에 중앙 자료 보기 권한이
+          자동으로 부여됩니다(Drive 알림 메일은 보내지 않습니다). 승인 전에는 교사가 학생
+          자료를 전혀 볼 수 없습니다.</p>
+        <p>수강 그룹 신청은 반 번호 대신 그룹 이름이 표시됩니다.</p>
+
+        <h3>담당 수업 관리</h3>
+        <p><code>교사 담당 수업</code> 표는 교사별로 묶여 보이며, 클릭하면 하위 담당이
+          펼쳐집니다.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>동작</th><th>결과</th></tr></thead>
+            <tbody>
+              <tr><td><strong>수정</strong></td><td>학년·과목·반(또는 그룹 이름)을 고칩니다</td></tr>
+              <tr><td><strong>비활성화 / 활성화</strong></td><td>담당 하나만 켜고 끕니다. 되돌릴 수 있습니다</td></tr>
+              <tr><td><strong>삭제</strong></td><td>담당 행 자체를 지웁니다. 수강 그룹이면 그 그룹의 이름·편성 명단(수강그룹·수강그룹원)까지 함께 지워집니다. 교사가 이미 저장한 활동 기록은 각자 소유 파일에 있어 지워지지 않습니다</td></tr>
+              <tr><td><strong>해지</strong> (표 상단, 여러 명 선택)</td><td>선택한 교사의 활성 담당을 전부 비활성화하고, 중앙 자료 보기 권한을 회수합니다. 신청·승인 이력과 개인 기록은 그대로 남습니다. 권한 회수가 실패하면 비활성 교사 행에서 재시도 버튼이 나타납니다</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>담당 추가</strong>로 관리자가 직접 담당을 만들 수도 있습니다. 수강 그룹을
+          만들 때는 반드시 그룹 이름을 입력하십시오. 비워 두면 화면에 <code>이름 없는
+          그룹</code>으로 표시됩니다.</p>
+
+        <h3>담당 신청 허용 범위</h3>
+        <p>기본값은 <strong>제한 없음</strong>(로그인한 Google 계정 누구나 신청 가능, 관리자
+          승인이 실제 관문)입니다.</p>
+        <div class="callout warn">
+          <span class="callout-label">개인 Gmail로 로그인하는 학교라면</span>
+          <p><code>특정 도메인·계정만</code>으로 바꾸지 마십시오 — 전원이 막힙니다. 학교
+            도메인이 있는 경우에만 켜고, <code>@학교도메인</code>과 개별 이메일을 쉼표로
+            함께 넣을 수 있습니다. <code>@gmail.com</code>처럼 아무나 만들 수 있는 공용 메일
+            도메인은 통째로 지정할 수 없습니다(개별 이메일 지정은 됩니다).</p>
+        </div>
+        <p>잘못 켜서 교사 전원이 막혀도 관리자 화면은 그대로 열리므로 같은 자리에서 다시
+          끌 수 있습니다.</p>
+      </section>
+
+      <section class="doc-section" id="admin-새-학년도-전환">
+        <h2>새 학년도 전환</h2>
+        <p>학년도는 <strong>3월 1일에 저절로 넘어갑니다.</strong> 별도로 누를 버튼이 없고,
+          관리자가 정할 수 있는 값도 아닙니다. 넘어가는 순간 자동으로 일어나는 일:</p>
+        <ul>
+          <li>지난 학년도 담당은 모든 교사 목록에서 사라지고 접근도 거부됩니다.</li>
+          <li>새 학년도 담당은 새 학년도 학생만 봅니다.</li>
+          <li>교사 개인 기록 파일이 학년도별로 새로 만들어집니다. 지난 기록은 지난 학년도
+            파일에 그대로 남습니다.</li>
+        </ul>
+        <p><code>연결 상태</code> 탭의 <strong>새 학년도 시작하기</strong>는 이 전환을
+          실행하는 버튼이 <strong>아닙니다.</strong> 준비 상태를 확인하고, 지난 학년도
+          자료를 정리하는 화면입니다.</p>
+        <ol class="steps">
+          <li>누르면 올해 학생·담당 건수가 뜹니다. 0이면 아직 명단·담당을 준비해야 한다는
+            뜻입니다.</li>
+          <li>지난 학년도 학생·담당을 항목별로 골라 체크하고 <strong>선택한 자료 정리하기</strong>를
+            누릅니다.</li>
+          <li>정리는 <strong>비활성화</strong>입니다(삭제 아님). 학생 관리·교사 관리 화면에서
+            다시 켤 수 있습니다.</li>
+        </ol>
+        <p>교사 개인 기록은 각 교사의 Drive에 있어 관리자가 접근할 수 없으므로 이 화면에서
+          건드리지 않습니다. 담당이 끊긴 교사에게는 담당 수업 신청 화면에 학년도가 바뀌었다는
+          안내가 자동으로 뜹니다.</p>
+        <p><strong>새 학년도에 관리자가 할 일은 두 가지뿐입니다</strong> — 새 학년도 학생
+          명단 업로드, 교사 담당 승인.</p>
+      </section>
+
+      <section class="doc-section" id="admin-설치-설정-초기화">
+        <h2>설치 설정 초기화 (주의)</h2>
+        <div class="callout danger">
+          <span class="callout-label">되돌릴 수 있지만 자주 쓸 버튼이 아님</span>
+          <p>중앙 DB·사진 폴더 연결, 중앙 스키마 버전, 학교명, 설치 완료 상태를 초기화하고
+            <strong>담당 수업 신청 이력도 함께 지웁니다.</strong> 신청 이력은 특정 중앙
+            시트를 전제로 한 기록이라, 연결을 끊으면 되살릴 수 없기 때문입니다.</p>
+        </div>
+        <ul>
+          <li>관리자 목록, 교사 개인 DB·폴더, 기존 중앙 Drive 파일은 유지됩니다.</li>
+          <li>초기화 후 같은 관리자가 다시 학교 설치 화면에서 새로 만들거나 기존 자료를
+            재연결할 수 있습니다.</li>
+          <li>기존 중앙 파일은 Drive에 그대로 남으므로, 실제로 없애려면 파일 소유자가
+            Drive에서 직접 지워야 합니다.</li>
+        </ul>
+        <p><strong>일반적인 학생·담당 정리에는 이 버튼이 아니라 위의 새 학년도 시작하기나
+          개별 비활성화를 쓰십시오.</strong></p>
+      </section>
+
+      <section class="doc-section" id="admin-업데이트-확인">
+        <h2>업데이트 확인</h2>
+        <p>새 버전이 나오면 이 화면(연결 상태 탭)에 알림이 뜹니다. 관리자 화면을 열 때만
+          확인하며, 확인에 실패해도(망 차단 등) 조용히 넘어가고 다른 기능에 영향을 주지
+          않습니다.</p>
+        <p>알림의 링크를 누르면 무엇이 바뀌었는지, 어떤 파일을 바꿔야 하는지 릴리스 노트에서
+          확인할 수 있습니다. 적용은 수동입니다 — Apps Script 편집기에서 안내된 파일만
+          덮어쓰고 다시 배포하십시오. 버전 앞자리가 바뀐 릴리스(<code>1.x → 2.0</code>)는
+          적용 전에 릴리스 노트를 반드시 먼저 읽으십시오. 관리자 작업이 필요할 수 있습니다.</p>
+      </section>
+
+      <section class="doc-section" id="admin-자주-겪는-상황">
+        <h2>자주 겪는 상황</h2>
+        <div class="qa-list">
+          <div class="qa">
+            <p class="q">교사가 담당 수업이 없다고 합니다</p>
+            <p class="a">교사 관리 탭에서 그 교사의 신청이 승인 대기 중인지, 이미 승인됐는데
+              비활성화돼 있는지 확인하십시오. 3월 1일 직후라면 학년도가 넘어가 재신청이
+              필요한 상황일 수 있습니다(<a href="#admin-새-학년도-전환">새 학년도 전환</a> 참고).</p>
+          </div>
+          <div class="qa">
+            <p class="q">사진이 안 보인다고 합니다</p>
+            <p class="a">사진 관리 탭에서 파일명 규칙(예: <code>1203.jpg</code>)과 용량(512KB
+              이하)을 확인하고, 동기화를 다시 눌러 보십시오. 학생 명단을 CSV로 새로 올린
+              직후라면 그래서인 경우가 많습니다 — 위 <a href="#admin-csv로-한-번에-올리기">CSV로 한 번에
+              올리기</a> 참고.</p>
+          </div>
+          <div class="qa">
+            <p class="q">CSV 가져오기가 머리글 오류로 거부됩니다</p>
+            <p class="a">열 순서가 <code>학년, 반, 번호, 이름, 학적상태</code>인지 확인하십시오.
+              <strong>빈 양식 받기</strong>로 새로 받은 파일에 채우는 것이 가장 안전합니다.</p>
+          </div>
+          <div class="qa">
+            <p class="q">반 0인 담당을 비활성화하려는데 오류가 납니다</p>
+            <p class="a">수강 그룹은 반이 정상적으로 <code>0</code>입니다. 이름이 비어 있는
+              그룹이면 먼저 <strong>수정</strong>으로 그룹 이름을 채운 뒤 비활성화하십시오.</p>
+          </div>
+        </div>
+      </section>
+    </article>
+
+    <!-- ============================================================ -->
+    <!-- 교사용                                                         -->
+    <!-- ============================================================ -->
+    <article class="doc is-hidden" id="doc-teacher" data-role="teacher">
+      <span class="pill"><span class="dot"></span>교사용</span>
+      <h1 class="font-display">교사용 사용 설명서</h1>
+      <p class="lede">담당 학급 학생의 활동을 기록하는 교사를 위한 화면별 안내입니다.</p>
+      <p class="cross-link">학생 명단·담당 승인을 관리하는 관리자이신가요?
+        <button type="button" data-switch-to="admin">관리자용 설명서 보기 →</button></p>
+
+      <section class="doc-section" id="teacher-처음-시작하기">
+        <h2>처음 시작하기</h2>
+        <p>Google 계정으로 학교에서 안내받은 웹앱 주소(<code>/exec</code>)에 접속합니다.
+          관리자 이메일로 등록돼 있지 않으면 자동으로 <strong>개인 이용자 화면</strong>이
+          열립니다.</p>
+        <p>화면 위쪽 <code>이용 순서</code> 카드가 지금 어느 단계인지 보여 줍니다.</p>
+        <ol class="steps">
+          <li><strong>개인 저장소 만들기</strong> — 내 Drive에 활동 기록을 저장할
+            스프레드시트를 만듭니다. <code>개인 저장소</code> 탭에서 안내를 따라가면
+            됩니다. 학교명이 붙은 폴더(<code>학교명_학생 활동 기록 데이터</code>) 안에
+            학년도별 파일이 하나씩 생깁니다.</li>
+          <li><strong>담당 수업 신청하고 승인받기</strong> — 아래
+            <a href="#teacher-담당-수업-신청">담당 수업 신청</a> 참고.</li>
+          <li><strong>학생 활동 기록하기</strong> — 위 두 단계가 끝나야 열립니다.</li>
+        </ol>
+        <p>세 단계 중 아직 안 끝난 게 있으면 그 탭이 자동으로 먼저 열립니다.</p>
+      </section>
+
+      <section class="doc-section" id="teacher-담당-수업-신청">
+        <h2>담당 수업 신청</h2>
+        <p><code>내 담당 수업 신청</code> 탭에서 신청합니다. <strong>관리자가 승인해야</strong>
+          실제로 학생 자료가 보입니다. 승인 전에는 신청 목록에 대기 상태로만 남습니다.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>항목</th><th>입력</th></tr></thead>
+            <tbody>
+              <tr><td>담당 유형</td><td><strong>학급 단위</strong>(보통 수업) 또는 <strong>수강 그룹</strong>(아래 참고)</td></tr>
+              <tr><td>학년도</td><td>자동으로 올해가 채워집니다</td></tr>
+              <tr><td>담당 학년</td><td>1~3학년</td></tr>
+              <tr><td>담당 과목</td><td>예: 문학</td></tr>
+              <tr><td>담당 반</td><td>여러 반은 쉼표로 구분 (예: <code>1, 2, 3</code>) — 학급 단위일 때만</td></tr>
+              <tr><td>수강 그룹 이름</td><td>예: 심화국어 A — 수강 그룹일 때만</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>담당 수업 승인 신청</strong>을 누르면 목록에 대기 상태로 뜹니다. 잘못
+          넣었으면 체크 후 <strong>선택 항목 일괄 취소</strong>로 취소할 수 있습니다(취소는
+          승인 전에만 가능합니다).</p>
+
+        <h3>수강 그룹이란</h3>
+        <p>고교학점제 등으로 <strong>학급 단위로 묶이지 않는 수업</strong>은 담당 유형을
+          <code>수강 그룹</code>으로 신청합니다. 관리자가 승인하면 그룹은 만들어지지만
+          <strong>학생은 비어 있는 상태</strong>입니다 — 아래처럼 직접 채워야 합니다.</p>
+      </section>
+
+      <section class="doc-section" id="teacher-수강-그룹-학생-편성">
+        <h2>수강 그룹 학생 편성</h2>
+        <p>승인된 수강 그룹이 있으면 <code>내 담당 수업 신청</code> 탭 아래에 <code>수강
+          그룹 학생 편성</code> 영역이 나타납니다.</p>
+        <ol class="steps">
+          <li><strong>편성할 수업</strong> 드롭다운에서 어느 그룹을 편성할지 고릅니다.
+            목록에는 수강 그룹만 나오고, 학급 단위 수업은 여기서 고를 수 없습니다.</li>
+          <li>왼쪽 <strong>후보 학생</strong>에서 넣을 학생을 체크한 뒤 가운데 화살표
+            버튼으로 오른쪽 <strong>그룹원</strong>으로 옮깁니다. 학생을 직접 끌어다
+            놓아도 됩니다.
+            <ul>
+              <li>이름으로 찾기: 왼쪽 위 검색창</li>
+              <li>전체 선택: 각 목록 위의 체크박스(보이는 후보/편성된 학생 기준)</li>
+            </ul>
+          </li>
+          <li>옮긴 뒤 반드시 <strong>편성 저장</strong>을 눌러야 반영됩니다. 저장하지 않으면
+            화면을 벗어날 때 사라집니다.</li>
+        </ol>
+
+        <h3>공동교육과정 학생</h3>
+        <p>우리 학교 학생이 아니라 <strong>공동교육과정으로 들어온 타교생</strong>은 후보
+          목록에 없습니다. <strong>공동교육과정 학생 추가</strong>로 이름을 입력해 직접
+          넣습니다(반은 자동으로 <code>공동</code>, 번호는 자동 배정됩니다).</p>
+        <p>잘못 넣었으면 <strong>공동교육과정 학생 삭제</strong>로 되돌릴 수 있습니다. 편성된
+          학생 목록에서 지울 학생을 체크한 뒤 누르면 됩니다. 단, 다음 조건을 모두 만족해야
+          지워집니다.</p>
+        <ul>
+          <li>공동교육과정으로 추가한 학생일 것 (우리 학교 학생은 이 버튼으로 지울 수
+            없습니다 — 왼쪽으로 옮겨 편성에서 빼기만 하십시오)</li>
+          <li>내 그룹에 편성돼 있을 것</li>
+          <li>다른 교사의 그룹에는 편성돼 있지 않을 것</li>
+        </ul>
+        <div class="callout">
+          <span class="callout-label">참고</span>
+          <p>편성된 학생이 0명인 채로 활동 기록 화면에서 그 수업을 고르면 "편성된 학생이
+            없습니다. 먼저 수강생을 편성해 주세요"라는 안내가 뜹니다.</p>
+        </div>
+      </section>
+
+      <section class="doc-section" id="teacher-학생-활동-기록하기">
+        <h2>학생 활동 기록하기</h2>
+        <p><code>학생 활동 기록</code> 탭입니다. 개인 저장소와 담당 수업이 모두 준비돼야
+          열립니다.</p>
+        <ol class="steps">
+          <li><strong>수업 선택</strong>에서 과목 → 학년 → 반(또는 그룹) 순서로 고릅니다.</li>
+          <li>아래 학생 목록이 뜹니다. 이름 일부로 검색할 수 있습니다.</li>
+          <li><strong>사진 켜기</strong>를 누르면 증명사진이 함께 보입니다(관리자가 올려 둔
+            경우에만).</li>
+          <li>기록할 학생을 클릭하면 기록 입력 칸이 열립니다.
+            <ul>
+              <li><strong>구분</strong>: 칭찬·긍정 / 지도 필요·부정</li>
+              <li><strong>역량</strong>: 여러 개를 함께 체크할 수 있습니다</li>
+              <li><strong>내용 메모</strong>: 선택 사항</li>
+            </ul>
+          </li>
+          <li><strong>기록 저장</strong>을 누르면 저장됩니다. 바로 아래에 이 학생의 최근
+            기록이 보입니다.</li>
+        </ol>
+
+        <h3>기록 조회·수정·삭제</h3>
+        <p>같은 탭 아래쪽 <code>내 활동 기록 조회</code>에서 구분·기록 위치(현재/보관/전체)·
+          과목으로 걸러 볼 수 있습니다. 각 기록에 <strong>수정</strong>·<strong>삭제</strong>
+          버튼이 뜨는데, 이는 <strong>내가 그 담당으로 남긴 기록에만</strong> 나타납니다.</p>
+      </section>
+
+      <section class="doc-section" id="teacher-개인-저장소-문제">
+        <h2>개인 저장소에 문제가 생겼다면</h2>
+        <p><code>개인 저장소</code> 탭에 상태와 함께 해결 버튼이 뜹니다. 파일이 휴지통에
+          있거나 찾을 수 없는 등 상황에 따라 나오는 버튼이 다릅니다(예: 휴지통에서
+          되살리기, 새 개인 저장소 만들기, 기존 파일로 다시 연결). 화면에 뜬 안내를 따라가면
+          됩니다.</p>
+      </section>
+
+      <section class="doc-section" id="teacher-자주-겪는-상황">
+        <h2>자주 겪는 상황</h2>
+        <div class="qa-list">
+          <div class="qa">
+            <p class="q">담당 수업이 없다고 나옵니다</p>
+            <p class="a">신청 후 관리자 승인을 기다리는 중이거나, 3월이 지나 학년도가 바뀌어
+              재신청이 필요한 상태일 수 있습니다. 새 학년도가 시작되면 지난해 담당은
+              자동으로 끊기고, 화면에 다시 신청하라는 안내가 뜹니다 — 지난 학년도 기록은
+              그대로 남아 있으니 걱정하지 않아도 됩니다.</p>
+          </div>
+          <div class="qa">
+            <p class="q">수강 그룹인데 학생이 하나도 안 보입니다</p>
+            <p class="a"><code>내 담당 수업 신청</code> 탭 아래 <code>수강 그룹 학생
+              편성</code>에서 먼저 학생을 넣고 <strong>편성 저장</strong>을 눌러야 합니다.</p>
+          </div>
+          <div class="qa">
+            <p class="q">기록에 수정·삭제 버튼이 없습니다</p>
+            <p class="a">다른 교사가 남긴 기록이거나, 담당 필터로 인해 내 것으로 판정되지
+              않은 옛 기록일 수 있습니다. 확인이 필요하면 관리자에게 문의하십시오.</p>
+          </div>
+          <div class="qa">
+            <p class="q">사진이 안 보입니다</p>
+            <p class="a">관리자가 아직 그 학생 사진을 올리지 않았을 수 있습니다. 사진 없이도
+              기록은 정상적으로 저장됩니다.</p>
+          </div>
+        </div>
+      </section>
+    </article>
+  </main>
+</div>
+
+<script>
+(function(){
+  var docs = {
+    admin: document.getElementById('doc-admin'),
+    teacher: document.getElementById('doc-teacher'),
+  };
+  var tabs = {
+    admin: document.getElementById('tabAdmin'),
+    teacher: document.getElementById('tabTeacher'),
+  };
+  var toc = document.getElementById('toc');
+  var observer = null;
+
+  function buildToc(role){
+    toc.innerHTML = '';
+    var heads = docs[role].querySelectorAll('h2, h3');
+    heads.forEach(function(h){
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      a.className = h.tagName === 'H2' ? 'toc-h2' : 'toc-h3';
+      a.addEventListener('click', function(evt){
+        evt.preventDefault();
+        h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + h.id);
+      });
+      toc.appendChild(a);
+    });
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = toc.querySelector('a[href="#' + entry.target.id + '"]');
+        if (!link) return;
+        if (entry.isIntersecting) {
+          toc.querySelectorAll('a.is-active').forEach(function(l){ l.classList.remove('is-active'); });
+          link.classList.add('is-active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    heads.forEach(function(h){ observer.observe(h); });
+  }
+
+  function setRole(role){
+    Object.keys(docs).forEach(function(key){
+      docs[key].classList.toggle('is-hidden', key !== role);
+      tabs[key].setAttribute('aria-pressed', String(key === role));
+    });
+    document.body.classList.toggle('role-teacher', role === 'teacher');
+    document.body.classList.toggle('role-admin', role === 'admin');
+    buildToc(role);
+    window.scrollTo({ top: 0 });
+  }
+
+  tabs.admin.addEventListener('click', function(){ setRole('admin'); });
+  tabs.teacher.addEventListener('click', function(){ setRole('teacher'); });
+  document.querySelectorAll('[data-switch-to]').forEach(function(btn){
+    btn.addEventListener('click', function(){ setRole(btn.getAttribute('data-switch-to')); });
+  });
+
+  setRole('admin');
+})();
+</script>
+</body>
+</html>

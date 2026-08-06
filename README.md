@@ -12,6 +12,9 @@
 
 - 관리자(학생 명단·담당 승인 관리): [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
 - 교사(학생 활동 기록): [USER_GUIDE.md](USER_GUIDE.md)
+- 위 둘을 목차·검색이 있는 한 페이지로 묶은 브라우저용 버전: [GUIDE.html](GUIDE.html)
+  (파일을 내려받아 열거나, GitHub Pages를 켰다면 그 주소로 바로 연다. GitHub의
+  저장소 화면에서 파일을 클릭하면 렌더링 없이 소스가 보인다 — 정상이다)
 
 ## 상태
 

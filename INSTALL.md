@@ -147,6 +147,7 @@ clasp을 쓰지 않으려면 [script.google.com](https://script.google.com)에�
 
 - 관리자: [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
 - 교사: [USER_GUIDE.md](USER_GUIDE.md)
+- 브라우저용 통합본: [GUIDE.html](GUIDE.html)
 
 ## 코드 검사
 
