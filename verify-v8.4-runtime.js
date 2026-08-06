@@ -66,6 +66,9 @@ const app = loadAppsScript(
     'CENTRAL_STUDENT_HEADERS', 'RECORD_HEADERS', 'PERSONAL_RECORD_HEADERS',
   ],
 );
+// formatDateTime_ 이 부르는데 빈 Session·Utilities 스텁에는 없다.
+app.Session.getScriptTimeZone = () => 'Asia/Seoul';
+app.Utilities.formatDate = (date) => date.toISOString();
 
 // 머리글 1행 + 자료 행으로 이루어진 시트 흉내. getRange 좌표는 1부터 센다.
 function fakeSheet(headers, rows) {
@@ -988,6 +991,66 @@ test(43, '업데이트 확인은 관리자 화면에서만 하고 실패해도 �
   );
 });
 
+// --- 신청 이력의 현재 상태 --------------------------------------------------
+
+function storedRequest(overrides) {
+  return Object.assign({
+    requestKey: 'REQ-1',
+    teacherEmail: 'kim@school.hs.kr',
+    schoolYear: 2026,
+    grade: 2,
+    classNumber: 3,
+    subject: '문학',
+    assignmentType: '교과',
+    groupName: '',
+    status: 'APPROVED',
+    requestedAt: new Date().toISOString(),
+    processedAt: '',
+    processedBy: '',
+    reason: '',
+    assignmentKey: 'A-1',
+  }, overrides || {});
+}
+
+function liveAssignment(overrides) {
+  return Object.assign({
+    assignmentKey: 'A-1', teacherEmail: 'kim@school.hs.kr', active: true,
+  }, overrides || {});
+}
+
+test(44, '관리자가 담당을 삭제하면 신청 이력에 삭제됨이 붙는다', () => {
+  const label = app.toPublicAssignmentRequest_(storedRequest(), false, []).statusLabel;
+  assert(label === '승인 · 삭제됨', `삭제된 담당인데 라벨이 '${label}'입니다.`);
+});
+
+test(45, '관리자가 담당을 비활성화하면 신청 이력에 비활성화됨이 붙는다', () => {
+  const label = app.toPublicAssignmentRequest_(
+    storedRequest(), false, [liveAssignment({ active: false })],
+  ).statusLabel;
+  assert(label === '승인 · 비활성화됨', `비활성 담당인데 라벨이 '${label}'입니다.`);
+});
+
+test(46, '담당이 살아 있으면 신청 이력 라벨을 그대로 둔다', () => {
+  const label = app.toPublicAssignmentRequest_(
+    storedRequest(), false, [liveAssignment()],
+  ).statusLabel;
+  assert(label === '승인', `살아 있는 담당인데 라벨이 '${label}'입니다.`);
+});
+
+test(47, '다른 교사의 같은 담당키는 내 상태 판정에 섞이지 않는다', () => {
+  const label = app.toPublicAssignmentRequest_(
+    storedRequest(), false, [liveAssignment({ teacherEmail: 'other@school.hs.kr' })],
+  ).statusLabel;
+  assert(label === '승인 · 삭제됨', '다른 교사의 담당을 내 것으로 착각합니다.');
+});
+
+test(48, '대기·거부 신청은 현재 상태를 확인하지 않는다', () => {
+  const label = app.toPublicAssignmentRequest_(
+    storedRequest({ status: 'PENDING', assignmentKey: '' }), false, [],
+  ).statusLabel;
+  assert(label === '승인 대기', `대기 신청인데 라벨이 '${label}'입니다.`);
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1000,7 +1063,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 43) {
-  console.error(`FAIL expected 43 tests, got ${tests.length}`);
+if (tests.length !== 48) {
+  console.error(`FAIL expected 48 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

@@ -1672,7 +1672,7 @@
         const requests = await callServer('getMyAssignmentRequests');
         $('myAssignmentRequestRows').innerHTML = requests.map(request => `<div class="record">
           <div class="row between">
-            <strong>${request.schoolYear}학년도 ${request.grade}학년 ${request.classNumber}반 ${escapeHtml(request.subject)}</strong>
+            <strong>${request.schoolYear}학년도 ${request.grade}학년 ${escapeHtml(request.target)} ${escapeHtml(request.subject)}</strong>
             <span class="badge">${escapeHtml(request.statusLabel)}</span>
           </div>
           <div class="small muted">신청 ${escapeHtml(request.requestedAt || '')}${request.reason ? ` · 사유: ${escapeHtml(request.reason)}` : ''}</div>

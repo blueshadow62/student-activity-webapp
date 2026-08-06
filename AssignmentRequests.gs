@@ -183,10 +183,15 @@ function notifyAdminsOfNewAssignmentRequest_(teacherEmail, createdRequests) {
 
 function getMyAssignmentRequests() {
   const teacherEmail = getRequiredActiveUserEmail_();
+  // 신청 이력의 '승인'은 그때 승인됐다는 감사 기록이라 관리자가 나중에 담당을
+  // 삭제·비활성화해도 저장된 status 는 바뀌지 않는다. 그대로 두면 교사가 지금도
+  // 그 수업에 접근할 수 있다고 착각한다. 그래서 화면에 보여줄 때만 지금 그
+  // 담당이 실제로 살아 있는지 함께 확인한다.
+  const assignments = readCentralTeacherAssignmentsCached_(true);
   return readStoredAssignmentRequestsForUser_(teacherEmail)
     .slice(0, CENTRAL_ASSIGNMENT_REQUEST_CONFIG.maxResults)
     .map(function (request) {
-      return toPublicAssignmentRequest_(request, false);
+      return toPublicAssignmentRequest_(request, false, assignments);
     });
 }
 
@@ -605,12 +610,23 @@ function buildCentralAssignmentRequestRow_(request) {
   ];
 }
 
-function toPublicAssignmentRequest_(request, includeTeacherEmail) {
+function toPublicAssignmentRequest_(request, includeTeacherEmail, currentAssignments) {
   const assignmentType = String(request.assignmentType || '').trim()
     === CENTRAL_ASSIGNMENT_TYPES.group
     ? CENTRAL_ASSIGNMENT_TYPES.group
     : CENTRAL_ASSIGNMENT_TYPES.subject;
   const groupName = String(request.groupName || '');
+  let statusLabel = assignmentRequestStatusLabel_(request.status);
+  // currentAssignments 가 주어졌을 때만 확인한다(교사 본인 화면에서만 쓴다).
+  // 승인 당시 기록은 감사 이력이라 바꾸지 않고, 화면에 붙는 문구만 지금 상태로
+  // 보정한다.
+  if (currentAssignments && request.status === CENTRAL_ASSIGNMENT_REQUEST_STATUS.approved) {
+    const state = myAssignmentRequestCurrentState_(
+      request.assignmentKey, request.teacherEmail, currentAssignments
+    );
+    if (state === 'DELETED') statusLabel += ' · 삭제됨';
+    else if (state === 'INACTIVE') statusLabel += ' · 비활성화됨';
+  }
   const result = {
     requestKey: request.requestKey,
     schoolYear: Number(request.schoolYear),
@@ -625,7 +641,7 @@ function toPublicAssignmentRequest_(request, includeTeacherEmail) {
       ? groupName
       : `${Number(request.classNumber)}반`,
     status: String(request.status || ''),
-    statusLabel: assignmentRequestStatusLabel_(request.status),
+    statusLabel: statusLabel,
     requestedAt: formatDateTime_(assignmentRequestDate_(request.requestedAt), ''),
     processedAt: request.processedAt
       ? formatDateTime_(assignmentRequestDate_(request.processedAt), '') : '',
@@ -633,6 +649,19 @@ function toPublicAssignmentRequest_(request, includeTeacherEmail) {
   };
   if (includeTeacherEmail) result.teacherEmail = request.teacherEmail;
   return result;
+}
+
+// assignmentKey 가 교사담당 시트에서 아예 사라졌으면(관리자 삭제) DELETED,
+// 남아 있는데 사용이 꺼져 있으면(비활성화·해지) INACTIVE, 그대로 켜져
+// 있으면 ACTIVE 다.
+function myAssignmentRequestCurrentState_(assignmentKey, teacherEmail, assignments) {
+  const key = String(assignmentKey || '').trim();
+  if (!key) return 'ACTIVE';
+  const found = assignments.find(function (assignment) {
+    return assignment.assignmentKey === key && assignment.teacherEmail === teacherEmail;
+  });
+  if (!found) return 'DELETED';
+  return found.active ? 'ACTIVE' : 'INACTIVE';
 }
 
 // 알림 메일과 화면이 같은 문구를 쓰게 한 곳에 모은다. 그룹 신청은 반이 0이라

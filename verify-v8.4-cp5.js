@@ -1117,6 +1117,27 @@ test(76, '빈 CSV 양식과 내보내기가 같은 열을 쓴다', () => {
   assertAdminGuardIn_('getCentralRosterCsvTemplate');
 });
 
+test(77, '내 담당 신청 내역이 그룹 신청을 0반으로 보여주지 않는다', () => {
+  const body = functionBody(html, 'loadMyAssignmentRequests');
+  assert(
+    body.includes('request.target'),
+    '수강 그룹 신청이 목록에서 0반으로 표시됩니다.',
+  );
+});
+
+test(78, '신청 이력이 담당 삭제·비활성화 상태를 함께 확인한다', () => {
+  const body = functionBody(requests, 'getMyAssignmentRequests');
+  assert(
+    body.includes('readCentralTeacherAssignmentsCached_(true)'),
+    '신청 이력을 지금 살아 있는 담당과 대조하지 않습니다.',
+  );
+  const publicBody = functionBody(requests, 'toPublicAssignmentRequest_');
+  assert(
+    publicBody.includes('myAssignmentRequestCurrentState_'),
+    '신청 이력 라벨이 삭제·비활성화 상태를 반영하지 않습니다.',
+  );
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1136,7 +1157,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 76) {
-  console.error(`FAIL expected 76 tests, got ${tests.length}`);
+if (tests.length !== 78) {
+  console.error(`FAIL expected 78 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
