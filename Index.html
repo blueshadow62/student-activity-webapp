@@ -220,6 +220,7 @@
         <div id="modeLabel" class="mode">접속 확인 중</div>
         <div id="userEmailLabel" class="small muted hidden"></div>
         <div id="versionLabel" class="small muted hidden"></div>
+        <div id="pcRecommendLabel" class="small muted hidden">학교 관리는 PC 환경을 추천합니다.</div>
       </div>
       <div class="row">
         <button id="toPersonalButton" class="secondary hidden">개인 이용자 모드로 전환</button>
@@ -736,8 +737,8 @@
       const userEmail = String(
         state.bootstrap && state.bootstrap.userEmail || ''
       ).trim();
-      $('appTitle').textContent = schoolName
-        ? `${schoolName} 학생 활동 기록` : '학생 활동 기록';
+      $('appTitle').innerHTML = schoolName
+        ? `${escapeHtml(schoolName)}<br>학생 활동 기록` : '학생 활동 기록';
       $('userEmailLabel').textContent = userEmail ? `접속 계정: ${userEmail}` : '';
       $('userEmailLabel').classList.toggle('hidden', !userEmail);
       const version = String(state.bootstrap && state.bootstrap.version || '').trim();
@@ -745,6 +746,7 @@
       $('versionLabel').classList.toggle('hidden', !version);
       $('toPersonalButton').classList.toggle('hidden', !(state.role === 'ADMIN' && state.mode === 'ADMIN_PORTAL'));
       $('toAdminButton').classList.toggle('hidden', !(state.role === 'ADMIN' && state.mode === 'PERSONAL_USER'));
+      $('pcRecommendLabel').classList.toggle('hidden', state.mode !== 'ADMIN_PORTAL');
       if (state.mode === 'INSTALLATION') {
         renderInstallation(state.bootstrap.installation);
         return;
