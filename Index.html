@@ -61,8 +61,9 @@
     @media (max-width:720px){
       .roster{grid-template-columns:1fr}
       .roster-actions{flex-direction:row;justify-content:center;padding-top:0}
-      .tabs{display:grid;grid-template-columns:repeat(2,1fr);overflow:visible}
-      .tab{width:100%;text-align:center;padding:9px 6px}
+      .tabs{gap:4px;overflow:visible}
+      .tab{flex:1 1 0;padding:9px 4px;font-size:13px;text-align:center;
+        overflow:hidden;text-overflow:ellipsis}
     }
     label{display:block;font-weight:700;color:var(--ink-soft);margin-bottom:6px;font-size:13px}
     input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;
