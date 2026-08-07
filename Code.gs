@@ -108,7 +108,9 @@ function getAppBootstrapState(requestedMode) {
       '관리자 권한이 필요한 화면입니다.'
     );
   }
-  if (role === 'ADMIN' && requested !== 'PERSONAL_USER') {
+  // 모바일 우선 앱이라 관리자도 첫 진입은 개인 이용자 화면으로 보낸다.
+  // 관리자 포털은 명시적으로 요청했을 때만 연다.
+  if (role === 'ADMIN' && requested === 'ADMIN_PORTAL') {
     return {
       version: APP_CONFIG.version,
       role: role,

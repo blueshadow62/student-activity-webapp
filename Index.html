@@ -528,8 +528,9 @@
       bindEvents();
       let requestedMode = '';
       try {
-        if (sessionStorage.getItem('student-activity:last-mode') === 'PERSONAL_USER') {
-          requestedMode = 'PERSONAL_USER';
+        const lastMode = sessionStorage.getItem('student-activity:last-mode');
+        if (lastMode === 'PERSONAL_USER' || lastMode === 'ADMIN_PORTAL') {
+          requestedMode = lastMode;
         }
       } catch (error) {
         // 브라우저 저장소를 사용할 수 없으면 서버 기본 모드로 시작한다.
@@ -665,8 +666,8 @@
         state.role = bootstrap.role;
         state.mode = bootstrap.mode;
         try {
-          if (state.role === 'ADMIN' && state.mode === 'PERSONAL_USER') {
-            sessionStorage.setItem('student-activity:last-mode', 'PERSONAL_USER');
+          if (state.role === 'ADMIN' && (state.mode === 'PERSONAL_USER' || state.mode === 'ADMIN_PORTAL')) {
+            sessionStorage.setItem('student-activity:last-mode', state.mode);
           } else {
             sessionStorage.removeItem('student-activity:last-mode');
           }

@@ -183,9 +183,12 @@ test(7, '일반 사용자 관리자 함수 호출 차단', () => {
   assert(blocked, '일반 사용자의 관리자 호출이 차단되지 않았습니다.');
 });
 test(8, '관리자 함수마다 requireAdmin_ 적용', () => adminFunctions.forEach(([name, file]) => assertAdminGuard(name, file)));
-test(9, '관리자는 관리자 포털 기본 진입', () => {
+test(9, '관리자 포털은 명시적 요청이 있어야 진입', () => {
   const body = functionBody(sources['Code.gs'], 'getAppBootstrapState');
-  assert(has(body, "role === 'ADMIN'") && has(body, "mode: 'ADMIN_PORTAL'"), '관리자 기본 모드가 아닙니다.');
+  assert(
+    has(body, "role === 'ADMIN' && requested === 'ADMIN_PORTAL'") && has(body, "mode: 'ADMIN_PORTAL'"),
+    '관리자 포털 진입이 명시 요청 조건에 걸려 있지 않습니다.'
+  );
   assert(
     has(body, 'const userEmail = getRequiredActiveUserEmail_()')
       && has(body, "const role = isAdminEmail_(userEmail) ? 'ADMIN' : 'USER'")
@@ -204,16 +207,16 @@ test(9, '관리자는 관리자 포털 기본 진입', () => {
 test(10, '일반 사용자는 개인 포털 기본 진입', () => {
   assert(has(functionBody(sources['Code.gs'], 'buildPersonalModeBootstrap_'), "mode: 'PERSONAL_USER'"), '개인 포털 반환이 없습니다.');
 });
-test(11, '관리자 개인 모드 전환·새로고침 유지·공통 진행 표시', () => {
+test(11, '관리자 모드 전환·새로고침 유지·공통 진행 표시', () => {
   const loadBody = functionBody(clientCode, 'loadApp');
-  assert(has(functionBody(sources['Code.gs'], 'getAppBootstrapState'), "requested !== 'PERSONAL_USER'"), '관리자 개인 모드가 없습니다.');
-  assert(has(html, '개인 이용자 모드로 전환'), '전환 버튼이 없습니다.');
+  assert(has(functionBody(sources['Code.gs'], 'getAppBootstrapState'), "requested === 'ADMIN_PORTAL'"), '관리자 포털 명시 요청 분기가 없습니다.');
+  assert(has(html, '개인 이용자 모드로 전환') && has(html, '관리자 모드로 돌아가기'), '전환 버튼이 없습니다.');
   assert(
     has(clientCode, "sessionStorage.getItem('student-activity:last-mode')")
-      && has(loadBody, "state.role === 'ADMIN' && state.mode === 'PERSONAL_USER'")
-      && has(loadBody, "sessionStorage.setItem('student-activity:last-mode', 'PERSONAL_USER')")
+      && has(loadBody, "state.role === 'ADMIN' && (state.mode === 'PERSONAL_USER' || state.mode === 'ADMIN_PORTAL')")
+      && has(loadBody, "sessionStorage.setItem('student-activity:last-mode', state.mode)")
       && has(loadBody, "sessionStorage.removeItem('student-activity:last-mode')"),
-    '관리자 개인 이용자 모드가 새로고침 후 유지되지 않습니다.'
+    '관리자가 고른 모드가 새로고침 후 유지되지 않습니다.'
   );
   assert(
     has(html, '처리 중입니다.')

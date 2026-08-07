@@ -1214,6 +1214,46 @@ test(57, '추가 학년 칸이 없는 기존 학교의 수강그룹 시트도 �
   );
 });
 
+// --- 관리자 기본 진입 화면 ---------------------------------------------------
+
+// getAppBootstrapState 는 설치 상태·계정 조회·관리자 대시보드까지 여러 실제
+// 함수를 부른다. 여기서 확인하려는 건 모드 분기 하나뿐이라 나머지는 갈아 끼운다.
+function withAdminBootstrapDeps(dashboard, run) {
+  const original = {
+    getSchoolInstallationState_: app.getSchoolInstallationState_,
+    getRequiredActiveUserEmail_: app.getRequiredActiveUserEmail_,
+    isAdminEmail_: app.isAdminEmail_,
+    buildAdminDashboard_: app.buildAdminDashboard_,
+    buildPersonalModeBootstrap_: app.buildPersonalModeBootstrap_,
+  };
+  app.getSchoolInstallationState_ = () => ({ ready: true, schoolName: '테스트고' });
+  app.getRequiredActiveUserEmail_ = () => 'admin@school.hs.kr';
+  app.isAdminEmail_ = () => true;
+  app.buildAdminDashboard_ = dashboard;
+  app.buildPersonalModeBootstrap_ = (role) => ({ mode: 'PERSONAL_USER', role });
+  try {
+    return run();
+  } finally {
+    Object.assign(app, original);
+  }
+}
+
+test(58, '관리자가 모드를 지정하지 않으면 개인 이용자 화면으로 간다', () => {
+  const result = withAdminBootstrapDeps(
+    () => { throw new Error('관리자 포털이 기본으로 열리면 안 됩니다'); },
+    () => app.getAppBootstrapState(''),
+  );
+  assert(result.mode === 'PERSONAL_USER', '모드 미지정 관리자 접속이 개인 이용자 화면으로 가지 않습니다.');
+});
+
+test(59, '관리자가 관리자 포털을 명시적으로 요청하면 그대로 연다', () => {
+  const result = withAdminBootstrapDeps(
+    () => ({ studentCount: 0 }),
+    () => app.getAppBootstrapState('ADMIN_PORTAL'),
+  );
+  assert(result.mode === 'ADMIN_PORTAL', '명시적으로 요청한 관리자 포털이 열리지 않습니다.');
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1226,7 +1266,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 57) {
-  console.error(`FAIL expected 57 tests, got ${tests.length}`);
+if (tests.length !== 59) {
+  console.error(`FAIL expected 59 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
