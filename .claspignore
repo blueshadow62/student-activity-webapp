@@ -2,3 +2,5 @@
 verify-*.js
 .clasp.json
 GUIDE.html
+scripts/**
+.github/**
