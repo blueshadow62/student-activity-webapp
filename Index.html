@@ -201,10 +201,14 @@
       .loading-progress-bar{width:100%}
       .primary,.secondary,.danger,.ghost,.student{transition:none}}
     /* 학생 카드는 폭이 고정이라 auto-fill 이 화면 폭에 맞춰 열 수를 스스로
-       정한다. 화면 크기별로 열 수나 사진 크기를 따로 지정하지 않는다. */
+       정한다. 좁은 화면에서는 카드 폭·좌우 여백만 줄여 한 줄에 2개 대신
+       3개가 들어오게 한다. */
     @media(max-width:760px){.grid-3,.grid-4{grid-template-columns:1fr 1fr}main{padding:12px}
       header{padding:12px}
-      th,td{padding:9px 10px}}
+      th,td{padding:9px 10px}
+      .students{grid-template-columns:repeat(auto-fill,92px);gap:6px}
+      .student{padding:10px 3px}
+      .students.photos-off .student{padding:9px 3px;gap:3px}}
     @media(max-width:430px){.grid-3,.grid-4{grid-template-columns:1fr}}
   </style>
 </head>
