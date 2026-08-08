@@ -1183,6 +1183,46 @@ test(81, '추가 학년 칸은 기존 4칸 수강그룹 시트 검증을 넓히�
   assert(count === 4, `CENTRAL_GROUP_HEADERS 가 ${count}칸입니다. 4칸이어야 기존 학교 시트가 계속 유효합니다.`);
 });
 
+test(82, '담당 신청 폼에 이름 입력 칸이 있다', () => {
+  assert(html.includes('id="requestTeacherName"'), '이름 입력 칸이 없습니다.');
+  assert(
+    functionBody(html, 'submitAssignmentRequest').includes('requestTeacherName'),
+    '신청 제출이 이름 입력값을 서버로 보내지 않습니다.',
+  );
+  assert(
+    functionBody(requests, 'submitMyAssignmentRequest').includes('normalizeAssignmentRequestTeacherName_'),
+    '서버가 이름을 검증하지 않습니다.',
+  );
+});
+
+test(83, '관리자 신청 목록에 교사 이름이 표시된다', () => {
+  assert(
+    functionBody(html, 'loadAssignments').includes('request.teacherName'),
+    '관리자 화면이 교사 이름을 표시하지 않습니다.',
+  );
+  assert(
+    functionBody(requests, 'toPublicAssignmentRequest_').includes('teacherName'),
+    '서버가 관리자 조회에 이름을 포함하지 않습니다.',
+  );
+});
+
+test(84, '담당 신청 알림 켜고 끄기 함수에 관리자 권한 검사가 있다', () => {
+  ['getAssignmentRequestNotifyPolicy', 'saveAssignmentRequestNotifyPolicy'].forEach((name) => {
+    assert(
+      /^\s*requireAdmin_\(\);/.test(functionBody(requests, name)),
+      `${name} 함수 시작 부분에 requireAdmin_()가 없습니다.`,
+    );
+  });
+});
+
+test(85, '담당 신청 알림 켜고 끄기가 클라이언트 요청 표에 등록되어 있다', () => {
+  assert(
+    html.includes('getAssignmentRequestNotifyPolicy:() =>')
+      && html.includes('saveAssignmentRequestNotifyPolicy:() =>'),
+    '새 서버 함수가 callServer 요청 표에 없어 호출할 수 없습니다.',
+  );
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1202,7 +1242,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 81) {
-  console.error(`FAIL expected 81 tests, got ${tests.length}`);
+if (tests.length !== 85) {
+  console.error(`FAIL expected 85 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

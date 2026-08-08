@@ -11,16 +11,36 @@ const CENTRAL_ASSIGNMENT_REQUEST_STATUS = Object.freeze({
 const CENTRAL_ASSIGNMENT_REQUEST_CONFIG = Object.freeze({
   propertyPrefix: 'ASSIGNMENT_REQUESTS_',
   allowedTeacherEmailsProperty: 'ALLOWED_TEACHER_EMAILS',
+  notifyAdminsProperty: 'ASSIGNMENT_REQUEST_NOTIFY_ADMINS',
   maxResults: 500,
   maxRequestsPerUser: 50,
   maxProcessedRetained: 10,
   maxReasonLength: 200,
+  maxTeacherNameLength: 50,
 });
+
+// 이메일만으로는 관리자가 승인 화면에서 누구인지 바로 알아보기 어렵다.
+// 신청마다 이름을 받아 관리자 화면·알림 메일에 함께 보여준다. 이미 저장된
+// 옛 신청에는 이 값이 없을 수 있으므로 조회 쪽(isValidStoredAssignmentRequest_)
+// 에서는 필수로 두지 않는다 — 새로 신청할 때만 강제한다.
+function normalizeAssignmentRequestTeacherName_(value) {
+  const name = String(value || '').trim();
+  if (!name) {
+    throw new Error('이름을 입력해 주세요.');
+  }
+  if (name.length > CENTRAL_ASSIGNMENT_REQUEST_CONFIG.maxTeacherNameLength) {
+    throw new Error(
+      `이름은 ${CENTRAL_ASSIGNMENT_REQUEST_CONFIG.maxTeacherNameLength}자 이내로 입력해 주세요.`
+    );
+  }
+  return name;
+}
 
 function submitMyAssignmentRequest(payload) {
   const teacherEmail = getRequiredActiveUserEmail_();
   requireAllowedTeacherEmail_(teacherEmail);
   const value = payload || {};
+  const teacherName = normalizeAssignmentRequestTeacherName_(value.teacherName);
   const requestType = normalizeAssignmentRequestType_(value);
   const classNumbers = requestType.classNumbers;
   const result = withCentralWriteLock_(function () {
@@ -82,6 +102,7 @@ function submitMyAssignmentRequest(payload) {
       return {
         requestKey: Utilities.getUuid(),
         teacherEmail: teacherEmail,
+        teacherName: teacherName,
         schoolYear: normalized.schoolYear,
         grade: normalized.grade,
         classNumber: normalized.classNumber,
@@ -168,18 +189,48 @@ function cancelAssignmentRequestsBatch(requestKeys) {
 }
 
 // 메일 발송 실패가 신청 처리 자체를 막지 않도록 쓰기 잠금 밖에서 보내고,
-// notifyTeacherByEmail_ 이 개별 실패를 조용히 흡수한다.
+// notifyTeacherByEmail_ 이 개별 실패를 조용히 흡수한다. 관리자가 교사 관리
+// 탭에서 이 알림을 꺼 두면 신청 자체는 그대로 접수하되 메일만 보내지 않는다
+// (신청 이력·승인 절차에는 영향이 없다).
 function notifyAdminsOfNewAssignmentRequest_(teacherEmail, createdRequests) {
   if (!createdRequests.length) return;
+  if (!isAssignmentRequestAdminNotifyEnabled_()) return;
   const adminEmails = getCentralConfiguration_().adminEmails;
   if (!adminEmails.length) return;
+  const teacherName = createdRequests[0].teacherName || '';
   const lines = createdRequests.map(function (request) {
     return `- ${assignmentRequestLabel_(request)}`;
   });
-  const body = `${teacherEmail} 님이 아래 담당 수업 승인을 신청했습니다.\n\n${lines.join('\n')}\n\n관리자 포털의 교사 담당 탭에서 승인·거부할 수 있습니다.`;
+  const who = teacherName ? `${teacherName}(${teacherEmail})` : teacherEmail;
+  const body = `${who} 님이 아래 담당 수업 승인을 신청했습니다.\n\n${lines.join('\n')}\n\n관리자 포털의 교사 담당 탭에서 승인·거부할 수 있습니다.`;
   adminEmails.forEach(function (email) {
     notifyTeacherByEmail_(email, '[학생 활동 기록 웹앱] 담당 수업 승인 신청 안내', body);
   });
+}
+
+// 기본값은 켜짐이다. 이미 배포된 학교는 이 속성이 없는데, 없다고 알림을
+// 끄면 관리자가 알아채지 못한 채 조용히 신청을 놓치게 된다.
+function isAssignmentRequestAdminNotifyEnabled_() {
+  return PropertiesService.getScriptProperties().getProperty(
+    CENTRAL_ASSIGNMENT_REQUEST_CONFIG.notifyAdminsProperty
+  ) !== 'false';
+}
+
+function getAssignmentRequestNotifyPolicy() {
+  requireAdmin_();
+  return { enabled: isAssignmentRequestAdminNotifyEnabled_() };
+}
+
+// requireAllowedTeacherEmail_ 과 마찬가지로 검사 자체(isAssignmentRequestAdminNotifyEnabled_)
+// 와 그 값을 관리자 화면에서 채우는 함수를 분리한다.
+function saveAssignmentRequestNotifyPolicy(payload) {
+  requireAdmin_();
+  const enabled = Boolean(payload && payload.enabled);
+  PropertiesService.getScriptProperties().setProperty(
+    CENTRAL_ASSIGNMENT_REQUEST_CONFIG.notifyAdminsProperty,
+    enabled ? 'true' : 'false'
+  );
+  return { ok: true, enabled: enabled };
 }
 
 function getMyAssignmentRequests() {
@@ -667,7 +718,10 @@ function toPublicAssignmentRequest_(request, includeTeacherEmail, currentAssignm
       ? formatDateTime_(assignmentRequestDate_(request.processedAt), '') : '',
     reason: request.reason || '',
   };
-  if (includeTeacherEmail) result.teacherEmail = request.teacherEmail;
+  if (includeTeacherEmail) {
+    result.teacherEmail = request.teacherEmail;
+    result.teacherName = request.teacherName || '';
+  }
   return result;
 }
 

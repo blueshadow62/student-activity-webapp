@@ -377,6 +377,13 @@
             <p class="small muted" style="margin-top:8px">교사들이 개인 Gmail로 로그인한다면 켜지 마세요. 전원 신청이 막힙니다. 잘못 켜도 관리자 화면은 그대로 열리므로 여기서 다시 끌 수 있습니다.</p>
             <p id="assignmentPolicyHint" class="small muted"></p>
           </div>
+          <div class="card">
+            <div class="row between"><h2>담당 신청 알림</h2>
+              <button id="saveAssignmentNotifyButton" class="primary">저장</button></div>
+            <label class="policy-option"><input id="assignmentNotifyEnabled" type="checkbox" checked>
+              <span>새 담당 신청이 들어오면 관리자 이메일로 알립니다.</span></label>
+            <p class="small muted">꺼도 신청 자체는 그대로 접수되고 이 탭에 그대로 쌓입니다 — 메일만 안 갑니다.</p>
+          </div>
         </div>
       </section>
 
@@ -406,6 +413,7 @@
             </div>
             <p class="muted">담당 학년·과목을 입력하고, 여러 반은 쉼표로 구분하세요. 학급 단위로 수업하지 않는 과목은 수강 그룹으로 신청한 뒤 승인 후 학생을 직접 편성합니다. 관리자가 승인하기 전에는 학생 자료가 표시되지 않습니다.</p>
             <div class="grid grid-4">
+              <div><label for="requestTeacherName">이름</label><input id="requestTeacherName" maxlength="50" placeholder="예: 홍길동"></div>
               <div><label for="requestAssignmentType">담당 유형</label><select id="requestAssignmentType"><option value="교과">학급 단위</option><option value="그룹">수강 그룹</option></select></div>
               <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
               <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
@@ -623,6 +631,15 @@
           await showAlert(restricted
             ? '허용 범위를 저장했습니다. 목록 밖 계정은 이제 담당 신청을 할 수 없습니다.'
             : '제한을 껐습니다. 로그인한 Google 계정 누구나 담당 신청을 할 수 있습니다.');
+        });
+      });
+      $('saveAssignmentNotifyButton').addEventListener('click', async () => {
+        const enabled = $('assignmentNotifyEnabled').checked;
+        await runAction(async () => {
+          await callServer('saveAssignmentRequestNotifyPolicy', { enabled: enabled });
+          await showAlert(enabled
+            ? '새 담당 신청 알림을 켰습니다.'
+            : '새 담당 신청 알림을 껐습니다. 신청은 그대로 접수됩니다.');
         });
       });
       $('refreshMyAssignmentRequestsButton').addEventListener('click', () => loadApp(state.mode));
@@ -1194,18 +1211,20 @@
 
     async function loadAssignments() {
       await runAction(async () => {
-        const [assignments, requests, approvedTeachers, policy] = await Promise.all([
+        const [assignments, requests, approvedTeachers, policy, notifyPolicy] = await Promise.all([
           callServer('getAdminTeacherAssignments', {}),
           callServer('getAdminAssignmentRequests', {}),
           callServer('getApprovedTeachers'),
           callServer('getAssignmentRequestPolicy'),
+          callServer('getAssignmentRequestNotifyPolicy'),
         ]);
         renderAssignmentPolicy_(policy);
+        $('assignmentNotifyEnabled').checked = notifyPolicy.enabled;
         $('assignmentCount').textContent = assignments.length;
         renderTeacherAssignmentGroups_(assignments, approvedTeachers);
         $('assignmentRequestRows').innerHTML = requests.map(request => `<tr>
           <td>${request.status === 'PENDING' ? `<input type="checkbox" data-assignment-request="${escapeHtml(request.requestKey)}" aria-label="담당 신청 선택">` : ''}</td>
-          <td>${escapeHtml(request.teacherEmail)}</td><td>${request.schoolYear}</td>
+          <td>${request.teacherName ? `${escapeHtml(request.teacherName)} · ` : ''}${escapeHtml(request.teacherEmail)}</td><td>${request.schoolYear}</td>
           <td>${request.grade}학년 ${escapeHtml(request.target || `${request.classNumber}반`)}</td><td>${escapeHtml(request.subject)}</td>
           <td>${escapeHtml(request.statusLabel)}</td><td>${request.status === 'PENDING'
             ? `<button class="secondary" data-approve-request="${escapeHtml(request.requestKey)}">승인</button>
@@ -1662,6 +1681,7 @@
     async function submitAssignmentRequest() {
       const isGroup = $('requestAssignmentType').value === '그룹';
       const payload = {
+        teacherName: $('requestTeacherName').value,
         assignmentType: isGroup ? '그룹' : '교과',
         groupName: isGroup ? $('requestGroupName').value : '',
         schoolYear:$('requestSchoolYear').value,
@@ -2556,6 +2576,8 @@
           saveTeacherAssignmentsBatch:() => runner.saveTeacherAssignmentsBatch(args[0]),
           setTeacherAssignmentActive:() => runner.setTeacherAssignmentActive(args[0],args[1]),
           getAssignmentRequestPolicy:() => runner.getAssignmentRequestPolicy(),
+          getAssignmentRequestNotifyPolicy:() => runner.getAssignmentRequestNotifyPolicy(),
+          saveAssignmentRequestNotifyPolicy:() => runner.saveAssignmentRequestNotifyPolicy(args[0]),
           getCentralRosterCsvTemplate:() => runner.getCentralRosterCsvTemplate(),
           getSchoolYearTransition:() => runner.getSchoolYearTransition(),
           runSchoolYearTransition:() => runner.runSchoolYearTransition(args[0]),

@@ -1254,6 +1254,102 @@ test(59, '관리자가 관리자 포털을 명시적으로 요청하면 그대�
   assert(result.mode === 'ADMIN_PORTAL', '명시적으로 요청한 관리자 포털이 열리지 않습니다.');
 });
 
+// --- 담당 신청 교사 이름 / 관리자 알림 켜고 끄기 ------------------------------
+
+test(60, '담당 신청 이름이 비어 있으면 거부한다', () => {
+  let rejected = false;
+  try {
+    app.normalizeAssignmentRequestTeacherName_('   ');
+  } catch (error) {
+    rejected = /이름/.test(error.message);
+  }
+  assert(rejected, '빈 이름을 그대로 통과시킵니다.');
+});
+
+test(61, '담당 신청 이름은 앞뒤 공백을 지우고 길이 제한을 둔다', () => {
+  assert(
+    app.normalizeAssignmentRequestTeacherName_('  홍길동  ') === '홍길동',
+    '이름의 앞뒤 공백을 지우지 않습니다.',
+  );
+  let rejected = false;
+  try {
+    app.normalizeAssignmentRequestTeacherName_('가'.repeat(51));
+  } catch (error) {
+    rejected = true;
+  }
+  assert(rejected, '51자 이름을 그대로 통과시킵니다.');
+});
+
+test(62, '관리자용 신청 조회에 교사 이름이 함께 담긴다', () => {
+  const request = {
+    requestKey: 'REQ-1', schoolYear: 2026, grade: 2, classNumber: 3,
+    subject: '물리학Ⅰ', assignmentType: '교과', groupName: '', status: 'PENDING',
+    requestedAt: new Date('2026-03-01T00:00:00Z').toISOString(), processedAt: '',
+    reason: '', teacherEmail: 'teacher@school.hs.kr', teacherName: '홍길동',
+  };
+  const publicView = app.toPublicAssignmentRequest_(request, true);
+  assert(publicView.teacherName === '홍길동', '관리자 조회에 교사 이름이 없습니다.');
+  const teacherView = app.toPublicAssignmentRequest_(request, false);
+  assert(teacherView.teacherName === undefined, '본인 조회에는 이름을 노출할 필요가 없습니다.');
+});
+
+function notifyPolicyStore() {
+  const store = new Map();
+  return {
+    store,
+    PropertiesService: {
+      getScriptProperties: () => ({
+        getProperty: (key) => store.get(key) || '',
+        setProperty: (key, value) => { store.set(key, value); },
+        deleteProperty: (key) => { store.delete(key); },
+      }),
+    },
+  };
+}
+
+test(63, '담당 신청 알림은 기본으로 켜져 있다(기존 배포 호환)', () => {
+  const original = { PropertiesService: app.PropertiesService, requireAdmin_: app.requireAdmin_ };
+  const { PropertiesService } = notifyPolicyStore();
+  app.PropertiesService = PropertiesService;
+  app.requireAdmin_ = () => {};
+  try {
+    assert(
+      app.getAssignmentRequestNotifyPolicy().enabled === true,
+      '속성이 없는 기존 배포에서 알림이 기본으로 꺼져 있습니다.',
+    );
+  } finally {
+    Object.assign(app, original);
+  }
+});
+
+test(64, '알림을 끄면 관리자에게 메일을 보내지 않고, 켜면 보낸다', () => {
+  const original = {
+    PropertiesService: app.PropertiesService,
+    getCentralConfiguration_: app.getCentralConfiguration_,
+    notifyTeacherByEmail_: app.notifyTeacherByEmail_,
+  };
+  const { store, PropertiesService } = notifyPolicyStore();
+  app.PropertiesService = PropertiesService;
+  app.getCentralConfiguration_ = () => ({ adminEmails: ['admin@school.hs.kr'] });
+  let sent = 0;
+  app.notifyTeacherByEmail_ = () => { sent += 1; };
+  const created = [{
+    schoolYear: 2026, grade: 2, classNumber: 3, subject: '물리학Ⅰ',
+    assignmentType: '교과', groupName: '', teacherName: '홍길동',
+  }];
+  try {
+    store.set('ASSIGNMENT_REQUEST_NOTIFY_ADMINS', 'false');
+    app.notifyAdminsOfNewAssignmentRequest_('teacher@school.hs.kr', created);
+    assert(sent === 0, '알림을 껐는데도 메일을 보냅니다.');
+
+    store.set('ASSIGNMENT_REQUEST_NOTIFY_ADMINS', 'true');
+    app.notifyAdminsOfNewAssignmentRequest_('teacher@school.hs.kr', created);
+    assert(sent === 1, '알림을 켰는데도 메일을 보내지 않습니다.');
+  } finally {
+    Object.assign(app, original);
+  }
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1266,7 +1362,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 59) {
-  console.error(`FAIL expected 59 tests, got ${tests.length}`);
+if (tests.length !== 64) {
+  console.error(`FAIL expected 64 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
