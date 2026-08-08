@@ -1350,6 +1350,41 @@ test(64, '알림을 끄면 관리자에게 메일을 보내지 않고, 켜면 �
   }
 });
 
+test(65, '승인된 담당 화면 이름은 가장 최근 신청 이력에서 가져온다', () => {
+  const original = { PropertiesService: app.PropertiesService };
+  const requestsByKey = {
+    ASSIGNMENT_REQUESTS_teacherA: JSON.stringify([
+      {
+        requestKey: 'R1', teacherEmail: 'a@school.hs.kr', teacherName: '김철수',
+        schoolYear: 2026, grade: 1, classNumber: 1, subject: '문학',
+        status: 'APPROVED', requestedAt: '2026-08-01T00:00:00.000Z',
+      },
+      {
+        requestKey: 'R0', teacherEmail: 'a@school.hs.kr', teacherName: '옛이름',
+        schoolYear: 2025, grade: 1, classNumber: 1, subject: '문학',
+        status: 'APPROVED', requestedAt: '2025-08-01T00:00:00.000Z',
+      },
+    ]),
+    ASSIGNMENT_REQUESTS_teacherB: JSON.stringify([
+      {
+        requestKey: 'R2', teacherEmail: 'b@school.hs.kr', teacherName: '',
+        schoolYear: 2026, grade: 2, classNumber: 2, subject: '수학',
+        status: 'APPROVED', requestedAt: '2026-08-01T00:00:00.000Z',
+      },
+    ]),
+  };
+  app.PropertiesService = {
+    getScriptProperties: () => ({ getProperties: () => requestsByKey }),
+  };
+  try {
+    const names = app.latestTeacherNamesByEmail_();
+    assert(names.get('a@school.hs.kr') === '김철수', '가장 최근 신청의 이름을 쓰지 않습니다.');
+    assert(!names.has('b@school.hs.kr'), '이름이 없던 신청에 빈 값을 채우면 안 됩니다.');
+  } finally {
+    Object.assign(app, original);
+  }
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1362,7 +1397,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 64) {
-  console.error(`FAIL expected 64 tests, got ${tests.length}`);
+if (tests.length !== 65) {
+  console.error(`FAIL expected 65 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

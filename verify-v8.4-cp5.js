@@ -1223,6 +1223,21 @@ test(85, '담당 신청 알림 켜고 끄기가 클라이언트 요청 표에 �
   );
 });
 
+test(86, '승인된 담당 조회가 신청 이력에서 교사 이름을 채운다', () => {
+  assert(
+    functionBody(admin, 'getApprovedTeachers').includes('latestTeacherNamesByEmail_')
+      && functionBody(admin, 'getAdminTeacherAssignments').includes('latestTeacherNamesByEmail_'),
+    '승인된 담당·전체 담당 조회가 이름을 채우지 않습니다.',
+  );
+});
+
+test(87, '교사 담당 수업 화면이 이름을 함께 보여준다', () => {
+  assert(
+    functionBody(html, 'renderTeacherAssignmentGroups_').includes('teacherName'),
+    '교사 담당 수업 화면이 이름을 표시하지 않습니다.',
+  );
+});
+
 function assertAdminGuardIn_(name) {
   assert(
     /^\s*requireAdmin_\(\);/.test(functionBody(admin, name)),
@@ -1242,7 +1257,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 85) {
-  console.error(`FAIL expected 85 tests, got ${tests.length}`);
+if (tests.length !== 87) {
+  console.error(`FAIL expected 87 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

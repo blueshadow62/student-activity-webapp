@@ -1288,11 +1288,13 @@
         // 교사 수가 늘면 반 목록이 화면을 가득 채워 누가 있는지 한눈에 안 보인다.
         // 기본은 교사 줄만 접어서 보여 주고, 눌렀을 때 그 교사의 수업을 펼친다.
         const marker = `<span class="teacher-marker" data-teacher-marker="${escapeHtml(teacherEmail)}">▸</span> `;
+        const teacherName = (approved && approved.teacherName) || (rows[0] && rows[0].teacherName) || '';
+        const teacherLabel = `${teacherName ? `${escapeHtml(teacherName)} · ` : ''}${escapeHtml(teacherEmail)}`;
         const headerCell = approved
           ? `<td><input type="checkbox" data-approved-teacher="${escapeHtml(teacherEmail)}" aria-label="교사 선택"></td>
-             <td colspan="5">${marker}<strong>${escapeHtml(teacherEmail)}</strong> · 담당 ${approved.assignmentCount}개 · 마지막 승인 ${escapeHtml(approved.lastApprovedAt || '')}
+             <td colspan="5">${marker}<strong>${teacherLabel}</strong> · 담당 ${approved.assignmentCount}개 · 마지막 승인 ${escapeHtml(approved.lastApprovedAt || '')}
              <button class="danger" data-revoke-teacher="${escapeHtml(teacherEmail)}" style="margin-left:8px">해지</button></td>`
-          : `<td></td><td colspan="5">${marker}<strong>${escapeHtml(teacherEmail)}</strong> · 수업 ${rows.length}개 · 활성 담당 없음${retryButton}</td>`;
+          : `<td></td><td colspan="5">${marker}<strong>${teacherLabel}</strong> · 수업 ${rows.length}개 · 활성 담당 없음${retryButton}</td>`;
         const detailRows = rows.map(a => `<tr class="hidden" data-teacher-rows="${escapeHtml(teacherEmail)}">
           <td></td><td>${a.schoolYear}</td>
           <td>${a.isGroup ? `${(a.grades || [a.grade]).join('·')}학년 ${escapeHtml(a.groupName || '이름 없는 그룹')}` : `${a.grade}-${a.classNumber}`}</td>

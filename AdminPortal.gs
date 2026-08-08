@@ -674,6 +674,7 @@ function getAdminTeacherAssignments(filters) {
   requireAdmin_();
   const value = filters || {};
   const query = String(value.query || '').trim().toLowerCase();
+  const teacherNames = latestTeacherNamesByEmail_();
   return readCentralTeacherAssignmentsCached_(true)
     .filter(function (assignment) {
     return !query
@@ -683,6 +684,7 @@ function getAdminTeacherAssignments(filters) {
     return {
       ...toPublicCentralAssignment_(assignment),
       teacherEmail: assignment.teacherEmail,
+      teacherName: teacherNames.get(assignment.teacherEmail) || '',
       active: assignment.active,
     };
   });
@@ -690,12 +692,14 @@ function getAdminTeacherAssignments(filters) {
 
 function getApprovedTeachers() {
   requireAdmin_();
+  const teacherNames = latestTeacherNamesByEmail_();
   const byEmail = new Map();
   readCentralTeacherAssignmentsCached_(true).filter(function (assignment) {
     return assignment.active;
   }).forEach(function (assignment) {
     const entry = byEmail.get(assignment.teacherEmail) || {
       teacherEmail: assignment.teacherEmail,
+      teacherName: teacherNames.get(assignment.teacherEmail) || '',
       assignments: [],
       lastApprovedAt: null,
     };

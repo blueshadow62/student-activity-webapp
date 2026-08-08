@@ -563,6 +563,23 @@ function readAllStoredAssignmentRequests_() {
   }).sort(compareStoredAssignmentRequests_);
 }
 
+// 승인된 담당(중앙 교사담당 시트)에는 이메일만 있고 이름이 없다 — 이름은 신청
+// 당시 입력값이라 신청 이력에만 있다. readAllStoredAssignmentRequests_ 가 이미
+// 최근순으로 정렬해 주므로, 이메일마다 처음 만나는 값이 가장 최근 신청이다.
+// 신청 이력은 이메일당 최근 처리 건까지만 보관하므로(pruneStoredAssignmentRequests_),
+// 이 기능이 생기기 전에 승인된 뒤 그 이후 신청이 없던 교사는 이름을 못 찾을 수
+// 있다 — 그럴 땐 화면에서 이메일만 보여준다.
+function latestTeacherNamesByEmail_() {
+  const seen = new Set();
+  const names = new Map();
+  readAllStoredAssignmentRequests_().forEach(function (request) {
+    if (seen.has(request.teacherEmail)) return;
+    seen.add(request.teacherEmail);
+    if (request.teacherName) names.set(request.teacherEmail, request.teacherName);
+  });
+  return names;
+}
+
 // 웹앱은 로그인한 Google 계정이면 누구나 열 수 있고, 담당 신청은 승인 전
 // 교사도 해야 하므로 승인 여부로 막을 수 없다. 그래서 관리자가 원할 때만
 // 켜는 관문을 둔다. `ALLOWED_TEACHER_EMAILS` 가 비어 있으면 지금처럼 누구나
