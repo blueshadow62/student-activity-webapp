@@ -306,6 +306,8 @@
             <div class="metric"><span>사진 연결</span><strong id="photoCount">0</strong></div>
             <div class="metric"><span>담당 설정</span><strong id="assignmentCount">0</strong></div>
             <div class="metric"><span>승인 대기 신청</span><strong id="pendingRequestCount">0</strong></div>
+            <div class="metric"><span>과목</span><strong id="subjectCount">0</strong></div>
+            <div class="metric"><span>성취기준</span><strong id="standardCount">0</strong></div>
           </div>
           <div id="schoolYearPanel" class="card hidden">
             <div class="row between"><h2 id="schoolYearTitle">새 학년도 시작</h2>
@@ -983,6 +985,8 @@
       $('photoCount').textContent = connection.counts.photos;
       $('assignmentCount').textContent = connection.counts.assignments;
       $('pendingRequestCount').textContent = dashboard.pendingAssignmentRequests || 0;
+      $('subjectCount').textContent = connection.counts.subjects || 0;
+      $('standardCount').textContent = connection.counts.standards || 0;
       const schoolLevel = dashboard.schoolLevel || state.bootstrap.schoolLevel || '';
       const schoolLevelLabel = dashboard.schoolLevelLabel
         || state.bootstrap.schoolLevelLabel || '';

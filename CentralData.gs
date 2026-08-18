@@ -546,6 +546,7 @@ function getCentralConnectionContext_(includeCounts) {
       configured: isValidCentralDriveId_(config.databaseId),
       accessible: false,
       schemaReady: false,
+      schemaDetails: null,
       status: 'NOT_READY',
     },
     photoFolder: {
@@ -560,6 +561,8 @@ function getCentralConnectionContext_(includeCounts) {
       students: 0,
       photos: 0,
       assignments: 0,
+      subjects: 0,
+      standards: 0,
     },
     message: '',
   };
@@ -571,6 +574,7 @@ function getCentralConnectionContext_(includeCounts) {
     state.database.accessible = true;
     schema = inspectCentralSchema_(spreadsheet);
     state.database.schemaReady = schema.ready;
+    state.database.schemaDetails = schema;
     state.database.status = schema.ready ? 'READY' : 'SCHEMA_REQUIRED';
     if (includeCounts) {
       state.counts.students = schema.studentSheet
@@ -581,6 +585,12 @@ function getCentralConnectionContext_(includeCounts) {
         : 0;
       state.counts.assignments = schema.assignmentSheet
         ? readCentralTeacherAssignments_(schema.assignmentSheet, true).length
+        : 0;
+      state.counts.subjects = schema.subjectCatalogSheet
+        ? Math.max(schema.subjectCatalogSheet.getLastRow() - 1, 0)
+        : 0;
+      state.counts.standards = schema.achievementStandardSheet
+        ? Math.max(schema.achievementStandardSheet.getLastRow() - 1, 0)
         : 0;
     }
   } catch (error) {
@@ -621,7 +631,7 @@ function centralConnectionStatusMessage_(state) {
     return centralSharedAccessMessage_();
   }
   if (!state.database.schemaReady) {
-    return '중앙 데이터베이스 스키마를 관리자 포털에서 준비해 주세요.';
+    return centralSchemaMissingMessage_(state.database.schemaDetails);
   }
   if (!state.photoFolder.configured) {
     return '관리자 중앙 사진 폴더가 설정되지 않았습니다.';
@@ -630,6 +640,23 @@ function centralConnectionStatusMessage_(state) {
     return centralSharedAccessMessage_();
   }
   return '학교 공통 자료 연결 상태를 확인해 주세요.';
+}
+
+function centralSchemaMissingMessage_(schema) {
+  if (!schema) {
+    return '중앙 시트 점검·생성을 눌러 주세요.';
+  }
+  const missing = [];
+  if (!schema.studentReady) missing.push(CENTRAL_CONFIG.studentSheetName);
+  if (!schema.photoReady) missing.push(CENTRAL_CONFIG.photoSheetName);
+  if (!schema.assignmentReady) missing.push(CENTRAL_CONFIG.teacherAssignmentSheetName);
+  if (!schema.assignmentRequestReady) missing.push(CENTRAL_CONFIG.assignmentRequestSheetName);
+  if (!schema.appSettingsReady) missing.push(CENTRAL_CONFIG.appSettingsSheetName);
+  if (!schema.subjectCatalogReady) missing.push(CENTRAL_CONFIG.subjectCatalogSheetName);
+  if (!schema.achievementStandardReady) missing.push(CENTRAL_CONFIG.achievementStandardSheetName);
+  return missing.length
+    ? `중앙 시트 점검·생성을 눌러 주세요. (${missing.join(', ')} 시트 필요)`
+    : '중앙 시트 점검·생성을 눌러 주세요.';
 }
 
 function inspectCentralSchema_(spreadsheet) {
@@ -842,25 +869,34 @@ const bundledStandardsMemo_ = {};
 
 function bundledStandardsForSchoolLevel_(schoolLevel) {
   const normalized = normalizeSchoolLevel_(schoolLevel, true);
-  if (
-    typeof STANDARDS_DATA === 'undefined'
-      || !Object.prototype.hasOwnProperty.call(STANDARDS_DATA, normalized)
-      || STANDARDS_DATA[normalized] == null
-  ) {
-    throw new Error(`${schoolLevelLabel_(normalized)} 성취기준 번들을 찾을 수 없습니다.`);
-  }
-  if (Array.isArray(STANDARDS_DATA[normalized])) {
-    return STANDARDS_DATA[normalized];
-  }
   if (!Object.prototype.hasOwnProperty.call(bundledStandardsMemo_, normalized)) {
-    bundledStandardsMemo_[normalized] = JSON.parse(
-      String(STANDARDS_DATA[normalized] || '[]')
-    );
+    const raw = getBundledStandardsRaw_(normalized);
+    bundledStandardsMemo_[normalized] = Array.isArray(raw) ? raw : JSON.parse(String(raw || '[]'));
     if (!Array.isArray(bundledStandardsMemo_[normalized])) {
       throw new Error(`${schoolLevelLabel_(normalized)} 성취기준 번들 형식이 올바르지 않습니다.`);
     }
   }
   return bundledStandardsMemo_[normalized];
+}
+
+// StandardsData.gs used to bundle every school level's achievement standards
+// (~29MB) alongside STANDARDS_SUBJECTS, so Apps Script re-parsed all of it on
+// every request even though this data is only read when an admin runs
+// "성취기준 데이터 설정". Each level now lives in its own file
+// (StandardsData_elementary.gs 등) behind a global const, loaded lazily here.
+// typeof is required (not hasOwnProperty) because these are undeclared
+// globals when a level's file is excluded via .claspignore, and referencing
+// an undeclared global directly throws a ReferenceError in Apps Script.
+function getBundledStandardsRaw_(schoolLevel) {
+  const lookup = {
+    elementary: typeof STANDARDS_DATA_ELEMENTARY !== 'undefined' ? STANDARDS_DATA_ELEMENTARY : undefined,
+    middle: typeof STANDARDS_DATA_MIDDLE !== 'undefined' ? STANDARDS_DATA_MIDDLE : undefined,
+    high: typeof STANDARDS_DATA_HIGH !== 'undefined' ? STANDARDS_DATA_HIGH : undefined,
+  };
+  if (lookup[schoolLevel] == null) {
+    throw new Error(`${schoolLevelLabel_(schoolLevel)} 성취기준 번들을 찾을 수 없습니다.`);
+  }
+  return lookup[schoolLevel];
 }
 
 function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
