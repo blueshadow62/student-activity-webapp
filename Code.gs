@@ -7,7 +7,7 @@ const APP_CONFIG = Object.freeze({
   // 않았다. 앞으로 semver 를 따른다: 고침 1.0.x, 기능 추가 1.1.0, 관리자 작업이
   // 필요한 변경 2.0.0. 업데이트 알림이 앞자리만 보고 "그냥 덮어써도 되는지"를
   // 가릴 수 있어야 하므로 이 규칙을 지킨다.
-  version: '1.2.0',
+  version: '2.0.0',
   recordSheetName: '활동기록',
   archivedRecordSheetName: '활동기록보관',
   deletedRecordSheetName: '삭제기록',
@@ -366,7 +366,10 @@ function getPinnedStandardsForAssignment(assignmentKey) {
 function pinStandardForAssignment(assignmentKey, standardKey) {
   return withPersonalDatabaseLock_(function () {
     const assignment = requireMyAssignment_(assignmentKey);
-    const standard = resolveAchievementStandard_(assignment.subject, standardKey);
+    const standard = resolveAchievementStandard_(
+      assignment.subject, standardKey, assignment.curriculumRevision,
+      assignment.subjectKey
+    );
     if (!standard) throw new Error('고정할 성취기준을 선택해 주세요.');
     const settingsSheet = ensureSettingsSheet_(getAppSpreadsheet_());
     const existing = readPinnedStandardRows_(settingsSheet).find(function (item) {
@@ -691,7 +694,10 @@ function validateCentralRecordPayload_(payload, settingsSheet, options) {
     ? String(options.preservedAchievementStandard || '').trim()
     : null;
   const standard = preservedAchievementStandard === null
-    ? resolveAchievementStandard_(assignment.subject, value.achievementStandard)
+    ? resolveAchievementStandard_(
+      assignment.subject, value.achievementStandard, assignment.curriculumRevision,
+      assignment.subjectKey
+    )
     : null;
   return {
     assignment: assignment,

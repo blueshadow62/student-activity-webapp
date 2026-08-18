@@ -9,7 +9,7 @@ const CENTRAL_CONFIG = Object.freeze({
   staffGroupEmailProperty: 'STAFF_GROUP_EMAIL',
   schemaVersionProperty: 'CENTRAL_SCHEMA_VERSION',
   legacyDatabaseIdProperty: 'STUDENT_ACTIVITY_DATABASE_SPREADSHEET_ID',
-  schemaVersion: '4',
+  schemaVersion: '5',
   studentSheetName: '학생목록',
   legacyStudentSheetName: '데이터베이스',
   photoSheetName: '사진정보',
@@ -51,11 +51,11 @@ const CENTRAL_PHOTO_HEADERS = Object.freeze([
 ]);
 const CENTRAL_TEACHER_ASSIGNMENT_HEADERS = Object.freeze([
   '담당키', '교사이메일', '학년도', '학년', '반', '과목', '담당유형', '사용',
-  '생성일시', '수정일시',
+  '생성일시', '수정일시', '교육과정', '과목키',
 ]);
 const CENTRAL_ASSIGNMENT_REQUEST_HEADERS = Object.freeze([
   '신청키', '교사이메일', '학년도', '학년', '반', '과목', '상태',
-  '신청일시', '처리일시', '처리자', '처리사유', '담당키',
+  '신청일시', '처리일시', '처리자', '처리사유', '담당키', '교육과정', '과목키',
 ]);
 const CENTRAL_GROUP_HEADERS = Object.freeze([
   '담당키', '그룹명', '생성일시', '수정일시',
@@ -72,9 +72,11 @@ const CENTRAL_ASSIGNMENT_TYPES = Object.freeze({
 const CENTRAL_APP_SETTING_HEADERS = Object.freeze(['항목', '값', '수정일시']);
 const CENTRAL_SUBJECT_CATALOG_HEADERS = Object.freeze([
   '과목명', '축약코드', '학교급', '계열', '과목구분',
+  '교육과정', '과목키',
 ]);
 const CENTRAL_ACHIEVEMENT_STANDARD_HEADERS = Object.freeze([
   '코드', '과목명', '영역', '내용', '학교급', '계열',
+  '교육과정', '과목키', '성취기준키',
 ]);
 const SCHOOL_LEVELS = Object.freeze({
   elementary: '초등학교',
@@ -100,6 +102,41 @@ function normalizeSchoolLevel_(value, required) {
 function schoolLevelLabel_(value) {
   const schoolLevel = normalizeSchoolLevel_(value, false);
   return schoolLevel ? SCHOOL_LEVELS[schoolLevel] : '';
+}
+
+// 고교는 2025 입학생부터 2022 개정 교육과정을 적용한다. 초·중학교는 현재
+// 번들이 2022만 제공되므로 기존 동작을 그대로 유지한다.
+function resolveCurriculumRevision_(schoolYear, grade, schoolLevel, value) {
+  const explicit = String(value || '').trim();
+  if (explicit === '2015' || explicit === '2022') return explicit;
+  const normalizedLevel = normalizeSchoolLevel_(schoolLevel, false)
+    || getConfiguredSchoolLevel_();
+  if (normalizedLevel !== 'high') return '2022';
+  return Number(schoolYear) - Number(grade) + 1 >= 2025 ? '2022' : '2015';
+}
+
+function curriculumRevisionLabel_(value) {
+  return resolveCurriculumRevision_(0, 0, '', value) + ' 개정';
+}
+
+function curriculumSubjectKey_(revision, schoolLevel, track, subject) {
+  return [revision, schoolLevel, track, subject].map(function (item) {
+    return String(item || '').trim();
+  }).join('|');
+}
+
+function normalizeAssignmentSubjectKey_(subject, curriculumRevision, value) {
+  const provided = String(value || '').trim();
+  const schoolLevel = getConfiguredSchoolLevel_();
+  if (!schoolLevel) return provided;
+  const candidates = getSubjectCatalogForSchoolLevel_(schoolLevel).filter(function (item) {
+    return item.name === subject && item.curriculumRevision === curriculumRevision;
+  });
+  if (!provided) return candidates.length === 1 ? candidates[0].subjectKey : '';
+  if (!candidates.some(function (item) { return item.subjectKey === provided; })) {
+    throw new Error('선택한 교육과정의 과목을 다시 확인해 주세요.');
+  }
+  return provided;
 }
 
 let configuredSchoolLevelMemo_ = null;
@@ -163,6 +200,8 @@ function getSubjectCatalogForSchoolLevel_(schoolLevel) {
       abbreviation: String(item.abbreviation || '').trim(),
       track: String(item.track || '').trim(),
       category: String(item.category || '').trim(),
+      curriculumRevision: String(item.curriculumRevision || '2022').trim(),
+      subjectKey: String(item.subjectKey || '').trim(),
     };
   }).filter(function (item) { return Boolean(item.name); });
 }
@@ -832,47 +871,68 @@ function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
     throw new Error(`${schoolLevelLabel_(normalized)} 과목·성취기준 데이터가 비어 있습니다.`);
   }
   const trackBySubject = new Map(subjects.map(function (subject) {
-    return [subject.name, subject.track];
+    return [`${subject.curriculumRevision}|${subject.name}`, subject.track];
   }));
   const subjectRows = subjects.map(function (subject) {
+    const revision = String(subject.curriculumRevision || '2022').trim();
     return [
       subject.name,
       subject.abbreviation,
       normalized,
       subject.track,
       subject.category,
+      revision,
+      subject.subjectKey || curriculumSubjectKey_(
+        revision, normalized, subject.track, subject.name
+      ),
     ];
   });
   const standardRows = standards.map(function (standard) {
     const subject = String(standard.subject || '').trim();
     const code = String(standard.code || '').trim();
     const text = String(standard.text || '').trim();
-    if (!subject || !code || !text) {
-      throw new Error('성취기준 번들에 코드·과목·내용이 비어 있는 항목이 있습니다.');
+    const revision = String(standard.curriculumRevision || '2022').trim();
+    if (!subject || !text || (revision !== '2015' && revision !== '2022')) {
+      throw new Error('성취기준 번들에 교육과정·과목·내용이 비어 있는 항목이 있습니다.');
     }
+    const track = String(standard.track || trackBySubject.get(
+      `${revision}|${subject}`
+    ) || '').trim();
+    const subjectKey = String(standard.subjectKey || curriculumSubjectKey_(
+      revision, normalized, track, subject
+    )).trim();
+    const standardKey = String(standard.standardKey || achievementStandardKey_({
+      curriculumRevision: revision, subject: subject, domain: standard.domain,
+      code: code, text: text,
+    })).trim();
     return [
       code,
       subject,
       String(standard.domain || '').trim(),
       text,
       normalized,
-      String(standard.track || trackBySubject.get(subject) || '').trim(),
+      track,
+      revision,
+      subjectKey,
+      standardKey,
     ];
   });
-  const subjectSheet = prepareCentralReplacementSheet_(
-    spreadsheet,
-    CENTRAL_CONFIG.subjectCatalogSheetName,
+  const subjectSheet = prepareCentralStagedReplacementSheet_(
+    spreadsheet, CENTRAL_CONFIG.subjectCatalogSheetName,
     CENTRAL_SUBJECT_CATALOG_HEADERS,
     '#1565c0'
   );
-  const standardSheet = prepareCentralReplacementSheet_(
-    spreadsheet,
-    CENTRAL_CONFIG.achievementStandardSheetName,
+  const standardSheet = prepareCentralStagedReplacementSheet_(
+    spreadsheet, CENTRAL_CONFIG.achievementStandardSheetName,
     CENTRAL_ACHIEVEMENT_STANDARD_HEADERS,
     '#6a1b9a'
   );
   writeCentralRowsInBatches_(subjectSheet, subjectRows);
   writeCentralRowsInBatches_(standardSheet, standardRows);
+  if (subjectSheet.getLastRow() !== subjectRows.length + 1
+      || standardSheet.getLastRow() !== standardRows.length + 1) {
+    throw new Error('임시 성취기준 시트 검증에 실패했습니다. 기존 시트는 유지됩니다.');
+  }
   subjectSheet.autoResizeColumns(1, CENTRAL_SUBJECT_CATALOG_HEADERS.length);
   standardSheet.setColumnWidth(1, 150);
   standardSheet.setColumnWidth(2, 180);
@@ -884,6 +944,10 @@ function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
     Math.max(standardRows.length, 1),
     2
   ).setWrap(true);
+  promoteCentralStagedReplacementSheets_(spreadsheet, [
+    { sheet: subjectSheet, name: CENTRAL_CONFIG.subjectCatalogSheetName },
+    { sheet: standardSheet, name: CENTRAL_CONFIG.achievementStandardSheetName },
+  ]);
   return {
     schoolLevel: normalized,
     subjectCount: subjectRows.length,
@@ -891,17 +955,35 @@ function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
   };
 }
 
-function prepareCentralReplacementSheet_(spreadsheet, sheetName, headers, color) {
-  let sheet = spreadsheet.getSheetByName(sheetName);
-  if (sheet && sheet.getLastRow() > 0 && !centralHeadersMatch_(sheet, headers)) {
-    throw createCentralError_(
-      'CENTRAL_SCHEMA_INVALID',
-      `'${sheetName}' 시트의 머리글을 확인해 주세요.`
-    );
-  }
-  if (!sheet) sheet = spreadsheet.insertSheet(sheetName);
+function prepareCentralStagedReplacementSheet_(spreadsheet, sheetName, headers, color) {
+  const stagedName = `${sheetName}__준비_${Utilities.getUuid().slice(0, 8)}`;
+  const sheet = spreadsheet.insertSheet(stagedName);
   initializeCentralSheet_(sheet, headers, color);
   return sheet;
+}
+
+function promoteCentralStagedReplacementSheets_(spreadsheet, entries) {
+  const stamp = `${Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMddHHmmss')}_${new Date().getTime()}`;
+  const renamed = [];
+  try {
+    entries.forEach(function (entry, index) {
+      const previous = spreadsheet.getSheetByName(entry.name);
+      if (!previous) return;
+      const backupName = `${entry.name}__백업_${stamp}_${index + 1}`;
+      previous.setName(backupName);
+      renamed.push({ sheet: previous, name: entry.name });
+    });
+    entries.forEach(function (entry) { entry.sheet.setName(entry.name); });
+  } catch (error) {
+    // 승격 중 실패하면 기존 시트 이름을 되돌려 운영 데이터를 즉시 복구한다.
+    entries.forEach(function (entry) {
+      if (entry.sheet.getName() === entry.name) {
+        entry.sheet.setName(`${entry.name}__실패_${stamp}`);
+      }
+    });
+    renamed.forEach(function (item) { item.sheet.setName(item.name); });
+    throw error;
+  }
 }
 
 function writeCentralRowsInBatches_(sheet, rows) {
@@ -927,25 +1009,23 @@ function writeCentralRowsInBatches_(sheet, rows) {
   }
 }
 
-function getStandardsForSubject(subject) {
-  const normalizedSubject = String(subject || '').trim();
-  if (!normalizedSubject) return [];
-  if (normalizedSubject.length > APP_CONFIG.maxSubjectLength) {
-    throw new Error('과목명이 너무 깁니다.');
-  }
-  const allowed = getMyAssignments().some(function (assignment) {
-    return assignment.subject === normalizedSubject;
-  });
-  if (!allowed) {
-    throw createCentralError_(
-      'ASSIGNMENT_FORBIDDEN',
-      '현재 담당 중인 과목의 성취기준만 조회할 수 있습니다.'
-    );
-  }
-  return readAchievementStandardsForSubject_(normalizedSubject);
+function getStandardsForAssignment(assignmentKey) {
+  const assignment = requireMyAssignment_(assignmentKey);
+  return readAchievementStandardsForSubject_(
+    assignment.subject, assignment.curriculumRevision, assignment.subjectKey
+  );
 }
 
-function readAchievementStandardsForSubject_(subject) {
+// 구 클라이언트 호환용이다. 새 흐름은 반드시 담당키 API를 사용한다.
+function getStandardsForSubject(subject) {
+  const assignment = getMyAssignments().find(function (item) {
+    return item.subject === String(subject || '').trim();
+  });
+  if (!assignment) throw createCentralError_('ASSIGNMENT_FORBIDDEN', '현재 담당 중인 과목의 성취기준만 조회할 수 있습니다.');
+  return getStandardsForAssignment(assignment.assignmentKey);
+}
+
+function readAchievementStandardsForSubject_(subject, curriculumRevision, subjectKey) {
   const schoolLevel = getConfiguredSchoolLevel_();
   if (!schoolLevel) return [];
   const sheet = getRequiredCentralAchievementStandardSheet_();
@@ -978,22 +1058,34 @@ function readAchievementStandardsForSubject_(subject) {
     ).getDisplayValues().forEach(function (row) {
       if (String(row[1] || '').trim() !== subject) return;
       if (String(row[4] || '').trim() !== schoolLevel) return;
+      if (String(row[6] || '2022').trim() !== curriculumRevision) return;
+      if (subjectKey && String(row[7] || '').trim() !== subjectKey) return;
       standards.push({
         code: String(row[0] || '').trim(),
         subject: String(row[1] || '').trim(),
         domain: String(row[2] || '').trim(),
         text: String(row[3] || '').trim(),
+        curriculumRevision: String(row[6] || '2022').trim(),
+        subjectKey: String(row[7] || '').trim(),
+        standardKey: String(row[8] || '').trim(),
       });
     });
   });
-  return standards.filter(function (standard) {
-    return standard.code && standard.text;
+  const filtered = standards.filter(function (standard) {
+    return standard.text;
   }).map(function (standard) {
     return {
       ...standard,
-      key: achievementStandardKey_(standard),
+      key: standard.standardKey || achievementStandardKey_(standard),
     };
-  }).sort(function (left, right) {
+  });
+  // v4/v5 초기 행처럼 과목키가 없는 기존 담당은 교육과정+과목명으로 조회한다.
+  // 여러 계열에 반복 수록된 공통 과목은 사용자에게 같은 기준이므로 표시 내용
+  // 기준으로 한 번만 남겨 기존 행도 중복 없이 사용할 수 있게 한다.
+  const unique = subjectKey ? filtered : [...new Map(filtered.map(function (standard) {
+    return [[standard.code, standard.domain, standard.text].join('\0'), standard];
+  })).values()];
+  return unique.sort(function (left, right) {
     return left.code.localeCompare(right.code, 'ko')
       || left.domain.localeCompare(right.domain, 'ko')
       || left.text.localeCompare(right.text, 'ko');
@@ -1002,6 +1094,7 @@ function readAchievementStandardsForSubject_(subject) {
 
 function achievementStandardKey_(standard) {
   return JSON.stringify([
+    String(standard && standard.curriculumRevision || '2022').trim(),
     String(standard && standard.subject || '').trim(),
     String(standard && standard.domain || '').trim(),
     String(standard && standard.code || '').trim(),
@@ -1013,10 +1106,12 @@ function achievementStandardDisplay_(standard) {
   return `${standard.code} ${standard.text}`.trim();
 }
 
-function resolveAchievementStandard_(subject, value) {
+function resolveAchievementStandard_(subject, value, curriculumRevision, subjectKey) {
   const input = String(value || '').trim();
   if (!input) return null;
-  const standards = readAchievementStandardsForSubject_(subject);
+  const standards = readAchievementStandardsForSubject_(
+    subject, curriculumRevision || '2022', subjectKey || ''
+  );
   const keyMatch = standards.find(function (item) {
     return item.key === input;
   });
@@ -1080,6 +1175,42 @@ function centralHeadersMatch_(sheet, expected) {
   return expected.every(function (header, index) {
     return actual[index] === header;
   });
+}
+
+// 운영 중인 v4 시트는 뒤에 열만 보태야 기존 열 번호와 행 데이터를 보존한다.
+function ensureCentralTrailingHeaders_(sheet, headers, color, backfill) {
+  if (centralHeadersMatch_(sheet, headers)) return sheet;
+  const actual = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0]
+    .map(function (value) { return String(value || '').trim(); });
+  let previousWidth = actual.length;
+  while (previousWidth > 0 && !actual[previousWidth - 1]) previousWidth -= 1;
+  const currentHeaders = actual.slice(0, previousWidth);
+  if (previousWidth > headers.length || !currentHeaders.every(function (value, index) {
+    return value === headers[index];
+  })) {
+    throw createCentralError_('CENTRAL_SCHEMA_INVALID', `'${sheet.getName()}' 시트의 머리글을 확인해 주세요.`);
+  }
+  const missing = headers.slice(previousWidth);
+  if (sheet.getMaxColumns() < headers.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), headers.length - sheet.getMaxColumns());
+  }
+  sheet.getRange(1, previousWidth + 1, 1, missing.length).setValues([missing])
+    .setBackground(color).setFontColor('#ffffff').setFontWeight('bold');
+  if (typeof backfill === 'function' && sheet.getLastRow() > 1) backfill(sheet, previousWidth);
+  return sheet;
+}
+
+function backfillAssignmentCurriculumRevision_(sheet, previousWidth) {
+  const curriculumColumn = sheet.getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0].findIndex(function (value) {
+      return String(value || '').trim() === '교육과정';
+    }) + 1;
+  if (!curriculumColumn || curriculumColumn <= previousWidth) return;
+  const rowCount = sheet.getLastRow() - 1;
+  const values = sheet.getRange(2, 1, rowCount, 4).getValues();
+  sheet.getRange(2, curriculumColumn, rowCount, 1).setValues(values.map(function (row) {
+    return [resolveCurriculumRevision_(row[2], row[3])];
+  }));
 }
 
 function initializeCentralSheet_(sheet, headers, color) {
@@ -1502,6 +1633,10 @@ function readCentralTeacherAssignments_(sheet, includeInactive) {
       active: isEnabled_(row[7]),
       createdAt: row[8],
       updatedAt: row[9],
+      curriculumRevision: resolveCurriculumRevision_(
+        row[2], row[3], '', display[10]
+      ),
+      subjectKey: String(display[11] || '').trim(),
       rowNumber: index + 2,
     };
   }).filter(function (assignment) {
@@ -1580,6 +1715,9 @@ function toPublicCentralAssignment_(assignment) {
     classNumber: assignment.classNumber,
     subject: assignment.subject,
     assignmentType: assignment.assignmentType,
+    curriculumRevision: assignment.curriculumRevision,
+    curriculumRevisionLabel: curriculumRevisionLabel_(assignment.curriculumRevision),
+    subjectKey: assignment.subjectKey || '',
     isGroup: isGroup,
     groupName: groupName,
     // 그룹 담당의 반은 0으로만 기록되므로 화면에 반 번호를 보여줄 이유가 없다.

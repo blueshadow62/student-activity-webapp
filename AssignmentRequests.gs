@@ -61,6 +61,8 @@ function submitMyAssignmentRequest(payload) {
         grade: value.grade,
         classNumber: classNumber,
         subject: value.subject,
+        curriculumRevision: value.curriculumRevision,
+        subjectKey: value.subjectKey,
         assignmentType: requestType.assignmentType,
         groupName: requestType.groupName,
         active: true,
@@ -107,6 +109,8 @@ function submitMyAssignmentRequest(payload) {
         grade: normalized.grade,
         classNumber: normalized.classNumber,
         subject: normalized.subject,
+        curriculumRevision: normalized.curriculumRevision,
+        subjectKey: normalized.subjectKey,
         assignmentType: requestType.assignmentType,
         groupName: requestType.groupName,
         additionalGrades: requestType.additionalGrades || [],
@@ -329,6 +333,8 @@ function reviewAssignmentRequests_(requestKeys, decision, reason) {
           grade: request.grade,
           classNumber: request.classNumber,
           subject: request.subject,
+          curriculumRevision: request.curriculumRevision,
+          subjectKey: request.subjectKey,
           assignmentType: request.assignmentType
             || CENTRAL_ASSIGNMENT_TYPES.subject,
           groupName: request.groupName || '',
@@ -695,6 +701,10 @@ function buildCentralAssignmentRequestRow_(request) {
     request.processedBy || '',
     sanitizeSpreadsheetText_(request.reason || ''),
     request.assignmentKey || '',
+    request.curriculumRevision || resolveCurriculumRevision_(
+      request.schoolYear, request.grade
+    ),
+    request.subjectKey || '',
   ];
 }
 
@@ -721,6 +731,10 @@ function toPublicAssignmentRequest_(request, includeTeacherEmail, currentAssignm
     grade: Number(request.grade),
     classNumber: Number(request.classNumber),
     subject: String(request.subject || ''),
+    curriculumRevision: resolveCurriculumRevision_(
+      request.schoolYear, request.grade, '', request.curriculumRevision
+    ),
+    subjectKey: String(request.subjectKey || ''),
     assignmentType: assignmentType,
     groupName: groupName,
     // 관리자가 무엇을 승인하는지 한 줄로 알 수 있어야 한다. 그룹 신청은 반이
@@ -769,6 +783,10 @@ function assignmentRequestMatches_(request, assignment) {
     && Number(request.schoolYear) === assignment.schoolYear
     && Number(request.grade) === assignment.grade
     && Number(request.classNumber) === assignment.classNumber
+    && resolveCurriculumRevision_(request.schoolYear, request.grade, '', request.curriculumRevision)
+      === assignment.curriculumRevision
+    && (!request.subjectKey || !assignment.subjectKey
+      || request.subjectKey === assignment.subjectKey)
     && request.subject === assignment.subject;
 }
 

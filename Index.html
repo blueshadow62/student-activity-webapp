@@ -437,8 +437,8 @@
               <div><label for="requestAssignmentType">담당 유형</label><select id="requestAssignmentType"><option value="교과">학급 단위</option><option value="그룹">수강 그룹</option></select></div>
               <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
               <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
-              <div id="requestTrackField" class="hidden"><label for="requestTrackFilter">계열 필터</label><select id="requestTrackFilter"><option value="">전체 계열</option></select></div>
-              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" list="requestSubjectOptions" maxlength="50" placeholder="과목명을 입력해 검색"><datalist id="requestSubjectOptions"></datalist></div>
+              <div id="requestTrackField" class="hidden"><label for="requestTrackFilter">전문교과 계열(선택)</label><select id="requestTrackFilter"><option value="">전체 전문계열</option></select></div>
+              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" list="requestSubjectOptions" maxlength="50" placeholder="과목명을 입력해 검색"><datalist id="requestSubjectOptions"></datalist><div id="requestCurriculumStatus" class="small muted" aria-live="polite"></div></div>
               <div id="requestClassesField"><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
               <div id="requestGroupNameField" class="hidden"><label for="requestGroupName">수강 그룹 이름</label><input id="requestGroupName" maxlength="50" placeholder="예: 심화국어 A"></div>
               <div id="requestGroupGradesField" class="hidden"><label for="requestGroupGrades">함께 듣는 다른 학년(선택)</label><input id="requestGroupGrades" placeholder="예: 3"></div>
@@ -509,6 +509,7 @@
                   <button id="toggleStandardPinButton" class="ghost hidden" type="button">이 수업에 고정</button>
                 </div>
                 <div id="achievementStandardStatus" class="small muted" aria-live="polite"></div>
+                <div id="achievementCurriculumStatus" class="small muted"></div>
                 <div id="pinnedStandards" class="competencies" style="margin-top:6px"></div>
               </div>
               <div style="margin-top:12px"><label for="recordMemo">내용 메모 (선택)</label><textarea id="recordMemo"></textarea></div>
@@ -630,6 +631,10 @@
       $('submitAssignmentRequestButton').addEventListener('click', submitAssignmentRequest);
       $('requestAssignmentType').addEventListener('change', renderAssignmentRequestType_);
       $('requestTrackFilter').addEventListener('change', renderSubjectCatalog_);
+      $('requestSchoolYear').addEventListener('input', renderSubjectCatalog_);
+      $('requestGrade').addEventListener('change', renderSubjectCatalog_);
+      // 큰 과목 목록을 datalist에 한꺼번에 넣으면 모바일 브라우저가 느려진다.
+      $('requestSubject').addEventListener('input', () => renderSubjectCatalog_($('requestSubject').value));
       $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
       $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
       $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
@@ -1524,12 +1529,21 @@
       const teacherEmail = await showPrompt('교사 Google 계정 이메일', item ? item.teacherEmail : ''); if (teacherEmail == null) return;
       const schoolYear = await showPrompt('학년도', item ? item.schoolYear : new Date().getFullYear()); if (schoolYear == null) return;
       const grade = await showPrompt('담당 학년', item ? item.grade : ''); if (grade == null) return;
-      const subject = await showSearchPrompt(
-        '담당 과목을 검색하거나 직접 입력하세요.',
+      const curriculumRevision = curriculumRevisionFor_(schoolYear, grade);
+      const enteredSubject = await showSearchPrompt(
+        `담당 과목을 검색하거나 직접 입력하세요.${curriculumRevision ? ` (${curriculumRevision} 개정)` : ''}`,
         item ? item.subject : '',
-        Array.from(new Set(subjectCatalog_().map(subject => subject.name).filter(Boolean)))
+        Array.from(new Set(subjectCatalogFor_(schoolYear, grade)
+          .map(subject => subject.name).filter(Boolean)))
           .sort((left, right) => left.localeCompare(right, 'ko'))
-      ); if (subject == null) return;
+      ); if (enteredSubject == null) return;
+      const subjectItem = item
+        && normalizeSubjectSearchText_(item.subject) === normalizeSubjectSearchText_(enteredSubject)
+        && item.curriculumRevision === curriculumRevision
+        && item.subjectKey
+        ? item
+        : selectedCatalogSubject_(enteredSubject, schoolYear, grade);
+      const subject = subjectItem ? subjectItem.name : enteredSubject;
       // 수강 그룹은 반이 0으로 고정이고 대신 이름으로 구분한다. 반을 물으면
       // 관리자가 0을 바꿔 저장이 막히고, 이름을 안 물으면 수정 자체가 막힌다.
       const isGroup = Boolean(item && item.isGroup);
@@ -1557,6 +1571,8 @@
           await callServer('saveTeacherAssignment', {
             assignmentKey:item.assignmentKey,
             teacherEmail,schoolYear,grade,subject,
+            curriculumRevision: curriculumRevision || undefined,
+            subjectKey: subjectItem && subjectItem.subjectKey || undefined,
             classNumber: isGroup ? 0 : classNumbers,
             assignmentType:item.assignmentType,
             groupName,
@@ -1566,6 +1582,8 @@
         } else {
           const result = await callServer('saveTeacherAssignmentsBatch', {
             teacherEmail,schoolYear,grade,subject,classNumbers,
+            curriculumRevision: curriculumRevision || undefined,
+            subjectKey: subjectItem && subjectItem.subjectKey || undefined,
             assignmentType:'교과',
           });
           await showAlert(`${result.count}개 반의 담당 수업을 등록했습니다.`);
@@ -1812,13 +1830,19 @@
 
     async function submitAssignmentRequest() {
       const isGroup = $('requestAssignmentType').value === '그룹';
+      const enteredSubject = $('requestSubject').value;
+      const subjectItem = selectedCatalogSubject_(enteredSubject,
+        $('requestSchoolYear').value, $('requestGrade').value,
+        $('requestTrackFilter').value);
       const payload = {
         teacherName: $('requestTeacherName').value,
         assignmentType: isGroup ? '그룹' : '교과',
         groupName: isGroup ? $('requestGroupName').value : '',
         schoolYear:$('requestSchoolYear').value,
         grade:$('requestGrade').value,
-        subject:$('requestSubject').value,
+        subject:subjectItem ? subjectItem.name : enteredSubject,
+        curriculumRevision: curriculumRevisionFor_($('requestSchoolYear').value, $('requestGrade').value) || undefined,
+        subjectKey: subjectItem && subjectItem.subjectKey || undefined,
         classNumbers: isGroup ? '' : $('requestClasses').value,
         additionalGrades: isGroup ? $('requestGroupGrades').value : '',
       };
@@ -1852,31 +1876,80 @@
         : [];
     }
 
-    function renderSubjectCatalog_() {
-      const catalog = subjectCatalog_();
+    function curriculumRevisionFor_(schoolYear, grade) {
+      const schoolLevel = state.bootstrap && state.bootstrap.schoolLevel;
+      const enrollmentYear = Number(schoolYear) - Number(grade) + 1;
+      return schoolLevel === 'high' && Number.isInteger(enrollmentYear)
+        ? (enrollmentYear >= 2025 ? '2022' : '2015')
+        : '';
+    }
+
+    function subjectCatalogFor_(schoolYear, grade) {
+      const revision = curriculumRevisionFor_(schoolYear, grade);
+      return subjectCatalog_().filter(item => !revision
+        || !item.curriculumRevision || item.curriculumRevision === revision);
+    }
+
+    function normalizeSubjectSearchText_(value) {
+      return String(value || '').trim().toLocaleLowerCase('ko').replace(/\s+/g, '');
+    }
+
+    function selectedCatalogSubject_(name, schoolYear, grade, selectedTrack) {
+      const normalizedName = normalizeSubjectSearchText_(name);
+      const matches = subjectCatalogFor_(schoolYear, grade).filter(item =>
+        normalizeSubjectSearchText_(item.name) === normalizedName
+          && (!selectedTrack || item.category === '보통교과'
+            || item.track === selectedTrack));
+      // 전체 계열에서 같은 공통 과목이 여러 계열에 있으면 임의의 첫 계열을
+      // 저장하지 않는다. 과목키가 없는 구버전 호환 조회가 표시 기준을 중복 제거한다.
+      return matches.length === 1 ? matches[0] : null;
+    }
+
+    function renderSubjectCatalog_(query) {
+      const catalog = subjectCatalogFor_($('requestSchoolYear').value, $('requestGrade').value);
+      const revision = curriculumRevisionFor_($('requestSchoolYear').value, $('requestGrade').value);
       const isHighSchool = state.bootstrap
         && state.bootstrap.schoolLevel === 'high';
       const trackField = $('requestTrackField');
       trackField.classList.toggle('hidden', !isHighSchool || !catalog.length);
       if (isHighSchool && catalog.length) {
         const current = $('requestTrackFilter').value;
-        const tracks = Array.from(new Set(catalog.map(item => item.track).filter(Boolean)))
+        const tracks = Array.from(new Set(catalog
+          .filter(item => item.category === '전문교과')
+          .map(item => item.track).filter(Boolean)))
           .sort((left, right) => left.localeCompare(right, 'ko'));
-        $('requestTrackFilter').innerHTML = '<option value="">전체 계열</option>'
+        $('requestTrackFilter').innerHTML = '<option value="">전체 전문계열</option>'
           + tracks.map(track => `<option value="${escapeHtml(track)}">${escapeHtml(track)}</option>`).join('');
         $('requestTrackFilter').value = tracks.includes(current) ? current : '';
       }
       const selectedTrack = isHighSchool ? $('requestTrackFilter').value : '';
+      const normalizedQuery = normalizeSubjectSearchText_(
+        query == null ? $('requestSubject').value : query
+      );
       const names = Array.from(new Set(catalog
-        .filter(item => !selectedTrack || item.track === selectedTrack)
+        .filter(item => !selectedTrack || item.category === '보통교과'
+          || item.track === selectedTrack)
         .map(item => item.name)
+        .filter(name => !normalizedQuery
+          || normalizeSubjectSearchText_(name).includes(normalizedQuery))
         .filter(Boolean)))
-        .sort((left, right) => left.localeCompare(right, 'ko'));
+        .sort((left, right) => {
+          const leftValue = normalizeSubjectSearchText_(left);
+          const rightValue = normalizeSubjectSearchText_(right);
+          const leftRank = !normalizedQuery || leftValue === normalizedQuery
+            ? 0 : leftValue.startsWith(normalizedQuery) ? 1 : 2;
+          const rightRank = !normalizedQuery || rightValue === normalizedQuery
+            ? 0 : rightValue.startsWith(normalizedQuery) ? 1 : 2;
+          return leftRank - rightRank || left.localeCompare(right, 'ko');
+        }).slice(0, 50);
       $('requestSubjectOptions').innerHTML = names
         .map(name => `<option value="${escapeHtml(name)}"></option>`).join('');
       $('requestSubject').placeholder = names.length
         ? '과목명을 입력해 검색하거나 직접 입력'
         : '예: 문학';
+      $('requestCurriculumStatus').textContent = revision
+        ? `${$('requestSchoolYear').value}학년도 ${$('requestGrade').value || '?'}학년 · ${revision} 개정 교육과정`
+        : '학년도와 학년을 선택하면 적용 교육과정을 안내합니다.';
     }
 
     async function loadMyAssignmentRequests() {
@@ -2232,6 +2305,7 @@
       $('achievementStandardOptions').replaceChildren();
       $('pinnedStandards').replaceChildren();
       $('achievementStandardStatus').textContent = '';
+      $('achievementCurriculumStatus').textContent = '';
       $('toggleStandardPinButton').classList.add('hidden');
       $('achievementStandardField').classList.add('hidden');
     }
@@ -2239,7 +2313,11 @@
     function loadAchievementStandards_(assignment) {
       const generation = ++state.standardsRequestGeneration;
       const assignmentKey = assignment.assignmentKey;
-      const cachedStandards = state.standardsBySubject[assignment.subject];
+      // 과목명은 2015·2022 교육과정 사이에서 겹칠 수 있다. 담당키는 수업과
+      // 교육과정을 함께 가리키므로 캐시도 이 키로 분리해야 한다.
+      const standardsCacheKey = assignment.assignmentKey
+        || `${assignment.curriculumRevision || ''}|${assignment.subjectKey || assignment.subject}`;
+      const cachedStandards = state.standardsBySubject[standardsCacheKey];
       state.achievementStandards = Array.isArray(cachedStandards)
         ? cachedStandards
         : [];
@@ -2250,7 +2328,7 @@
       Promise.all([
         (Array.isArray(cachedStandards)
           ? Promise.resolve({ items:cachedStandards, cacheable:true })
-          : callServer('getStandardsForSubject', assignment.subject)
+          : callServer('getStandardsForAssignment', assignmentKey)
             .then(items => ({ items, cacheable:true }))
         ).catch(error => {
           if (generation === state.standardsRequestGeneration) {
@@ -2267,7 +2345,7 @@
         const standards = standardsResult.items;
         state.achievementStandards = Array.isArray(standards) ? standards : [];
         if (standardsResult.cacheable) {
-          state.standardsBySubject[assignment.subject] = state.achievementStandards;
+          state.standardsBySubject[standardsCacheKey] = state.achievementStandards;
         }
         state.pinnedStandardKeys = new Set(
           (Array.isArray(pinned) ? pinned : []).map(item => item.key)
@@ -2283,7 +2361,8 @@
     }
 
     function standardDisplay_(standard) {
-      return `${standard.code} ${standard.text}`.trim();
+      // 전문교과Ⅱ처럼 공식 코드가 없는 기준은 내부 키를 화면에 노출하지 않는다.
+      return [standard.code, standard.text].filter(Boolean).join(' ').trim();
     }
 
     function renderAchievementStandards_() {
@@ -2300,7 +2379,8 @@
       const ordered = state.achievementStandards.slice().sort((left, right) => {
         const leftPinned = state.pinnedStandardKeys.has(left.key) ? 0 : 1;
         const rightPinned = state.pinnedStandardKeys.has(right.key) ? 0 : 1;
-        return leftPinned - rightPinned || left.code.localeCompare(right.code, 'ko');
+        return leftPinned - rightPinned
+          || String(left.code || left.text || '').localeCompare(String(right.code || right.text || ''), 'ko');
       });
       $('achievementStandardOptions').innerHTML = ordered.map(standard =>
         `<option value="${escapeHtml(standardDisplay_(standard))}"`
@@ -2310,7 +2390,7 @@
         state.pinnedStandardKeys.has(standard.key));
       $('pinnedStandards').innerHTML = pinned.map(standard =>
         `<button type="button" class="chip" data-pinned-standard="${escapeHtml(standard.key)}">`
-          + `★ ${escapeHtml(standard.code)} ${escapeHtml(standard.text)}</button>`
+          + `★ ${escapeHtml(standardDisplay_(standard))}${standard.domain ? ` · ${escapeHtml(standard.domain)}` : ''}</button>`
       ).join('');
       document.querySelectorAll('[data-pinned-standard]').forEach(button => {
         button.addEventListener('click', () => {
@@ -2326,6 +2406,11 @@
         : state.standardsError
           ? state.standardsError
           : `${state.achievementStandards.length}개 성취기준 · 코드나 문구 일부를 입력해 검색하세요.`;
+      const selectedAssignment = state.bootstrap && (state.bootstrap.assignments || []).find(item =>
+        item.assignmentKey === state.selectedAssignmentKey);
+      $('achievementCurriculumStatus').textContent = selectedAssignment && selectedAssignment.curriculumRevision
+        ? `${selectedAssignment.curriculumRevision} 개정 교육과정`
+        : '';
       renderStandardPinControl_();
     }
 
@@ -2947,7 +3032,7 @@
           addExternalStudentToMyGroup:() => runner.addExternalStudentToMyGroup(args[0],args[1]),
           removeExternalStudentFromMyGroup:() => runner.removeExternalStudentFromMyGroup(args[0],args[1]),
           getStudentPhotosForMyAssignment:() => runner.getStudentPhotosForMyAssignment(args[0],args[1]),
-          getStandardsForSubject:() => runner.getStandardsForSubject(args[0]),
+          getStandardsForAssignment:() => runner.getStandardsForAssignment(args[0]),
           getPinnedStandardsForAssignment:() => runner.getPinnedStandardsForAssignment(args[0]),
           pinStandardForAssignment:() => runner.pinStandardForAssignment(args[0],args[1]),
           unpinStandardForAssignment:() => runner.unpinStandardForAssignment(args[0],args[1]),

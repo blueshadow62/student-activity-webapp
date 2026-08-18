@@ -12,7 +12,13 @@ const sources = Object.fromEntries(gsFiles.map((name) => [
   name,
   fs.readFileSync(path.join(__dirname, name), 'utf8'),
 ]));
-const serverCode = gsFiles.map((name) => sources[name]).join('\n');
+// 생성 데이터의 교과 문장(예: "인증번호")은 실행 코드 보안 검사 대상이
+// 아니다. 함수도 없는 대용량 번들을 제외해야 문자열 오탐과 구문 검사 비용을
+// 피하면서 실제 서버 코드 전체는 그대로 검사할 수 있다.
+const serverCode = gsFiles
+  .filter((name) => name !== 'StandardsData.gs')
+  .map((name) => sources[name])
+  .join('\n');
 const html = fs.readFileSync(path.join(__dirname, 'Index.html'), 'utf8');
 const manifestText = fs.readFileSync(path.join(__dirname, 'appsscript.json'), 'utf8');
 const manifest = JSON.parse(manifestText);

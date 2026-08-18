@@ -81,11 +81,6 @@ function initializeCentralDataSchema() {
       CENTRAL_APP_SETTING_HEADERS,
       '#7b1fa2'
     );
-    upsertCentralAppSetting_(
-      appSettings,
-      'schemaVersion',
-      CENTRAL_CONFIG.schemaVersion
-    );
     const schoolLevel = getConfiguredSchoolLevel_();
     if (schoolLevel) {
       const subjectCatalogSheet = spreadsheet.getSheetByName(
@@ -110,13 +105,16 @@ function initializeCentralDataSchema() {
           || subjectCatalogSheet.getLastRow() < 2
           || achievementStandardSheet.getLastRow() < 2
       ) {
-        throw createCentralError_(
-          'CENTRAL_SCHEMA_INVALID',
-          '과목목록·성취기준 시트가 일부만 준비되어 있습니다. 기존 데이터를 백업한 뒤 성취기준 데이터 설정 버튼으로 다시 적재해 주세요.'
-        );
+        // 성취기준은 임시 시트 검증 후 백업을 남기고 승격한다. v4 머리글은
+        // 여기서 안전하게 v5 데이터 구조로 올릴 수 있다.
+        replaceCentralStandardsData_(spreadsheet, schoolLevel);
       }
       upsertCentralAppSetting_(appSettings, 'schoolLevel', schoolLevel);
     }
+    upsertCentralAppSetting_(appSettings, 'schemaVersion', CENTRAL_CONFIG.schemaVersion);
+    PropertiesService.getScriptProperties().setProperty(
+      CENTRAL_CONFIG.schemaVersionProperty, CENTRAL_CONFIG.schemaVersion
+    );
     removeCentralDefaultSheet_(spreadsheet);
     clearCentralStudentCache_();
     clearCentralGroupCache_(spreadsheet);
@@ -194,13 +192,11 @@ function ensureCentralAdminSheet_(spreadsheet, sheetName, headers, color) {
     initializeCentralSheet_(sheet, headers, color);
     return sheet;
   }
-  if (!centralHeadersMatch_(sheet, headers)) {
-    throw createCentralError_(
-      'CENTRAL_SCHEMA_INVALID',
-      `'${sheetName}' 시트의 머리글을 확인해 주세요.`
-    );
-  }
-  return sheet;
+  const backfill = sheetName === CENTRAL_CONFIG.teacherAssignmentSheetName
+    || sheetName === CENTRAL_CONFIG.assignmentRequestSheetName
+    ? backfillAssignmentCurriculumRevision_
+    : null;
+  return ensureCentralTrailingHeaders_(sheet, headers, color, backfill);
 }
 
 function upsertCentralAppSetting_(sheet, key, value) {
@@ -970,6 +966,8 @@ function saveTeacherAssignmentsBatch(payload) {
         grade: value.grade,
         classNumber: classNumber,
         subject: value.subject,
+        curriculumRevision: value.curriculumRevision,
+        subjectKey: value.subjectKey,
         assignmentType: value.assignmentType,
         active: true,
       });
@@ -1028,6 +1026,7 @@ function isDuplicateTeacherAssignment_(assignment, normalized, excludedKey) {
     && assignment.teacherEmail === normalized.teacherEmail
     && assignment.schoolYear === normalized.schoolYear
     && assignment.grade === normalized.grade
+    && assignment.curriculumRevision === normalized.curriculumRevision
     && assignment.subject === normalized.subject;
   if (!sameBase) return false;
   const storedIsGroup = centralAssignmentIsGroup_(assignment);
@@ -1057,6 +1056,8 @@ function buildTeacherAssignmentRow_(normalized, key, createdAt, updatedAt) {
     normalized.active,
     createdAt,
     updatedAt,
+    normalized.curriculumRevision,
+    normalized.subjectKey,
   ];
 }
 
@@ -1245,6 +1246,14 @@ function normalizeTeacherAssignmentPayload_(payload) {
   if (!subject || subject.length > APP_CONFIG.maxSubjectLength) {
     throw new Error('담당 과목을 확인해 주세요.');
   }
+  const curriculumRevision = resolveCurriculumRevision_(schoolYear, grade);
+  const requestedCurriculumRevision = String(value.curriculumRevision || '').trim();
+  if (
+    requestedCurriculumRevision
+      && requestedCurriculumRevision !== curriculumRevision
+  ) {
+    throw new Error('학년도와 학년에 맞는 교육과정을 다시 확인해 주세요.');
+  }
   return {
     assignmentKey: value.assignmentKey
       ? normalizeCentralKey_(value.assignmentKey, '담당키')
@@ -1254,6 +1263,10 @@ function normalizeTeacherAssignmentPayload_(payload) {
     grade: grade,
     classNumber: classNumber,
     subject: subject,
+    curriculumRevision: curriculumRevision,
+    subjectKey: normalizeAssignmentSubjectKey_(
+      subject, curriculumRevision, value.subjectKey
+    ),
     assignmentType: assignmentType.slice(0, 30),
     groupName: isGroup ? groupName : '',
     active: value.active == null ? true : Boolean(value.active),

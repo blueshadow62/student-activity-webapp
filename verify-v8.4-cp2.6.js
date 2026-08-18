@@ -54,8 +54,8 @@ test(1, '체크포인트 2.5 회귀 91/91', () => {
 test(2, '앱 버전이 semver 형식', () => {
   assert(/version: '\d+\.\d+\.\d+'/.test(code), '앱 버전이 semver 형식이 아닙니다.');
 });
-test(3, '중앙 스키마 버전 4', () => {
-  assert(central.includes("schemaVersion: '4'"), '중앙 스키마 버전이 4가 아닙니다.');
+test(3, '중앙 스키마 버전 5', () => {
+  assert(central.includes("schemaVersion: '5'"), '중앙 스키마 버전이 5가 아닙니다.');
 });
 test(4, '담당신청 시트 정의·초기화', () => {
   assert(central.includes("assignmentRequestSheetName: '담당신청'"), '담당신청 시트명이 없습니다.');
