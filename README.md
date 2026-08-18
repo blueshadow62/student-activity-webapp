@@ -4,8 +4,9 @@
 관리자 소유 중앙 자료에 한 벌만 두고, 활동 기록은 교사 각자의 Drive에 각자 소유로
 저장한다.
 
-**설치는 [INSTALL.md](INSTALL.md)를 따른다.** 이 문서는 구조·운영 계약·설정
-항목을 설명한다.
+**설치는 [INSTALL.md](INSTALL.md)를 따른다.** 일반 사용자는 GitHub Release의
+Windows 설치 도우미를, 개발자·AI 도구 사용자는 기존 clasp 방식을 선택할 수 있다.
+이 문서는 구조·운영 계약·설정 항목을 설명한다.
 
 **설치가 끝난 뒤 사용법은 아래 두 문서에 이미 있다. 새로 만들지 말고 그대로
 안내한다.**
@@ -129,7 +130,7 @@ v8.3의 `DatabaseProvision.gs`는 넣지 않는다. 파일 일부만 섞어 복�
 | `ADMIN_EMAILS` | 관리자 이메일, 쉼표·공백·줄바꿈 구분 |
 | `STAFF_GROUP_EMAIL` | 선택 사항. 운영 메모용 Google 그룹 주소 |
 | `ALLOWED_TEACHER_EMAILS` | 선택 사항. 담당 신청을 허용할 계정 목록 |
-| `CENTRAL_SCHEMA_VERSION` | `3` |
+| `CENTRAL_SCHEMA_VERSION` | `4` |
 
 `ALLOWED_TEACHER_EMAILS`는 **관리자 화면 `교사 관리` 탭 아래 `담당 신청 허용 범위`**
 에서 설정한다. 이 속성을 직접 편집할 필요는 없다.

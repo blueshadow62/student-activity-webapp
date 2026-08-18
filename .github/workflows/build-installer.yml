@@ -1,0 +1,120 @@
+name: Build Windows installer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "installer/**"
+      - ".github/workflows/build-installer.yml"
+      - "*.gs"
+      - "Index.html"
+      - "appsscript.json"
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test and build portable EXE
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: installer
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: installer/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run Apps Script regression tests
+        working-directory: ${{ github.workspace }}
+        run: |
+          node verify-v8.4-cp2.6.js
+          node verify-v8.4-runtime.js
+          node verify-achievement-parser.js
+          node verify-achievement-standards.js
+          node verify-achievement-integration.js
+
+      - name: Run installer tests
+        run: npm test
+
+      - name: Match installer version to release tag
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $version = $env:RELEASE_TAG.TrimStart("v")
+          if ($version -notmatch '^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
+            throw "Release tag must be a semantic version such as v1.2.0."
+          }
+          npm version $version --no-git-tag-version --allow-same-version
+
+      - name: Build portable Windows executable
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm exec -- electron-builder --win portable --x64 --publish never
+
+      - name: Generate SHA-256 checksums
+        run: |
+          $executables = @(Get-ChildItem -Path dist -Filter *.exe -File)
+          if ($executables.Count -eq 0) {
+            throw "electron-builder did not produce an EXE in installer/dist."
+          }
+
+          $checksums = foreach ($executable in $executables) {
+            $hash = (Get-FileHash -LiteralPath $executable.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($executable.Name)"
+          }
+          $checksums | Set-Content -LiteralPath dist\SHA256SUMS.txt -Encoding utf8
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-activity-installer
+          path: |
+            installer/dist/*.exe
+            installer/dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+  release:
+    name: Attach installer to GitHub Release
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: student-activity-installer
+          path: installer/dist
+
+      - name: Attach installer to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $assets = @((Get-ChildItem -Path installer\dist -Filter *.exe -File).FullName)
+          $assets += (Resolve-Path -LiteralPath installer\dist\SHA256SUMS.txt).Path
+          & gh release upload $env:RELEASE_TAG @assets --clobber

@@ -43,7 +43,20 @@ AI 코딩 도구(Claude Code, Codex 등)에게 이 저장소 주소만 주고 �
 있는 계정만** 최초 관리자로 등록됩니다. 웹앱 주소만 아는 사람은 이 함수를 호출해도
 관리자가 될 수 없습니다.
 
-## A. clasp으로 설치하기 (권장)
+## A. Windows 설치 도우미로 설치하기 (일반 사용자 권장)
+
+[GitHub Releases](https://github.com/blueshadow62/student-activity-webapp/releases)에서
+`학생활동기록-설치도우미-<버전>-x64.exe`를 내려받아 실행합니다. Node.js, Git,
+clasp 또는 AI 코딩 도구를 따로 설치할 필요가 없습니다.
+
+설치 도우미가 프로젝트 생성, 코드 업로드, 편집기 열기와 웹앱 배포를 진행합니다.
+화면 안내에 따라 위 표의 사람이 해야 하는 네 단계만 직접 승인하십시오. 설치가
+끝나면 웹앱 주소를 열거나 바탕화면 바로가기를 만들 수 있습니다.
+
+서명되지 않은 시험 배포판은 Windows SmartScreen 경고가 표시될 수 있습니다. 파일을
+실행하기 전에 Release에 함께 있는 `SHA256SUMS.txt`와 파일 체크섬을 비교하십시오.
+
+## B. clasp으로 설치하기 (개발자·AI 도구 사용자)
 
 명령 몇 줄로 끝나고, 나중에 코드를 갱신할 때도 편합니다.
 
@@ -61,7 +74,7 @@ clasp login
 이 저장소를 받은 폴더에서 새 Apps Script 프로젝트를 만듭니다.
 
 ```bash
-clasp create-script --type webapp --title "학생 활동 기록"
+clasp create-script --type standalone --title "학생 활동 기록"
 ```
 
 이 저장소에는 `.clasp.json`이 없습니다. 위 명령이 그 파일을 새로 만들며, 그
@@ -95,11 +108,14 @@ clasp list-deployments
 https://script.google.com/macros/s/<배포ID>/exec
 ```
 
-## B. 손으로 복사해 설치하기
+## C. 손으로 복사해 설치하기
 
 clasp을 쓰지 않으려면 [script.google.com](https://script.google.com)에서 새
 프로젝트를 만들고 파일을 하나씩 붙여넣습니다. 어떤 파일을 어떤 형식으로 만드는지는
 [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) 1장에 표로 정리되어 있습니다.
+
+`StandardsData.gs`는 용량이 크므로 이 방식보다 Windows 설치 도우미 또는
+`clasp push`를 권장합니다.
 
 `appsscript.json`은 **프로젝트 설정 → 매니페스트 파일을 편집기에 표시**를 켜야
 보입니다.
@@ -109,7 +125,8 @@ clasp을 쓰지 않으려면 [script.google.com](https://script.google.com)에�
 여기서부터는 웹앱 화면 안에서 진행됩니다.
 
 1. `/exec` 주소를 **관리자 계정으로** 엽니다. 학교 설치 화면이 나옵니다.
-2. 학교명을 입력하고 **새 중앙 자료 만들기**를 고릅니다. 관리자 Drive에 중앙
+2. 학교명과 학교급(초등학교·중학교·고등학교)을 선택하고 **새 중앙 자료 만들기**를
+   고릅니다. 관리자 Drive에 중앙
    스프레드시트와 사진 폴더가 만들어지고, 필요한 시트가 자동으로 생성됩니다.
    - 이미 쓰던 자료가 있으면 **기존 중앙 자료 다시 연결하기**를 고릅니다.
 3. 관리자 포털에서 학생 명단을 CSV로 넣습니다.

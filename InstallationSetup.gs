@@ -6,7 +6,8 @@ const INSTALLATION_CONFIG = Object.freeze({
   stateProperty: 'INSTALLATION_STATE',
   versionProperty: 'INSTALLATION_VERSION',
   schoolNameProperty: 'SCHOOL_NAME',
-  version: '1',
+  schoolLevelProperty: 'SCHOOL_LEVEL',
+  version: '2',
   maxSchoolNameLength: 100,
   states: Object.freeze({
     adminRegistrationRequired: 'ADMIN_REGISTRATION_REQUIRED',
@@ -82,6 +83,10 @@ function provisionSchoolCentralResources(payload) {
   const requestedSchoolName = normalizeInstallationSchoolName_(
     payload && payload.schoolName
   );
+  const schoolLevel = normalizeSchoolLevel_(
+    payload && payload.schoolLevel,
+    true
+  );
   const resources = withCentralWriteLock_(function () {
     const properties = PropertiesService.getScriptProperties();
     const existingSchoolName = String(
@@ -103,11 +108,13 @@ function provisionSchoolCentralResources(payload) {
     );
     const values = {};
     values[INSTALLATION_CONFIG.schoolNameProperty] = schoolName;
+    values[INSTALLATION_CONFIG.schoolLevelProperty] = schoolLevel;
     values[INSTALLATION_CONFIG.versionProperty] =
       INSTALLATION_CONFIG.version;
     values[CENTRAL_CONFIG.schemaVersionProperty] =
       CENTRAL_CONFIG.schemaVersion;
     properties.setProperties(values, false);
+    setConfiguredSchoolLevelMemo_(schoolLevel);
     return {
       databaseCreated: databaseCreated,
       photoFolderCreated: photoFolderCreated,
@@ -142,6 +149,10 @@ function connectExistingSchoolCentralResources(payload) {
   const schoolName = normalizeInstallationSchoolName_(
     payload && payload.schoolName
   );
+  const schoolLevel = normalizeSchoolLevel_(
+    payload && payload.schoolLevel,
+    true
+  );
   const databaseId = extractInstallationDriveId_(
     payload && payload.databaseReference,
     'spreadsheet'
@@ -160,11 +171,13 @@ function connectExistingSchoolCentralResources(payload) {
     values[CENTRAL_CONFIG.schemaVersionProperty] =
       CENTRAL_CONFIG.schemaVersion;
     values[INSTALLATION_CONFIG.schoolNameProperty] = schoolName;
+    values[INSTALLATION_CONFIG.schoolLevelProperty] = schoolLevel;
     values[INSTALLATION_CONFIG.stateProperty] =
       INSTALLATION_CONFIG.states.setupRequired;
     values[INSTALLATION_CONFIG.versionProperty] =
       INSTALLATION_CONFIG.version;
     properties.setProperties(values, false);
+    setConfiguredSchoolLevelMemo_(schoolLevel);
   });
 
   const dashboard = initializeCentralDataSchema();
@@ -195,9 +208,11 @@ function resetSchoolInstallationConnections(payload) {
       CENTRAL_CONFIG.photoFolderIdProperty,
       CENTRAL_CONFIG.schemaVersionProperty,
       INSTALLATION_CONFIG.schoolNameProperty,
+      INSTALLATION_CONFIG.schoolLevelProperty,
     ].forEach(function (key) {
       properties.deleteProperty(key);
     });
+    setConfiguredSchoolLevelMemo_('');
     const clearedRequests = clearStoredAssignmentRequests_(properties);
     const values = {};
     values[INSTALLATION_CONFIG.stateProperty] =
@@ -345,6 +360,7 @@ function getSchoolInstallationState_() {
     : adminConfigured
       ? INSTALLATION_CONFIG.states.setupRequired
       : INSTALLATION_CONFIG.states.adminRegistrationRequired;
+  const schoolLevel = getConfiguredSchoolLevel_();
   return {
     state: state,
     ready: ready,
@@ -355,6 +371,8 @@ function getSchoolInstallationState_() {
     schoolName: String(
       properties.getProperty(INSTALLATION_CONFIG.schoolNameProperty) || ''
     ).trim(),
+    schoolLevel: schoolLevel,
+    schoolLevelLabel: schoolLevelLabel_(schoolLevel),
     version: String(
       properties.getProperty(INSTALLATION_CONFIG.versionProperty) || ''
     ).trim(),

@@ -9,7 +9,7 @@ const CENTRAL_CONFIG = Object.freeze({
   staffGroupEmailProperty: 'STAFF_GROUP_EMAIL',
   schemaVersionProperty: 'CENTRAL_SCHEMA_VERSION',
   legacyDatabaseIdProperty: 'STUDENT_ACTIVITY_DATABASE_SPREADSHEET_ID',
-  schemaVersion: '3',
+  schemaVersion: '4',
   studentSheetName: '학생목록',
   legacyStudentSheetName: '데이터베이스',
   photoSheetName: '사진정보',
@@ -19,6 +19,8 @@ const CENTRAL_CONFIG = Object.freeze({
   groupSheetName: '수강그룹',
   groupMemberSheetName: '수강그룹원',
   appSettingsSheetName: '앱설정',
+  subjectCatalogSheetName: '과목목록',
+  achievementStandardSheetName: '성취기준',
   maxAssignmentsPerUser: 30,
   maxClassNumbersPerBatch: 20,
   maxStudentResults: 50,
@@ -70,12 +72,111 @@ const CENTRAL_ASSIGNMENT_TYPES = Object.freeze({
   group: '그룹',
 });
 const CENTRAL_APP_SETTING_HEADERS = Object.freeze(['항목', '값', '수정일시']);
+const CENTRAL_SUBJECT_CATALOG_HEADERS = Object.freeze([
+  '과목명', '축약코드', '학교급', '계열', '과목구분',
+]);
+const CENTRAL_ACHIEVEMENT_STANDARD_HEADERS = Object.freeze([
+  '코드', '과목명', '영역', '내용', '학교급', '계열',
+]);
+const SCHOOL_LEVELS = Object.freeze({
+  elementary: '초등학교',
+  middle: '중학교',
+  high: '고등학교',
+});
 const CENTRAL_ROSTER_CSV_HEADERS = Object.freeze([
   '학년', '반', '번호', '이름', '학적상태',
 ]);
 const CENTRAL_ALLOWED_PHOTO_MIME_TYPES = Object.freeze([
   'image/jpeg', 'image/png', 'image/webp',
 ]);
+
+function normalizeSchoolLevel_(value, required) {
+  const schoolLevel = String(value || '').trim().toLowerCase();
+  if (!schoolLevel && !required) return '';
+  if (!Object.prototype.hasOwnProperty.call(SCHOOL_LEVELS, schoolLevel)) {
+    throw new Error('학교급을 초등학교, 중학교, 고등학교 중에서 선택해 주세요.');
+  }
+  return schoolLevel;
+}
+
+function schoolLevelLabel_(value) {
+  const schoolLevel = normalizeSchoolLevel_(value, false);
+  return schoolLevel ? SCHOOL_LEVELS[schoolLevel] : '';
+}
+
+let configuredSchoolLevelMemo_ = null;
+
+function getConfiguredSchoolLevel_() {
+  if (configuredSchoolLevelMemo_ !== null) return configuredSchoolLevelMemo_;
+  try {
+    if (
+      !PropertiesService
+        || typeof PropertiesService.getScriptProperties !== 'function'
+    ) {
+      configuredSchoolLevelMemo_ = '';
+      return configuredSchoolLevelMemo_;
+    }
+    configuredSchoolLevelMemo_ = normalizeSchoolLevel_(
+      PropertiesService.getScriptProperties().getProperty('SCHOOL_LEVEL'),
+      false
+    );
+    return configuredSchoolLevelMemo_;
+  } catch (error) {
+    // 학교급 설정을 읽지 못해도 기존 1~3학년 기능은 계속 동작해야 한다.
+    configuredSchoolLevelMemo_ = '';
+    return configuredSchoolLevelMemo_;
+  }
+}
+
+function setConfiguredSchoolLevelMemo_(value) {
+  configuredSchoolLevelMemo_ = normalizeSchoolLevel_(value, false);
+}
+
+function getAllowedGrades_() {
+  return getConfiguredSchoolLevel_() === 'elementary'
+    ? [1, 2, 3, 4, 5, 6]
+    : APP_CONFIG.allowedGrades.slice();
+}
+
+// 승인 전 교사는 중앙 Drive 파일을 읽을 권한이 없다. 담당 신청 과목 목록은
+// 배포 번들에서 학교급만 골라 내려 줘야 신청 화면 자체가 중앙 공유에 의존하지 않는다.
+let bundledSubjectCatalogMemo_ = null;
+
+function readBundledSubjectCatalog_() {
+  if (bundledSubjectCatalogMemo_ !== null) return bundledSubjectCatalogMemo_;
+  if (typeof STANDARDS_SUBJECTS === 'undefined') {
+    bundledSubjectCatalogMemo_ = [];
+  } else if (Array.isArray(STANDARDS_SUBJECTS)) {
+    bundledSubjectCatalogMemo_ = STANDARDS_SUBJECTS;
+  } else {
+    bundledSubjectCatalogMemo_ = JSON.parse(String(STANDARDS_SUBJECTS || '[]'));
+  }
+  return bundledSubjectCatalogMemo_;
+}
+
+function getSubjectCatalogForSchoolLevel_(schoolLevel) {
+  const normalized = normalizeSchoolLevel_(schoolLevel, false);
+  if (!normalized) return [];
+  return readBundledSubjectCatalog_().filter(function (item) {
+    return String(item && item.schoolLevel || '').trim() === normalized;
+  }).map(function (item) {
+    return {
+      name: String(item.name || '').trim(),
+      abbreviation: String(item.abbreviation || '').trim(),
+      track: String(item.track || '').trim(),
+      category: String(item.category || '').trim(),
+    };
+  }).filter(function (item) { return Boolean(item.name); });
+}
+
+function getSubjectCatalog() {
+  const schoolLevel = getConfiguredSchoolLevel_();
+  return {
+    schoolLevel: schoolLevel,
+    schoolLevelLabel: schoolLevelLabel_(schoolLevel),
+    subjects: getSubjectCatalogForSchoolLevel_(schoolLevel),
+  };
+}
 
 function getRequiredActiveUserEmail_() {
   const email = normalizeCentralEmail_(
@@ -495,6 +596,7 @@ function centralConnectionStatusMessage_(state) {
 }
 
 function inspectCentralSchema_(spreadsheet) {
+  const schoolLevel = getConfiguredSchoolLevel_();
   const studentSheet = getCentralStudentSheet_(spreadsheet, false);
   const photoSheet = getCentralPhotoSheet_(spreadsheet, false);
   const assignmentSheet = spreadsheet.getSheetByName(
@@ -505,6 +607,12 @@ function inspectCentralSchema_(spreadsheet) {
   );
   const appSettingsSheet = spreadsheet.getSheetByName(
     CENTRAL_CONFIG.appSettingsSheetName
+  );
+  const subjectCatalogSheet = spreadsheet.getSheetByName(
+    CENTRAL_CONFIG.subjectCatalogSheetName
+  );
+  const achievementStandardSheet = spreadsheet.getSheetByName(
+    CENTRAL_CONFIG.achievementStandardSheetName
   );
   const studentReady = Boolean(
     studentSheet && isSupportedCentralStudentSheet_(studentSheet)
@@ -534,22 +642,48 @@ function inspectCentralSchema_(spreadsheet) {
         CENTRAL_APP_SETTING_HEADERS
       )
   );
+  const subjectCatalogReady = Boolean(
+    subjectCatalogSheet
+      && centralHeadersMatch_(
+        subjectCatalogSheet,
+        CENTRAL_SUBJECT_CATALOG_HEADERS
+      )
+      && subjectCatalogSheet.getLastRow() > 1
+  );
+  const achievementStandardReady = Boolean(
+    achievementStandardSheet
+      && centralHeadersMatch_(
+        achievementStandardSheet,
+        CENTRAL_ACHIEVEMENT_STANDARD_HEADERS
+      )
+      && achievementStandardSheet.getLastRow() > 1
+  );
+  // SCHOOL_LEVEL이 없는 기존 설치는 새 기능을 사용하지 않을 뿐 기존 중앙
+  // 기능은 계속 준비 상태여야 한다. 학교급을 정한 뒤부터 두 시트를 요구한다.
+  const standardsReady = !schoolLevel
+    || (subjectCatalogReady && achievementStandardReady);
   return {
     ready: studentReady
       && photoReady
       && assignmentReady
       && assignmentRequestReady
-      && appSettingsReady,
+      && appSettingsReady
+      && standardsReady,
     studentReady: studentReady,
     photoReady: photoReady,
     assignmentReady: assignmentReady,
     assignmentRequestReady: assignmentRequestReady,
     appSettingsReady: appSettingsReady,
+    subjectCatalogReady: subjectCatalogReady,
+    achievementStandardReady: achievementStandardReady,
+    standardsReady: standardsReady,
     studentSheet: studentSheet,
     photoSheet: photoSheet,
     assignmentSheet: assignmentSheet,
     assignmentRequestSheet: assignmentRequestSheet,
     appSettingsSheet: appSettingsSheet,
+    subjectCatalogSheet: subjectCatalogSheet,
+    achievementStandardSheet: achievementStandardSheet,
   };
 }
 
@@ -646,6 +780,264 @@ function getRequiredCentralAssignmentRequestSheet_() {
     );
   }
   return sheet;
+}
+
+function getRequiredCentralAchievementStandardSheet_() {
+  const sheet = getCentralDatabase_().getSheetByName(
+    CENTRAL_CONFIG.achievementStandardSheetName
+  );
+  if (
+    !sheet
+      || !centralHeadersMatch_(
+        sheet,
+        CENTRAL_ACHIEVEMENT_STANDARD_HEADERS
+      )
+  ) {
+    throw createCentralError_(
+      'CENTRAL_SCHEMA_INVALID',
+      '중앙 성취기준 시트를 관리자가 먼저 준비해야 합니다.'
+    );
+  }
+  return sheet;
+}
+
+const bundledStandardsMemo_ = {};
+
+function bundledStandardsForSchoolLevel_(schoolLevel) {
+  const normalized = normalizeSchoolLevel_(schoolLevel, true);
+  if (
+    typeof STANDARDS_DATA === 'undefined'
+      || !Object.prototype.hasOwnProperty.call(STANDARDS_DATA, normalized)
+      || STANDARDS_DATA[normalized] == null
+  ) {
+    throw new Error(`${schoolLevelLabel_(normalized)} 성취기준 번들을 찾을 수 없습니다.`);
+  }
+  if (Array.isArray(STANDARDS_DATA[normalized])) {
+    return STANDARDS_DATA[normalized];
+  }
+  if (!Object.prototype.hasOwnProperty.call(bundledStandardsMemo_, normalized)) {
+    bundledStandardsMemo_[normalized] = JSON.parse(
+      String(STANDARDS_DATA[normalized] || '[]')
+    );
+    if (!Array.isArray(bundledStandardsMemo_[normalized])) {
+      throw new Error(`${schoolLevelLabel_(normalized)} 성취기준 번들 형식이 올바르지 않습니다.`);
+    }
+  }
+  return bundledStandardsMemo_[normalized];
+}
+
+function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
+  const normalized = normalizeSchoolLevel_(schoolLevel, true);
+  const subjects = getSubjectCatalogForSchoolLevel_(normalized);
+  const standards = bundledStandardsForSchoolLevel_(normalized);
+  if (!subjects.length || !standards.length) {
+    throw new Error(`${schoolLevelLabel_(normalized)} 과목·성취기준 데이터가 비어 있습니다.`);
+  }
+  const trackBySubject = new Map(subjects.map(function (subject) {
+    return [subject.name, subject.track];
+  }));
+  const subjectRows = subjects.map(function (subject) {
+    return [
+      subject.name,
+      subject.abbreviation,
+      normalized,
+      subject.track,
+      subject.category,
+    ];
+  });
+  const standardRows = standards.map(function (standard) {
+    const subject = String(standard.subject || '').trim();
+    const code = String(standard.code || '').trim();
+    const text = String(standard.text || '').trim();
+    if (!subject || !code || !text) {
+      throw new Error('성취기준 번들에 코드·과목·내용이 비어 있는 항목이 있습니다.');
+    }
+    return [
+      code,
+      subject,
+      String(standard.domain || '').trim(),
+      text,
+      normalized,
+      String(standard.track || trackBySubject.get(subject) || '').trim(),
+    ];
+  });
+  const subjectSheet = prepareCentralReplacementSheet_(
+    spreadsheet,
+    CENTRAL_CONFIG.subjectCatalogSheetName,
+    CENTRAL_SUBJECT_CATALOG_HEADERS,
+    '#1565c0'
+  );
+  const standardSheet = prepareCentralReplacementSheet_(
+    spreadsheet,
+    CENTRAL_CONFIG.achievementStandardSheetName,
+    CENTRAL_ACHIEVEMENT_STANDARD_HEADERS,
+    '#6a1b9a'
+  );
+  writeCentralRowsInBatches_(subjectSheet, subjectRows);
+  writeCentralRowsInBatches_(standardSheet, standardRows);
+  subjectSheet.autoResizeColumns(1, CENTRAL_SUBJECT_CATALOG_HEADERS.length);
+  standardSheet.setColumnWidth(1, 150);
+  standardSheet.setColumnWidth(2, 180);
+  standardSheet.setColumnWidth(3, 180);
+  standardSheet.setColumnWidth(4, 520);
+  standardSheet.getRange(
+    2,
+    3,
+    Math.max(standardRows.length, 1),
+    2
+  ).setWrap(true);
+  return {
+    schoolLevel: normalized,
+    subjectCount: subjectRows.length,
+    standardCount: standardRows.length,
+  };
+}
+
+function prepareCentralReplacementSheet_(spreadsheet, sheetName, headers, color) {
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (sheet && sheet.getLastRow() > 0 && !centralHeadersMatch_(sheet, headers)) {
+    throw createCentralError_(
+      'CENTRAL_SCHEMA_INVALID',
+      `'${sheetName}' 시트의 머리글을 확인해 주세요.`
+    );
+  }
+  if (!sheet) sheet = spreadsheet.insertSheet(sheetName);
+  initializeCentralSheet_(sheet, headers, color);
+  return sheet;
+}
+
+function writeCentralRowsInBatches_(sheet, rows) {
+  if (!rows.length) return;
+  const requiredRows = rows.length + 1;
+  const requiredColumns = rows[0].length;
+  if (sheet.getMaxRows() < requiredRows) {
+    sheet.insertRowsAfter(
+      sheet.getMaxRows(),
+      requiredRows - sheet.getMaxRows()
+    );
+  }
+  if (sheet.getMaxColumns() < requiredColumns) {
+    sheet.insertColumnsAfter(
+      sheet.getMaxColumns(),
+      requiredColumns - sheet.getMaxColumns()
+    );
+  }
+  const batchSize = 5000;
+  for (let offset = 0; offset < rows.length; offset += batchSize) {
+    const batch = rows.slice(offset, offset + batchSize);
+    sheet.getRange(offset + 2, 1, batch.length, batch[0].length).setValues(batch);
+  }
+}
+
+function getStandardsForSubject(subject) {
+  const normalizedSubject = String(subject || '').trim();
+  if (!normalizedSubject) return [];
+  if (normalizedSubject.length > APP_CONFIG.maxSubjectLength) {
+    throw new Error('과목명이 너무 깁니다.');
+  }
+  const allowed = getMyAssignments().some(function (assignment) {
+    return assignment.subject === normalizedSubject;
+  });
+  if (!allowed) {
+    throw createCentralError_(
+      'ASSIGNMENT_FORBIDDEN',
+      '현재 담당 중인 과목의 성취기준만 조회할 수 있습니다.'
+    );
+  }
+  return readAchievementStandardsForSubject_(normalizedSubject);
+}
+
+function readAchievementStandardsForSubject_(subject) {
+  const schoolLevel = getConfiguredSchoolLevel_();
+  if (!schoolLevel) return [];
+  const sheet = getRequiredCentralAchievementStandardSheet_();
+  const rowCount = sheet.getLastRow() - 1;
+  if (rowCount <= 0) return [];
+  const matches = sheet
+    .getRange(2, 2, rowCount, 1)
+    .createTextFinder(subject)
+    .matchEntireCell(true)
+    .findAll();
+  if (!matches.length) return [];
+  const rowNumbers = matches.map(function (match) { return match.getRow(); })
+    .sort(function (left, right) { return left - right; });
+  const groups = [];
+  rowNumbers.forEach(function (rowNumber) {
+    const last = groups[groups.length - 1];
+    if (last && rowNumber === last.end + 1) {
+      last.end = rowNumber;
+    } else {
+      groups.push({ start: rowNumber, end: rowNumber });
+    }
+  });
+  const standards = [];
+  groups.forEach(function (group) {
+    sheet.getRange(
+      group.start,
+      1,
+      group.end - group.start + 1,
+      CENTRAL_ACHIEVEMENT_STANDARD_HEADERS.length
+    ).getDisplayValues().forEach(function (row) {
+      if (String(row[1] || '').trim() !== subject) return;
+      if (String(row[4] || '').trim() !== schoolLevel) return;
+      standards.push({
+        code: String(row[0] || '').trim(),
+        subject: String(row[1] || '').trim(),
+        domain: String(row[2] || '').trim(),
+        text: String(row[3] || '').trim(),
+      });
+    });
+  });
+  return standards.filter(function (standard) {
+    return standard.code && standard.text;
+  }).map(function (standard) {
+    return {
+      ...standard,
+      key: achievementStandardKey_(standard),
+    };
+  }).sort(function (left, right) {
+    return left.code.localeCompare(right.code, 'ko')
+      || left.domain.localeCompare(right.domain, 'ko')
+      || left.text.localeCompare(right.text, 'ko');
+  });
+}
+
+function achievementStandardKey_(standard) {
+  return JSON.stringify([
+    String(standard && standard.subject || '').trim(),
+    String(standard && standard.domain || '').trim(),
+    String(standard && standard.code || '').trim(),
+    String(standard && standard.text || '').trim(),
+  ]);
+}
+
+function achievementStandardDisplay_(standard) {
+  return `${standard.code} ${standard.text}`.trim();
+}
+
+function resolveAchievementStandard_(subject, value) {
+  const input = String(value || '').trim();
+  if (!input) return null;
+  const standards = readAchievementStandardsForSubject_(subject);
+  const keyMatch = standards.find(function (item) {
+    return item.key === input;
+  });
+  if (keyMatch) return keyMatch;
+  const displayMatches = standards.filter(function (item) {
+    return achievementStandardDisplay_(item) === input;
+  });
+  // 영역만 다르고 코드·원문이 같은 행은 사용자에게 같은 기준으로 보인다.
+  // 정렬된 첫 행을 택해도 저장되는 표시값은 동일하다.
+  if (displayMatches.length) return displayMatches[0];
+  const codeMatch = input.match(/^\s*(\[[^\]]+\])\s*$/);
+  const codeMatches = codeMatch
+    ? standards.filter(function (item) { return item.code === codeMatch[1].trim(); })
+    : [];
+  if (codeMatches.length === 1) return codeMatches[0];
+  if (codeMatches.length > 1) {
+    throw new Error('같은 코드의 성취기준이 여러 개입니다. 코드와 문장이 함께 표시된 항목을 골라 주세요.');
+  }
+  throw new Error('선택한 과목에 포함된 성취기준을 목록에서 골라 주세요.');
 }
 
 function normalizeCentralClassNumberList_(value) {
@@ -961,7 +1353,7 @@ function readCentralGroupGradesCached_() {
   }
   centralGroupGradesMemo_ = new Map(rows.map(function (pair) {
     return [pair[0], pair[1].split('·').map(Number).filter(function (grade) {
-      return APP_CONFIG.allowedGrades.includes(grade);
+      return getAllowedGrades_().includes(grade);
     })];
   }));
   return centralGroupGradesMemo_;
@@ -1027,7 +1419,7 @@ function isValidCentralStudent_(student) {
       && Number.isInteger(student.schoolYear)
       && student.schoolYear >= 2000
       && student.schoolYear <= 2100
-      && APP_CONFIG.allowedGrades.includes(student.grade)
+      && getAllowedGrades_().includes(student.grade)
       && Number.isInteger(student.classNumber)
       // 공동교육과정 타교생은 우리 학교 어느 반도 아니라서 반을 0으로 쓴다.
       // 쓰는 쪽(normalizeCentralStudentPayload_)과 짝을 맞춰야 조회에서
@@ -1118,7 +1510,7 @@ function readCentralTeacherAssignments_(sheet, includeInactive) {
     return assignment.assignmentKey
       && isValidCentralEmail_(assignment.teacherEmail)
       && Number.isInteger(assignment.schoolYear)
-      && APP_CONFIG.allowedGrades.includes(assignment.grade)
+      && getAllowedGrades_().includes(assignment.grade)
       && Number.isInteger(assignment.classNumber)
       // 수강 그룹 담당도 반을 0으로 쓴다. 쓰는 쪽
       // (normalizeTeacherAssignmentPayload_)과 짝을 맞추지 않으면 승인이

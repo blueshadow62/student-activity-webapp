@@ -1,0 +1,11 @@
+학생 활동 기록 설치 도우미는 다음 오픈 소스 구성 요소를 포함합니다.
+
+- Electron — MIT License
+  https://github.com/electron/electron
+- @google/clasp — Apache License 2.0
+  https://github.com/google/clasp
+- electron-builder — MIT License
+  https://github.com/electron-userland/electron-builder
+
+각 구성 요소의 전체 라이선스 문서는 배포 파일 내부의 패키지 메타데이터 또는 위
+프로젝트 저장소에서 확인할 수 있습니다.

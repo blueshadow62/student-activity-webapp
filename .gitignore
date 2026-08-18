@@ -4,3 +4,5 @@
 .clasprc.json
 
 node_modules/
+installer/dist/
+installer/artifacts/

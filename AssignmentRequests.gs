@@ -659,7 +659,7 @@ function isValidStoredAssignmentRequest_(request) {
       || !request.requestKey
       || !isValidCentralEmail_(request.teacherEmail)
       || !Number.isInteger(Number(request.schoolYear))
-      || !APP_CONFIG.allowedGrades.includes(Number(request.grade))
+      || !getAllowedGrades_().includes(Number(request.grade))
       || !Number.isInteger(Number(request.classNumber))
       || !String(request.subject || '').trim()
       || !Object.values(CENTRAL_ASSIGNMENT_REQUEST_STATUS)

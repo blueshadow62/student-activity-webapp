@@ -55,8 +55,10 @@ function parseAndValidateRosterCsv_(csvText) {
     const studentNumber = Number(String(row[2]).trim());
     const name = String(row[3]).trim();
     const status = String(row[4]).trim();
-    if (!APP_CONFIG.allowedGrades.includes(grade)) {
-      throw new Error(`${rowNumber}행 학년은 1·2·3 중에서 입력해 주세요.`);
+    if (!getAllowedGrades_().includes(grade)) {
+      throw new Error(
+        `${rowNumber}행 학년은 ${getAllowedGrades_().join('·')} 중에서 입력해 주세요.`
+      );
     }
     if (!Number.isInteger(classNumber) || classNumber <= 0) {
       throw new Error(`${rowNumber}행 반은 1 이상의 정수로 입력해 주세요.`);

@@ -1,0 +1,63 @@
+{
+  "name": "student-activity-installer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "학생 활동 기록 Google Apps Script Windows 설치 도우미",
+  "main": "main.cjs",
+  "author": "류기현",
+  "license": "CC-BY-NC-SA-4.0",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.cjs",
+    "dist": "electron-builder --win portable --x64 --publish never"
+  },
+  "dependencies": {
+    "@google/clasp": "3.3.0"
+  },
+  "devDependencies": {
+    "electron": "43.4.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "kr.co.donga.student-activity-installer",
+    "productName": "학생 활동 기록 설치 도우미",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/@google/clasp/**"
+    ],
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "lib/**/*",
+      "renderer/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "../AdminPortal.gs", "to": "payload/AdminPortal.gs" },
+      { "from": "../AssignmentRequests.gs", "to": "payload/AssignmentRequests.gs" },
+      { "from": "../CentralData.gs", "to": "payload/CentralData.gs" },
+      { "from": "../Code.gs", "to": "payload/Code.gs" },
+      { "from": "../CourseGroups.gs", "to": "payload/CourseGroups.gs" },
+      { "from": "../InstallationSetup.gs", "to": "payload/InstallationSetup.gs" },
+      { "from": "../PersonalRouting.gs", "to": "payload/PersonalRouting.gs" },
+      { "from": "../PersonalStorage.gs", "to": "payload/PersonalStorage.gs" },
+      { "from": "../SchoolSetup.gs", "to": "payload/SchoolSetup.gs" },
+      { "from": "../StandardsData.gs", "to": "payload/StandardsData.gs" },
+      { "from": "../Index.html", "to": "payload/Index.html" },
+      { "from": "../appsscript.json", "to": "payload/appsscript.json" },
+      { "from": "../LICENSE", "to": "LICENSE.txt" },
+      { "from": "THIRD_PARTY_NOTICES.txt", "to": "THIRD_PARTY_NOTICES.txt" }
+    ],
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "artifactName": "학생활동기록-설치도우미-${version}-${arch}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

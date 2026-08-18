@@ -14,11 +14,14 @@ function getAdminDashboard() {
 }
 
 function buildAdminDashboard_() {
+  const schoolLevel = getConfiguredSchoolLevel_();
   return {
     connection: getCentralConnectionState_(true),
     pendingAssignmentRequests: countPendingAssignmentRequests_(),
     appVersion: APP_CONFIG.version,
     mode: 'ADMIN_PORTAL',
+    schoolLevel: schoolLevel,
+    schoolLevelLabel: schoolLevelLabel_(schoolLevel),
   };
 }
 
@@ -84,12 +87,82 @@ function initializeCentralDataSchema() {
       'schemaVersion',
       CENTRAL_CONFIG.schemaVersion
     );
+    const schoolLevel = getConfiguredSchoolLevel_();
+    if (schoolLevel) {
+      const subjectCatalogSheet = spreadsheet.getSheetByName(
+        CENTRAL_CONFIG.subjectCatalogSheetName
+      );
+      const achievementStandardSheet = spreadsheet.getSheetByName(
+        CENTRAL_CONFIG.achievementStandardSheetName
+      );
+      if (!subjectCatalogSheet && !achievementStandardSheet) {
+        replaceCentralStandardsData_(spreadsheet, schoolLevel);
+      } else if (
+        !subjectCatalogSheet
+          || !achievementStandardSheet
+          || !centralHeadersMatch_(
+            subjectCatalogSheet,
+            CENTRAL_SUBJECT_CATALOG_HEADERS
+          )
+          || !centralHeadersMatch_(
+            achievementStandardSheet,
+            CENTRAL_ACHIEVEMENT_STANDARD_HEADERS
+          )
+          || subjectCatalogSheet.getLastRow() < 2
+          || achievementStandardSheet.getLastRow() < 2
+      ) {
+        throw createCentralError_(
+          'CENTRAL_SCHEMA_INVALID',
+          '과목목록·성취기준 시트가 일부만 준비되어 있습니다. 기존 데이터를 백업한 뒤 성취기준 데이터 설정 버튼으로 다시 적재해 주세요.'
+        );
+      }
+      upsertCentralAppSetting_(appSettings, 'schoolLevel', schoolLevel);
+    }
     removeCentralDefaultSheet_(spreadsheet);
     clearCentralStudentCache_();
     clearCentralGroupCache_(spreadsheet);
     clearCentralTeacherAssignmentCache_(spreadsheet);
     clearCentralPhotoRowsCache_(spreadsheet);
     return buildAdminDashboard_();
+  });
+}
+
+function configureSchoolStandards(schoolLevel) {
+  requireAdmin_();
+  const normalized = normalizeSchoolLevel_(schoolLevel, true);
+  const current = getConfiguredSchoolLevel_();
+  if (current && current !== normalized) {
+    throw new Error(
+      `이미 ${schoolLevelLabel_(current)}로 설정되어 있습니다. 학교급 변경은 기존 학생·담당 데이터에 영향을 주므로 새 설치로 진행해 주세요.`
+    );
+  }
+  return withCentralWriteLock_(function () {
+    const spreadsheet = getCentralDatabase_();
+    const result = replaceCentralStandardsData_(spreadsheet, normalized);
+    const appSettings = ensureCentralAdminSheet_(
+      spreadsheet,
+      CENTRAL_CONFIG.appSettingsSheetName,
+      CENTRAL_APP_SETTING_HEADERS,
+      '#7b1fa2'
+    );
+    upsertCentralAppSetting_(appSettings, 'schoolLevel', normalized);
+    upsertCentralAppSetting_(
+      appSettings,
+      'schemaVersion',
+      CENTRAL_CONFIG.schemaVersion
+    );
+    const values = {};
+    values[INSTALLATION_CONFIG.schoolLevelProperty] = normalized;
+    values[CENTRAL_CONFIG.schemaVersionProperty] = CENTRAL_CONFIG.schemaVersion;
+    PropertiesService.getScriptProperties().setProperties(values, false);
+    setConfiguredSchoolLevelMemo_(normalized);
+    return {
+      ok: true,
+      schoolLevel: normalized,
+      schoolLevelLabel: schoolLevelLabel_(normalized),
+      subjectCount: result.subjectCount,
+      standardCount: result.standardCount,
+    };
   });
 }
 
@@ -471,8 +544,8 @@ function normalizeCentralStudentPayload_(payload, current) {
   ) {
     throw new Error('학년도를 확인해 주세요.');
   }
-  if (!APP_CONFIG.allowedGrades.includes(student.grade)) {
-    throw new Error('학년은 1·2·3 중에서 선택해 주세요.');
+  if (!getAllowedGrades_().includes(student.grade)) {
+    throw new Error(`학년은 ${getAllowedGrades_().join('·')} 중에서 선택해 주세요.`);
   }
   // 공동교육과정 타교생은 우리 학교 어느 반에도 속하지 않는다. 실제로 없는
   // 0반에 두어야 그 반 담임의 학생 목록에 모르는 학생이 나타나지 않는다.
@@ -1144,7 +1217,7 @@ function normalizeTeacherAssignmentPayload_(payload) {
   if (!Number.isInteger(schoolYear) || schoolYear < 2000 || schoolYear > 2100) {
     throw new Error('학년도를 확인해 주세요.');
   }
-  if (!APP_CONFIG.allowedGrades.includes(grade)) {
+  if (!getAllowedGrades_().includes(grade)) {
     throw new Error('담당 학년을 확인해 주세요.');
   }
   // 수강 그룹은 학급으로 묶이지 않아 반 번호가 없다. 실제로 없는 0반에 두어

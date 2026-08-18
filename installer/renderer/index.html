@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>학생 활동 기록 설치 도우미</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="eyebrow">WINDOWS 설치 도우미</div>
+      <h1>학생 활동 기록</h1>
+      <p>학교 전용 Google Apps Script 웹앱을 순서대로 설치합니다.</p>
+    </header>
+
+    <section class="notice" aria-label="설치 전 안내">
+      <strong>시작하기 전에</strong>
+      <span>관리자로 사용할 Google 계정으로 브라우저에 로그인하세요. 기존 학교 설치를 업데이트하는 기능은 아직 지원하지 않습니다.</span>
+    </section>
+
+    <ol class="steps">
+      <li class="step" data-step="api">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <h2>Apps Script API 켜기</h2>
+          <p>Google 설정 페이지에서 Apps Script API를 켠 뒤 이 창으로 돌아오세요.</p>
+          <button id="open-api" class="button secondary">설정 페이지 열기</button>
+        </div>
+        <span class="status" id="api-status">사용자 확인</span>
+      </li>
+
+      <li class="step" data-step="login">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <h2>Google 로그인 승인</h2>
+          <p>기본 브라우저에서 프로젝트 설치 권한을 승인합니다. 인증 정보는 이 Windows 사용자 폴더에만 저장됩니다.</p>
+          <button id="login" class="button primary">Google 로그인</button>
+        </div>
+        <span class="status" id="login-status">대기</span>
+      </li>
+
+      <li class="step" data-step="project">
+        <div class="step-number">3</div>
+        <div class="step-body">
+          <h2>프로젝트 생성 및 코드 업로드</h2>
+          <p>학교 전용 프로젝트를 만들고 설치 파일 12개만 업로드합니다. 중간에 실패하면 같은 프로젝트에서 이어집니다.</p>
+          <button id="prepare" class="button primary">프로젝트 준비</button>
+        </div>
+        <span class="status" id="project-status">대기</span>
+      </li>
+
+      <li class="step" data-step="admin">
+        <div class="step-number">4</div>
+        <div class="step-body">
+          <h2>최초 관리자 등록</h2>
+          <p>편집기에서 <code>registerInitialSchoolAdministrator</code>를 선택해 실행하고 Drive·Sheets·메일 권한을 승인하세요.</p>
+          <div class="actions">
+            <button id="open-editor" class="button secondary">Apps Script 편집기 열기</button>
+            <label class="check"><input id="admin-complete" type="checkbox"> 실행과 권한 승인을 완료했습니다</label>
+          </div>
+        </div>
+        <span class="status" id="admin-status">대기</span>
+      </li>
+
+      <li class="step" data-step="deploy">
+        <div class="step-number">5</div>
+        <div class="step-body">
+          <h2>웹앱 배포</h2>
+          <p>교사에게 전달할 학교 전용 웹앱 주소를 만듭니다.</p>
+          <button id="deploy" class="button primary">웹앱 배포</button>
+        </div>
+        <span class="status" id="deploy-status">대기</span>
+      </li>
+    </ol>
+
+    <section id="complete" class="complete" hidden>
+      <div>
+        <div class="eyebrow">설치 완료</div>
+        <h2>웹앱에서 학교 설정을 마무리하세요.</h2>
+        <p>학교명·학교급을 입력하고 중앙 자료를 새로 만들거나 기존 자료를 연결합니다.</p>
+        <div class="url-row"><input id="web-app-url" readonly aria-label="웹앱 주소"></div>
+      </div>
+      <div class="complete-actions">
+        <button id="open-web-app" class="button primary">웹앱 열기</button>
+        <button id="shortcut" class="button secondary">바탕화면 바로가기 만들기</button>
+      </div>
+      <p class="security-note">교사 배포 전 Google Workspace 도메인 제한 또는 <code>ALLOWED_TEACHER_EMAILS</code> 설정을 확인하세요.</p>
+    </section>
+
+    <footer class="footer">
+      <div id="progress" role="status" aria-live="polite">설치를 시작할 준비가 되었습니다.</div>
+      <div id="error" role="alert" hidden></div>
+    </footer>
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>

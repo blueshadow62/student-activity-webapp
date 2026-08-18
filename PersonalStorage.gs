@@ -15,6 +15,7 @@ const PERSONAL_STORAGE_CONFIG = Object.freeze({
   databaseIdPropertyPrefix: 'PERSONAL_DATABASE_FILE_ID_',
   schemaVersionProperty: 'PERSONAL_STORAGE_SCHEMA_VERSION',
   metadataStartColumn: 10,
+  pinnedStandardStartColumn: 14,
   lockTimeoutMs: 30000,
   minSchoolYear: 2000,
   maxSchoolYear: 2100,
@@ -41,7 +42,7 @@ const PERSONAL_DATABASE_SHEETS = Object.freeze({
 const PERSONAL_RECORD_HEADERS = Object.freeze([
   '기록ID', '기록일시', '학년', '반', '번호', '이름', '학적상태',
   '구분', '역량', '과목', '내용메모', '작성자', '수정일시', '학생ID', '학년도',
-  '담당키',
+  '담당키', '성취기준',
 ]);
 
 const PERSONAL_COMPETENCY_HEADERS = Object.freeze([
@@ -51,6 +52,9 @@ const PERSONAL_COMPETENCY_HEADERS = Object.freeze([
 const PERSONAL_SUBJECT_HEADERS = Object.freeze(['학년', '기본과목']);
 
 const PERSONAL_METADATA_HEADERS = Object.freeze(['항목', '값', '수정일시']);
+const PERSONAL_PINNED_STANDARD_HEADERS = Object.freeze([
+  '담당키', '성취기준키', '고정일시',
+]);
 
 const PERSONAL_METADATA_KEYS = Object.freeze([
   'appId',
@@ -1074,6 +1078,14 @@ function initializePersonalSettingsSheet_(sheet, schoolYear) {
     .setValues([PERSONAL_METADATA_HEADERS]);
   sheet
     .getRange(
+      1,
+      PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+      1,
+      PERSONAL_PINNED_STANDARD_HEADERS.length
+    )
+    .setValues([PERSONAL_PINNED_STANDARD_HEADERS]);
+  sheet
+    .getRange(
       2,
       PERSONAL_STORAGE_CONFIG.metadataStartColumn,
       metadataRows.length,
@@ -1097,6 +1109,15 @@ function initializePersonalSettingsSheet_(sheet, schoolYear) {
       PERSONAL_METADATA_HEADERS.length
     ),
     '#6f42c1'
+  );
+  stylePersonalHeader_(
+    sheet.getRange(
+      1,
+      PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+      1,
+      PERSONAL_PINNED_STANDARD_HEADERS.length
+    ),
+    '#ad1457'
   );
   sheet
     .getRange(

@@ -7,7 +7,7 @@ const APP_CONFIG = Object.freeze({
   // 않았다. 앞으로 semver 를 따른다: 고침 1.0.x, 기능 추가 1.1.0, 관리자 작업이
   // 필요한 변경 2.0.0. 업데이트 알림이 앞자리만 보고 "그냥 덮어써도 되는지"를
   // 가릴 수 있어야 하므로 이 규칙을 지킨다.
-  version: '1.1.0',
+  version: '1.2.0',
   recordSheetName: '활동기록',
   archivedRecordSheetName: '활동기록보관',
   deletedRecordSheetName: '삭제기록',
@@ -38,13 +38,13 @@ const LEGACY_RECORD_HEADERS = Object.freeze([
 // 실제 반이 남아서, 학년·반·과목 대조만으로는 어느 담당의 기록인지 알 수 없다.
 // 이전 기록은 이 칸이 비어 있고, 그때는 예전처럼 학년·반·과목으로 판정한다.
 const RECORD_HEADERS = Object.freeze([
-  ...LEGACY_RECORD_HEADERS, '학생ID', '학년도', '담당키',
+  ...LEGACY_RECORD_HEADERS, '학생ID', '학년도', '담당키', '성취기준',
 ]);
 const LEGACY_DELETED_RECORD_HEADERS = Object.freeze([
   ...LEGACY_RECORD_HEADERS, '삭제일시', '삭제자', '삭제사유',
 ]);
 const DELETED_RECORD_HEADERS = Object.freeze([
-  ...LEGACY_DELETED_RECORD_HEADERS, '학생ID', '학년도',
+  ...LEGACY_DELETED_RECORD_HEADERS, '학생ID', '학년도', '성취기준',
 ]);
 const COMPETENCY_HEADERS = Object.freeze(['구분', '역량', '설명', '사용', '정렬']);
 const SUBJECT_HEADERS = Object.freeze(['학년', '기본과목']);
@@ -117,6 +117,9 @@ function getAppBootstrapState(requestedMode) {
       mode: 'ADMIN_PORTAL',
       userEmail: userEmail,
       schoolName: installation.schoolName,
+      schoolLevel: installation.schoolLevel,
+      schoolLevelLabel: installation.schoolLevelLabel,
+      subjectCatalog: getSubjectCatalogForSchoolLevel_(installation.schoolLevel),
       dashboard: buildAdminDashboard_(),
     };
   }
@@ -125,6 +128,11 @@ function getAppBootstrapState(requestedMode) {
   const personal = buildPersonalModeBootstrap_(role);
   personal.userEmail = userEmail;
   personal.schoolName = installation.schoolName;
+  personal.schoolLevel = installation.schoolLevel;
+  personal.schoolLevelLabel = installation.schoolLevelLabel;
+  personal.subjectCatalog = getSubjectCatalogForSchoolLevel_(
+    installation.schoolLevel
+  );
   return personal;
 }
 
@@ -227,7 +235,9 @@ function saveRecord(payload) {
       normalized.student.studentId,
       normalized.student.schoolYear,
       sanitizeSpreadsheetText_(normalized.assignment.assignmentKey),
+      sanitizeSpreadsheetText_(normalized.achievementStandard),
     ]]);
+    context.recordSheet.getRange(nextRow, RECORD_HEADERS.length).setWrap(true);
     formatRecordRow_(context.recordSheet, nextRow);
 
     return {
@@ -239,6 +249,7 @@ function saveRecord(payload) {
         category: normalized.category,
         competencies: normalized.competencies.slice(),
         subject: normalized.subject,
+        achievementStandard: normalized.achievementStandard,
         memo: normalized.memo,
         canEdit: canDeleteRecord_(recordedAuthor, identity),
         canDelete: canDeleteRecord_(recordedAuthor, identity),
@@ -263,6 +274,17 @@ function updateRecord(recordId, patch) {
       true
     );
     requireCentralStudentAssignment_(student, assignment);
+    const existingAchievementStandard = String(
+      located.displayValues[16] || ''
+    ).trim();
+    const requestedAchievementStandard = patch
+      && patch.achievementStandard != null
+      ? String(patch.achievementStandard).trim()
+      : existingAchievementStandard;
+    const validationOptions = requestedAchievementStandard
+      === existingAchievementStandard
+      ? { preservedAchievementStandard: existingAchievementStandard }
+      : {};
     const normalized = validateCentralRecordPayload_(
       {
         assignmentKey: assignment.assignmentKey,
@@ -281,8 +303,10 @@ function updateRecord(recordId, patch) {
         memo: patch && patch.memo != null
           ? patch.memo
           : located.displayValues[10],
+        achievementStandard: requestedAchievementStandard,
       },
-      context.settingsSheet
+      context.settingsSheet,
+      validationOptions
     );
     const now = new Date();
     located.sheet
@@ -295,6 +319,10 @@ function updateRecord(recordId, patch) {
         located.values[11],
         now,
       ]]);
+    located.sheet
+      .getRange(located.rowNumber, RECORD_HEADERS.length)
+      .setValue(sanitizeSpreadsheetText_(normalized.achievementStandard))
+      .setWrap(true);
     formatRecordRow_(located.sheet, located.rowNumber);
     return {
       ok: true,
@@ -324,6 +352,116 @@ function getRecentRecords(studentKey, assignmentKey, limit) {
     safeLimit,
     identity
   );
+}
+
+function getPinnedStandardsForAssignment(assignmentKey) {
+  return withPersonalDatabaseLock_(function () {
+    const assignment = requireMyAssignment_(assignmentKey);
+    const spreadsheet = getAppSpreadsheet_();
+    const settingsSheet = ensureSettingsSheet_(spreadsheet);
+    return pinnedStandardsForAssignment_(settingsSheet, assignment);
+  });
+}
+
+function pinStandardForAssignment(assignmentKey, standardKey) {
+  return withPersonalDatabaseLock_(function () {
+    const assignment = requireMyAssignment_(assignmentKey);
+    const standard = resolveAchievementStandard_(assignment.subject, standardKey);
+    if (!standard) throw new Error('고정할 성취기준을 선택해 주세요.');
+    const settingsSheet = ensureSettingsSheet_(getAppSpreadsheet_());
+    const existing = readPinnedStandardRows_(settingsSheet).find(function (item) {
+      return item.assignmentKey === assignment.assignmentKey
+        && item.standardKey === standard.key;
+    });
+    if (!existing) {
+      const rowNumber = firstEmptyPinnedStandardRow_(settingsSheet);
+      settingsSheet.getRange(
+        rowNumber,
+        PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+        1,
+        PERSONAL_PINNED_STANDARD_HEADERS.length
+      ).setValues([[
+        assignment.assignmentKey,
+        standard.key,
+        new Date(),
+      ]]);
+    }
+    return {
+      ok: true,
+      pinnedStandards: pinnedStandardsForAssignment_(settingsSheet, assignment),
+    };
+  });
+}
+
+function unpinStandardForAssignment(assignmentKey, standardKey) {
+  return withPersonalDatabaseLock_(function () {
+    const assignment = requireMyAssignment_(assignmentKey);
+    const normalizedKey = String(standardKey || '').trim();
+    if (!normalizedKey) throw new Error('고정을 해제할 성취기준을 선택해 주세요.');
+    const settingsSheet = ensureSettingsSheet_(getAppSpreadsheet_());
+    readPinnedStandardRows_(settingsSheet).forEach(function (item) {
+      if (
+        item.assignmentKey === assignment.assignmentKey
+          && item.standardKey === normalizedKey
+      ) {
+        settingsSheet.getRange(
+          item.rowNumber,
+          PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+          1,
+          PERSONAL_PINNED_STANDARD_HEADERS.length
+        ).clearContent();
+      }
+    });
+    return {
+      ok: true,
+      pinnedStandards: pinnedStandardsForAssignment_(settingsSheet, assignment),
+    };
+  });
+}
+
+function pinnedStandardsForAssignment_(settingsSheet, assignment) {
+  return readPinnedStandardRows_(settingsSheet)
+    .filter(function (item) {
+      return item.assignmentKey === assignment.assignmentKey;
+    })
+    .map(function (item) {
+      return { key: item.standardKey };
+    });
+}
+
+function readPinnedStandardRows_(settingsSheet) {
+  ensurePinnedStandardHeaders_(settingsSheet);
+  const rowCount = settingsSheet.getLastRow() - 1;
+  if (rowCount <= 0) return [];
+  return settingsSheet.getRange(
+    2,
+    PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+    rowCount,
+    PERSONAL_PINNED_STANDARD_HEADERS.length
+  ).getValues().map(function (row, index) {
+    return {
+      rowNumber: index + 2,
+      assignmentKey: String(row[0] || '').trim(),
+      standardKey: String(row[1] || '').trim(),
+      pinnedAt: row[2],
+    };
+  }).filter(function (item) {
+    return item.assignmentKey && item.standardKey;
+  });
+}
+
+function firstEmptyPinnedStandardRow_(settingsSheet) {
+  const rowCount = Math.max(settingsSheet.getLastRow() - 1, 1);
+  const values = settingsSheet.getRange(
+    2,
+    PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+    rowCount,
+    1
+  ).getDisplayValues();
+  const emptyIndex = values.findIndex(function (row) {
+    return !String(row[0] || '').trim();
+  });
+  return emptyIndex >= 0 ? emptyIndex + 2 : settingsSheet.getLastRow() + 1;
 }
 
 function searchRecords(options) {
@@ -395,6 +533,7 @@ function deleteRecord(recordId, reason) {
       sanitizeSpreadsheetText_(safeReason),
       located.values[13],
       located.values[14],
+      located.values[16],
     ];
     const nextDeletedRow = context.deletedRecordSheet.getLastRow() + 1;
     context.deletedRecordSheet
@@ -511,7 +650,7 @@ function clearPersonalRecordSchemaVerification_(spreadsheet) {
   }
 }
 
-function validateCentralRecordPayload_(payload, settingsSheet) {
+function validateCentralRecordPayload_(payload, settingsSheet, options) {
   const value = payload || {};
   const assignment = requireMyAssignment_(value.assignmentKey);
   const student = getCentralStudentByKey_(
@@ -544,12 +683,25 @@ function validateCentralRecordPayload_(payload, settingsSheet) {
   if (memo.length > APP_CONFIG.maxMemoLength) {
     throw new Error(`내용 메모는 ${APP_CONFIG.maxMemoLength}자 이내로 입력해 주세요.`);
   }
+  const preservedAchievementStandard = options
+    && Object.prototype.hasOwnProperty.call(
+      options,
+      'preservedAchievementStandard'
+    )
+    ? String(options.preservedAchievementStandard || '').trim()
+    : null;
+  const standard = preservedAchievementStandard === null
+    ? resolveAchievementStandard_(assignment.subject, value.achievementStandard)
+    : null;
   return {
     assignment: assignment,
     student: centralStudentToLegacyStudent_(student),
     category: category,
     competencies: competencies,
     subject: assignment.subject,
+    achievementStandard: preservedAchievementStandard === null
+      ? (standard ? achievementStandardDisplay_(standard) : '')
+      : preservedAchievementStandard,
     memo: memo,
   };
 }
@@ -676,6 +828,7 @@ function readCentralFilteredPersonalRecords_(
         category: display[7],
         competencies: String(display[8] || '').split(/\r?\n/).filter(Boolean),
         subject: display[9],
+        achievementStandard: display[16],
         memo: display[10],
         archived: Boolean(source.archived),
         canEdit: canDeleteRecord_(recordedAuthor, identity),
@@ -704,7 +857,37 @@ function ensureSettingsSheet_(spreadsheet) {
   }
   assertHeaders_(sheet, 1, 1, COMPETENCY_HEADERS, APP_CONFIG.settingsSheetName);
   assertHeaders_(sheet, 1, 7, SUBJECT_HEADERS, APP_CONFIG.settingsSheetName);
+  ensurePinnedStandardHeaders_(sheet);
   return sheet;
+}
+
+function ensurePinnedStandardHeaders_(sheet) {
+  const startColumn = PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn;
+  ensureMinimumColumns_(
+    sheet,
+    startColumn + PERSONAL_PINNED_STANDARD_HEADERS.length - 1
+  );
+  assertCompatibleExtensionHeaders_(
+    sheet,
+    startColumn,
+    PERSONAL_PINNED_STANDARD_HEADERS,
+    APP_CONFIG.settingsSheetName
+  );
+  sheet.getRange(
+    1,
+    startColumn,
+    1,
+    PERSONAL_PINNED_STANDARD_HEADERS.length
+  ).setValues([PERSONAL_PINNED_STANDARD_HEADERS]);
+  styleHeader_(
+    sheet.getRange(
+      1,
+      startColumn,
+      1,
+      PERSONAL_PINNED_STANDARD_HEADERS.length
+    ),
+    '#ad1457'
+  );
 }
 
 function ensureRecordSheet_(spreadsheet) {
@@ -759,6 +942,7 @@ function migrateRecordSheet_(sheet, label) {
   assertCompatibleExtensionHeaders_(sheet, 14, RECORD_HEADERS.slice(13), label);
   sheet.getRange(1, 1, 1, RECORD_HEADERS.length).setValues([RECORD_HEADERS]);
   styleHeader_(sheet.getRange(1, 1, 1, RECORD_HEADERS.length), '#1a73e8');
+  sheet.setColumnWidth(RECORD_HEADERS.length, 520);
   const rowCount = sheet.getLastRow() - 1;
   if (rowCount <= 0) return;
 
@@ -770,6 +954,7 @@ function migrateRecordSheet_(sheet, label) {
     return [studentId, schoolYear];
   });
   sheet.getRange(2, 14, identityColumns.length, 2).setValues(identityColumns);
+  sheet.getRange(2, RECORD_HEADERS.length, rowCount, 1).setWrap(true);
 }
 
 function migrateDeletedRecordSheet_(sheet) {
@@ -800,6 +985,7 @@ function migrateDeletedRecordSheet_(sheet) {
     return [studentId, schoolYear];
   });
   sheet.getRange(2, 17, identityColumns.length, 2).setValues(identityColumns);
+  sheet.getRange(2, 19, rowCount, 1).setWrap(true);
 }
 
 function ensureMinimumColumns_(sheet, requiredColumns) {
@@ -839,11 +1025,26 @@ function initializeSettingsSheet_(sheet) {
   sheet.setHiddenGridlines(true);
   sheet.getRange(1, 1, 1, COMPETENCY_HEADERS.length).setValues([COMPETENCY_HEADERS]);
   sheet.getRange(1, 7, 1, SUBJECT_HEADERS.length).setValues([SUBJECT_HEADERS]);
+  sheet.getRange(
+    1,
+    PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+    1,
+    PERSONAL_PINNED_STANDARD_HEADERS.length
+  ).setValues([PERSONAL_PINNED_STANDARD_HEADERS]);
   sheet.getRange(2, 4, DEFAULT_COMPETENCIES.length, 1).insertCheckboxes();
   sheet.getRange(2, 1, DEFAULT_COMPETENCIES.length, 5).setValues(DEFAULT_COMPETENCIES);
   sheet.getRange(2, 7, DEFAULT_SUBJECTS.length, 2).setValues(DEFAULT_SUBJECTS);
   styleHeader_(sheet.getRange(1, 1, 1, 5), '#137333');
   styleHeader_(sheet.getRange(1, 7, 1, 2), '#1a73e8');
+  styleHeader_(
+    sheet.getRange(
+      1,
+      PERSONAL_STORAGE_CONFIG.pinnedStandardStartColumn,
+      1,
+      PERSONAL_PINNED_STANDARD_HEADERS.length
+    ),
+    '#ad1457'
+  );
   sheet.getRange(2, 3, DEFAULT_COMPETENCIES.length, 1).setWrap(true);
   [120, 180, 360, 70, 70, 24, 70, 140].forEach(function (width, index) {
     sheet.setColumnWidth(index + 1, width);
@@ -852,14 +1053,15 @@ function initializeSettingsSheet_(sheet) {
 
 function initializeRecordSheet_(sheet) {
   initializeLogSheet_(sheet, RECORD_HEADERS, '#1a73e8');
-  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 260, 90, 260];
+  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 260, 90, 260, 520];
   widths.forEach(function (width, index) { sheet.setColumnWidth(index + 1, width); });
   formatLogColumns_(sheet, 2, 13, 9, 3);
+  sheet.getRange(2, 17, Math.max(sheet.getMaxRows() - 1, 1), 1).setWrap(true);
 }
 
 function initializeDeletedRecordSheet_(sheet) {
   initializeLogSheet_(sheet, DELETED_RECORD_HEADERS, '#b3261e');
-  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 150, 180, 220, 260, 90];
+  const widths = [220, 150, 60, 60, 60, 110, 90, 120, 200, 120, 420, 180, 150, 150, 180, 220, 260, 90, 520];
   widths.forEach(function (width, index) { sheet.setColumnWidth(index + 1, width); });
   formatLogColumns_(sheet, 2, 13, 9, 3);
   sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1)
@@ -899,6 +1101,7 @@ function formatDeletedRecordRow_(sheet, rowNumber) {
   formatRecordRow_(sheet, rowNumber);
   sheet.getRange(rowNumber, 14).setNumberFormat('yyyy-mm-dd hh:mm:ss');
   sheet.getRange(rowNumber, 16).setWrap(true);
+  sheet.getRange(rowNumber, 19).setWrap(true);
 }
 
 function toPublicStudent_(student) {
@@ -957,7 +1160,7 @@ function readSubjectDefaults_(settingsSheet) {
     .forEach(function (row) {
       const grade = Number(row[0]);
       const subject = String(row[1]).trim();
-      if (APP_CONFIG.allowedGrades.includes(grade) && subject) {
+      if (getAllowedGrades_().includes(grade) && subject) {
         subjects[String(grade)] = subject;
       }
     });
@@ -1034,6 +1237,7 @@ function readRecentRecords_(recordSheets, student, limit, identity) {
         category: String(row[7] || ''),
         competencies: String(row[8] || '').split(/\r?\n/).filter(Boolean),
         subject: String(row[9] || ''),
+        achievementStandard: String(row[16] || ''),
         memo: String(row[10] || ''),
         canEdit: canDeleteRecord_(recordedAuthor, identity),
         canDelete: canDeleteRecord_(recordedAuthor, identity),

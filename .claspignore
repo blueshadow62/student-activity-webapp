@@ -3,4 +3,6 @@ verify-*.js
 .clasp.json
 GUIDE.html
 scripts/**
+docs/**
+installer/**
 .github/**

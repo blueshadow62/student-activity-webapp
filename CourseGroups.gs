@@ -45,8 +45,8 @@ function centralGroupCandidateStudents_(assignment) {
 }
 
 // 반은 1~99 라 자유롭게 여러 개를 받지만(normalizeCentralClassNumberList_),
-// 학년은 학교급 안에서 1~3으로 정해져 있다. 고교학점제 수강 그룹은 여러
-// 학년이 함께 듣는 경우가 흔해 반처럼 쉼표로 여러 학년을 받는다. 학급 단위
+// 학년은 초등 1~6, 중·고 1~3으로 정해진다. 수강 그룹은 여러 학년이 함께
+// 듣는 경우가 있어 반처럼 쉼표로 여러 학년을 받는다. 학급 단위
 // 담당은 학년이 하나뿐이라 이 함수를 쓰지 않는다.
 function normalizeCentralGroupGradeList_(value) {
   const raw = (Array.isArray(value)
@@ -57,11 +57,11 @@ function normalizeCentralGroupGradeList_(value) {
   const parsed = raw.map(function (item) { return Number(item); });
   if (
     parsed.some(function (item) {
-      return !APP_CONFIG.allowedGrades.includes(item);
+      return !getAllowedGrades_().includes(item);
     })
   ) {
     throw new Error(
-      `함께 듣는 학년은 ${APP_CONFIG.allowedGrades.join(', ')}학년 중에서 입력해 주세요.`
+      `함께 듣는 학년은 ${getAllowedGrades_().join(', ')}학년 중에서 입력해 주세요.`
     );
   }
   return Array.from(new Set(parsed))

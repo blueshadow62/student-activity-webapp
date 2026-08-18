@@ -241,6 +241,13 @@
           <label for="installationSchoolName">학교명</label>
           <input id="installationSchoolName" maxlength="100"
             placeholder="예: 부산 동아공업고등학교">
+          <label for="installationSchoolLevel" style="margin-top:12px">학교급</label>
+          <select id="installationSchoolLevel">
+            <option value="">선택</option>
+            <option value="elementary">초등학교</option>
+            <option value="middle">중학교</option>
+            <option value="high">고등학교</option>
+          </select>
           <div class="tabs" style="margin-top:14px">
             <button class="tab active" data-installation-mode="new">새 중앙 자료 만들기</button>
             <button class="tab" data-installation-mode="existing">기존 중앙 자료 다시 연결하기</button>
@@ -282,6 +289,16 @@
                 <button id="resetSchoolInstallationButton" class="danger">설치 설정 초기화</button>
               </div></div>
             <div id="centralStatus" class="status"></div>
+            <div class="row" style="margin-top:10px">
+              <span id="adminSchoolLevelStatus" class="small muted"></span>
+              <select id="adminSchoolLevel" style="max-width:180px">
+                <option value="">학교급 선택</option>
+                <option value="elementary">초등학교</option>
+                <option value="middle">중학교</option>
+                <option value="high">고등학교</option>
+              </select>
+              <button id="configureSchoolStandardsButton" class="secondary">성취기준 데이터 설정</button>
+            </div>
             <p id="updateNotice" class="status hidden" style="margin-top:10px"></p>
           </div>
           <div class="grid grid-4">
@@ -417,7 +434,8 @@
               <div><label for="requestAssignmentType">담당 유형</label><select id="requestAssignmentType"><option value="교과">학급 단위</option><option value="그룹">수강 그룹</option></select></div>
               <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
               <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
-              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" maxlength="50" placeholder="예: 문학"></div>
+              <div id="requestTrackField" class="hidden"><label for="requestTrackFilter">계열 필터</label><select id="requestTrackFilter"><option value="">전체 계열</option></select></div>
+              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" list="requestSubjectOptions" maxlength="50" placeholder="과목명을 입력해 검색"><datalist id="requestSubjectOptions"></datalist></div>
               <div id="requestClassesField"><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
               <div id="requestGroupNameField" class="hidden"><label for="requestGroupName">수강 그룹 이름</label><input id="requestGroupName" maxlength="50" placeholder="예: 심화국어 A"></div>
               <div id="requestGroupGradesField" class="hidden"><label for="requestGroupGrades">함께 듣는 다른 학년(선택)</label><input id="requestGroupGrades" placeholder="예: 3"></div>
@@ -480,6 +498,16 @@
                 <div><label for="recordCategory">구분</label><select id="recordCategory"></select></div>
                 <div style="grid-column:span 2"><label>역량</label><div id="competencyChips" class="competencies"></div><div id="competencyHelp" class="competency-help" aria-live="polite"></div></div>
               </div>
+              <div id="achievementStandardField" class="hidden" style="margin-top:12px">
+                <label for="recordAchievementStandard">성취기준 (선택)</label>
+                <div class="row">
+                  <input id="recordAchievementStandard" list="achievementStandardOptions" placeholder="코드나 문구 키워드로 검색" style="flex:1">
+                  <datalist id="achievementStandardOptions"></datalist>
+                  <button id="toggleStandardPinButton" class="ghost hidden" type="button">이 수업에 고정</button>
+                </div>
+                <div id="achievementStandardStatus" class="small muted" aria-live="polite"></div>
+                <div id="pinnedStandards" class="competencies" style="margin-top:6px"></div>
+              </div>
               <div style="margin-top:12px"><label for="recordMemo">내용 메모 (선택)</label><textarea id="recordMemo"></textarea></div>
               <button id="saveRecordButton" class="primary">기록 저장</button>
               <button id="cancelEditRecordButton" class="ghost hidden">수정 취소</button>
@@ -527,6 +555,9 @@
       missingPhotos:new Set(), pendingPhotos:new Set(), photoQueue:[],
       activePhotoLoads:0, photoGeneration:0, photoObserver:null, photosEnabled:false,
       selectedSubject:'', selectedGradeKey:'', selectedAssignmentKey:'', groupRoster:null,
+      achievementStandards:[], pinnedStandardKeys:new Set(),
+      standardsRequestGeneration:0, standardsLoading:false, standardsError:'',
+      standardsBySubject:{},
     };
     const $ = id => document.getElementById(id);
     const escapeHtml = value => String(value == null ? '' : value)
@@ -562,6 +593,7 @@
       });
       $('runSchoolYearButton').addEventListener('click', runSchoolYearTransition_);
       $('initializeCentralButton').addEventListener('click', initializeCentral);
+      $('configureSchoolStandardsButton').addEventListener('click', configureSchoolStandards_);
       $('resetSchoolInstallationButton').addEventListener('click', resetSchoolInstallation);
       $('provisionSchoolButton').addEventListener('click', provisionSchool);
       $('connectExistingSchoolButton').addEventListener('click', connectExistingSchool);
@@ -593,6 +625,7 @@
       });
       $('submitAssignmentRequestButton').addEventListener('click', submitAssignmentRequest);
       $('requestAssignmentType').addEventListener('change', renderAssignmentRequestType_);
+      $('requestTrackFilter').addEventListener('change', renderSubjectCatalog_);
       $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
       $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
       $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
@@ -669,6 +702,8 @@
       $('loadStudentsButton').addEventListener('click', loadStudents);
       $('studentQuery').addEventListener('input', debounce(loadStudents, 250));
       $('recordCategory').addEventListener('change', renderCompetencies);
+      $('recordAchievementStandard').addEventListener('input', renderStandardPinControl_);
+      $('toggleStandardPinButton').addEventListener('click', toggleSelectedStandardPin_);
       $('saveRecordButton').addEventListener('click', saveActivityRecord);
       $('cancelEditRecordButton').addEventListener('click', cancelEditRecord_);
       $('searchRecordsButton').addEventListener('click', searchMyRecords);
@@ -736,6 +771,16 @@
       state.selectedSubject = '';
       state.selectedGradeKey = '';
       state.selectedAssignmentKey = '';
+      state.achievementStandards = [];
+      state.standardsBySubject = {};
+      state.pinnedStandardKeys = new Set();
+      state.standardsRequestGeneration += 1;
+      state.standardsLoading = false;
+      state.standardsError = '';
+      $('recordAchievementStandard').value = '';
+      $('achievementStandardOptions').replaceChildren();
+      $('pinnedStandards').replaceChildren();
+      $('achievementStandardField').classList.add('hidden');
       $('adminScreen').classList.add('hidden');
       $('personalScreen').classList.add('hidden');
       $('errorScreen').classList.add('hidden');
@@ -816,6 +861,9 @@
       if (isAdministrator && !$('installationSchoolName').value) {
         $('installationSchoolName').value = installation.schoolName || '';
       }
+      if (isAdministrator && !$('installationSchoolLevel').value) {
+        $('installationSchoolLevel').value = installation.schoolLevel || '';
+      }
       $('installationScreen').classList.remove('hidden');
     }
 
@@ -833,15 +881,22 @@
 
     async function provisionSchool() {
       const schoolName = $('installationSchoolName').value.trim();
+      const schoolLevel = $('installationSchoolLevel').value;
       if (!schoolName) {
         await showAlert('학교명을 입력해 주세요.');
         $('installationSchoolName').focus();
+        return;
+      }
+      if (!schoolLevel) {
+        await showAlert('학교급을 선택해 주세요.');
+        $('installationSchoolLevel').focus();
         return;
       }
       if (!(await showConfirm(`${schoolName}의 중앙 데이터베이스와 사진 폴더를 준비할까요?`))) return;
       await runAction(async () => {
         await callServer('provisionSchoolCentralResources', {
           schoolName: schoolName,
+          schoolLevel: schoolLevel,
         });
         await loadApp('ADMIN_PORTAL');
       });
@@ -849,6 +904,7 @@
 
     async function connectExistingSchool() {
       const schoolName = $('installationSchoolName').value.trim();
+      const schoolLevel = $('installationSchoolLevel').value;
       const databaseReference =
         $('installationDatabaseReference').value.trim();
       const photoFolderReference =
@@ -856,6 +912,11 @@
       if (!schoolName) {
         await showAlert('학교명을 입력해 주세요.');
         $('installationSchoolName').focus();
+        return;
+      }
+      if (!schoolLevel) {
+        await showAlert('학교급을 선택해 주세요.');
+        $('installationSchoolLevel').focus();
         return;
       }
       if (!databaseReference || !photoFolderReference) {
@@ -869,6 +930,7 @@
       await runAction(async () => {
         await callServer('connectExistingSchoolCentralResources', {
           schoolName: schoolName,
+          schoolLevel: schoolLevel,
           databaseReference: databaseReference,
           photoFolderReference: photoFolderReference,
         });
@@ -912,11 +974,42 @@
       $('photoCount').textContent = connection.counts.photos;
       $('assignmentCount').textContent = connection.counts.assignments;
       $('pendingRequestCount').textContent = dashboard.pendingAssignmentRequests || 0;
+      const schoolLevel = dashboard.schoolLevel || state.bootstrap.schoolLevel || '';
+      const schoolLevelLabel = dashboard.schoolLevelLabel
+        || state.bootstrap.schoolLevelLabel || '';
+      $('adminSchoolLevel').value = schoolLevel;
+      $('adminStudentGrade').max = schoolLevel === 'elementary' ? '6' : '3';
+      $('adminSchoolLevelStatus').textContent = schoolLevelLabel
+        ? `현재 학교급: ${schoolLevelLabel}`
+        : '학교급 미설정: 기존 기능은 유지되지만 과목·성취기준 검색은 꺼져 있습니다.';
+      $('configureSchoolStandardsButton').textContent = schoolLevel
+        ? '성취기준 데이터 다시 설정'
+        : '성취기준 데이터 설정';
       // 화면을 다시 그릴 때마다 GitHub에 묻지 않는다. 한 번 열 때 한 번이면 된다.
       if (!state.updateChecked) {
         state.updateChecked = true;
         checkForUpdate_();
       }
+    }
+
+    async function configureSchoolStandards_() {
+      const schoolLevel = $('adminSchoolLevel').value;
+      const labels = {
+        elementary:'초등학교', middle:'중학교', high:'고등학교',
+      };
+      if (!schoolLevel) return await showAlert('학교급을 선택해 주세요.');
+      if (!(await showConfirm(
+        `${labels[schoolLevel]} 과목과 성취기준으로 중앙 데이터 시트를 설정할까요?\n`
+        + '학생·교사·활동 기록은 변경되지 않습니다.'
+      ))) return;
+      await runAction(async () => {
+        const result = await callServer('configureSchoolStandards', schoolLevel);
+        await showAlert(
+          `${result.schoolLevelLabel} 과목 ${result.subjectCount}개와 `
+          + `성취기준 ${result.standardCount}개를 설정했습니다.`
+        );
+        await loadApp('ADMIN_PORTAL');
+      });
     }
 
     // 새 버전 확인은 브라우저에서 GitHub에 직접 묻는다. 서버(Apps Script)에서
@@ -1090,7 +1183,9 @@
 
     async function editStudent(student) {
       const year = await showPrompt('학년도', student ? student.schoolYear : new Date().getFullYear()); if (year == null) return;
-      const grade = await showPrompt('학년(1~3)', student ? student.grade : ''); if (grade == null) return;
+      const gradeRange = state.bootstrap && state.bootstrap.schoolLevel === 'elementary'
+        ? '1~6' : '1~3';
+      const grade = await showPrompt(`학년(${gradeRange})`, student ? student.grade : ''); if (grade == null) return;
       const classNumber = await showPrompt('반', student ? student.classNumber : ''); if (classNumber == null) return;
       const studentNumber = await showPrompt('번호', student ? student.studentNumber : ''); if (studentNumber == null) return;
       const name = await showPrompt('이름', student ? student.name : ''); if (name == null) return;
@@ -1409,7 +1504,12 @@
       const teacherEmail = await showPrompt('교사 Google 계정 이메일', item ? item.teacherEmail : ''); if (teacherEmail == null) return;
       const schoolYear = await showPrompt('학년도', item ? item.schoolYear : new Date().getFullYear()); if (schoolYear == null) return;
       const grade = await showPrompt('담당 학년', item ? item.grade : ''); if (grade == null) return;
-      const subject = await showPrompt('담당 과목', item ? item.subject : ''); if (subject == null) return;
+      const subject = await showSearchPrompt(
+        '담당 과목을 검색하거나 직접 입력하세요.',
+        item ? item.subject : '',
+        Array.from(new Set(subjectCatalog_().map(subject => subject.name).filter(Boolean)))
+          .sort((left, right) => left.localeCompare(right, 'ko'))
+      ); if (subject == null) return;
       // 수강 그룹은 반이 0으로 고정이고 대신 이름으로 구분한다. 반을 물으면
       // 관리자가 0을 바꿔 저장이 막히고, 이름을 안 물으면 수정 자체가 막힌다.
       const isGroup = Boolean(item && item.isGroup);
@@ -1490,6 +1590,16 @@
       if (!$('requestSchoolYear').value) {
         $('requestSchoolYear').value = b.currentSchoolYear || new Date().getFullYear();
       }
+      const currentGrade = Number($('requestGrade').value);
+      const allowedGrades = b.schoolLevel === 'elementary'
+        ? [1, 2, 3, 4, 5, 6]
+        : [1, 2, 3];
+      $('requestGrade').innerHTML = '<option value="">선택</option>'
+        + allowedGrades.map(grade => `<option value="${grade}">${grade}학년</option>`).join('');
+      $('requestGrade').value = allowedGrades.includes(currentGrade)
+        ? String(currentGrade)
+        : '';
+      renderSubjectCatalog_();
       const assignments = b.assignments || [];
       $('noAssignments').classList.toggle('hidden', assignments.length > 0);
       renderPreviousYearNotice_(assignments.length, b.previousAssignmentCount || 0);
@@ -1714,6 +1824,39 @@
       $('requestGroupNameField').classList.toggle('hidden', !isGroup);
       $('requestGroupGradesField').classList.toggle('hidden', !isGroup);
       $('requestClassesField').classList.toggle('hidden', isGroup);
+    }
+
+    function subjectCatalog_() {
+      return state.bootstrap && Array.isArray(state.bootstrap.subjectCatalog)
+        ? state.bootstrap.subjectCatalog
+        : [];
+    }
+
+    function renderSubjectCatalog_() {
+      const catalog = subjectCatalog_();
+      const isHighSchool = state.bootstrap
+        && state.bootstrap.schoolLevel === 'high';
+      const trackField = $('requestTrackField');
+      trackField.classList.toggle('hidden', !isHighSchool || !catalog.length);
+      if (isHighSchool && catalog.length) {
+        const current = $('requestTrackFilter').value;
+        const tracks = Array.from(new Set(catalog.map(item => item.track).filter(Boolean)))
+          .sort((left, right) => left.localeCompare(right, 'ko'));
+        $('requestTrackFilter').innerHTML = '<option value="">전체 계열</option>'
+          + tracks.map(track => `<option value="${escapeHtml(track)}">${escapeHtml(track)}</option>`).join('');
+        $('requestTrackFilter').value = tracks.includes(current) ? current : '';
+      }
+      const selectedTrack = isHighSchool ? $('requestTrackFilter').value : '';
+      const names = Array.from(new Set(catalog
+        .filter(item => !selectedTrack || item.track === selectedTrack)
+        .map(item => item.name)
+        .filter(Boolean)))
+        .sort((left, right) => left.localeCompare(right, 'ko'));
+      $('requestSubjectOptions').innerHTML = names
+        .map(name => `<option value="${escapeHtml(name)}"></option>`).join('');
+      $('requestSubject').placeholder = names.length
+        ? '과목명을 입력해 검색하거나 직접 입력'
+        : '예: 문학';
     }
 
     async function loadMyAssignmentRequests() {
@@ -2026,6 +2169,7 @@
       state.selectedSubject = subject;
       state.selectedGradeKey = '';
       state.selectedAssignmentKey = '';
+      resetAchievementStandards_();
       renderAssignmentPicker_();
       clearStudentsForAssignment_(
         state.selectedGradeKey ? '반을 선택해 주세요.' : '학년을 선택해 주세요.'
@@ -2035,6 +2179,7 @@
     function selectAssignmentGrade_(gradeKey) {
       state.selectedGradeKey = gradeKey;
       state.selectedAssignmentKey = '';
+      resetAchievementStandards_();
       renderAssignmentPicker_();
       clearStudentsForAssignment_('반을 선택해 주세요.');
     }
@@ -2053,7 +2198,160 @@
       }
       state.selectedAssignmentKey = assignment.assignmentKey;
       renderAssignmentPicker_();
+      loadAchievementStandards_(assignment);
       loadStudents();
+    }
+
+    function resetAchievementStandards_() {
+      state.standardsRequestGeneration += 1;
+      state.achievementStandards = [];
+      state.pinnedStandardKeys = new Set();
+      state.standardsLoading = false;
+      state.standardsError = '';
+      $('recordAchievementStandard').value = '';
+      $('achievementStandardOptions').replaceChildren();
+      $('pinnedStandards').replaceChildren();
+      $('achievementStandardStatus').textContent = '';
+      $('toggleStandardPinButton').classList.add('hidden');
+      $('achievementStandardField').classList.add('hidden');
+    }
+
+    function loadAchievementStandards_(assignment) {
+      const generation = ++state.standardsRequestGeneration;
+      const assignmentKey = assignment.assignmentKey;
+      const cachedStandards = state.standardsBySubject[assignment.subject];
+      state.achievementStandards = Array.isArray(cachedStandards)
+        ? cachedStandards
+        : [];
+      state.pinnedStandardKeys = new Set();
+      state.standardsLoading = true;
+      state.standardsError = '';
+      renderAchievementStandards_();
+      Promise.all([
+        (Array.isArray(cachedStandards)
+          ? Promise.resolve({ items:cachedStandards, cacheable:true })
+          : callServer('getStandardsForSubject', assignment.subject)
+            .then(items => ({ items, cacheable:true }))
+        ).catch(error => {
+          if (generation === state.standardsRequestGeneration) {
+            state.standardsError = safeErrorMessage(error);
+          }
+          return { items:[], cacheable:false };
+        }),
+        callServer('getPinnedStandardsForAssignment', assignmentKey).catch(() => []),
+      ]).then(([standardsResult, pinned]) => {
+        if (
+          generation !== state.standardsRequestGeneration
+            || assignmentKey !== state.selectedAssignmentKey
+        ) return;
+        const standards = standardsResult.items;
+        state.achievementStandards = Array.isArray(standards) ? standards : [];
+        if (standardsResult.cacheable) {
+          state.standardsBySubject[assignment.subject] = state.achievementStandards;
+        }
+        state.pinnedStandardKeys = new Set(
+          (Array.isArray(pinned) ? pinned : []).map(item => item.key)
+        );
+      }).finally(() => {
+        if (
+          generation !== state.standardsRequestGeneration
+            || assignmentKey !== state.selectedAssignmentKey
+        ) return;
+        state.standardsLoading = false;
+        renderAchievementStandards_();
+      });
+    }
+
+    function standardDisplay_(standard) {
+      return `${standard.code} ${standard.text}`.trim();
+    }
+
+    function renderAchievementStandards_() {
+      const field = $('achievementStandardField');
+      const hasFeature = Boolean(state.bootstrap && state.bootstrap.schoolLevel);
+      const visible = hasFeature
+        && (
+          state.standardsLoading
+            || state.achievementStandards.length > 0
+            || state.standardsError
+        );
+      field.classList.toggle('hidden', !visible);
+      if (!visible) return;
+      const ordered = state.achievementStandards.slice().sort((left, right) => {
+        const leftPinned = state.pinnedStandardKeys.has(left.key) ? 0 : 1;
+        const rightPinned = state.pinnedStandardKeys.has(right.key) ? 0 : 1;
+        return leftPinned - rightPinned || left.code.localeCompare(right.code, 'ko');
+      });
+      $('achievementStandardOptions').innerHTML = ordered.map(standard =>
+        `<option value="${escapeHtml(standardDisplay_(standard))}"`
+          + `${standard.domain ? ` label="${escapeHtml(standard.domain)}"` : ''}></option>`
+      ).join('');
+      const pinned = ordered.filter(standard =>
+        state.pinnedStandardKeys.has(standard.key));
+      $('pinnedStandards').innerHTML = pinned.map(standard =>
+        `<button type="button" class="chip" data-pinned-standard="${escapeHtml(standard.key)}">`
+          + `★ ${escapeHtml(standard.code)} ${escapeHtml(standard.text)}</button>`
+      ).join('');
+      document.querySelectorAll('[data-pinned-standard]').forEach(button => {
+        button.addEventListener('click', () => {
+          const standard = state.achievementStandards
+            .find(item => item.key === button.dataset.pinnedStandard);
+          if (!standard) return;
+          $('recordAchievementStandard').value = standardDisplay_(standard);
+          renderStandardPinControl_();
+        });
+      });
+      $('achievementStandardStatus').textContent = state.standardsLoading
+        ? '성취기준을 백그라운드에서 불러오는 중입니다. 다른 입력은 계속할 수 있습니다.'
+        : state.standardsError
+          ? state.standardsError
+          : `${state.achievementStandards.length}개 성취기준 · 코드나 문구 일부를 입력해 검색하세요.`;
+      renderStandardPinControl_();
+    }
+
+    function selectedAchievementStandard_() {
+      const input = $('recordAchievementStandard').value.trim();
+      if (!input) return null;
+      return state.achievementStandards.find(standard =>
+        standardDisplay_(standard) === input
+      ) || null;
+    }
+
+    function renderStandardPinControl_() {
+      const standard = selectedAchievementStandard_();
+      const button = $('toggleStandardPinButton');
+      button.classList.toggle('hidden', !standard);
+      if (!standard) return;
+      button.textContent = state.pinnedStandardKeys.has(standard.key)
+        ? '고정 해제'
+        : '이 수업에 고정';
+    }
+
+    async function toggleSelectedStandardPin_() {
+      const standard = selectedAchievementStandard_();
+      if (!standard || !state.selectedAssignmentKey) {
+        return await showAlert('목록에서 성취기준을 먼저 선택해 주세요.');
+      }
+      const assignmentKey = state.selectedAssignmentKey;
+      const pinned = state.pinnedStandardKeys.has(standard.key);
+      const button = $('toggleStandardPinButton');
+      button.disabled = true;
+      try {
+        await runAction(async () => {
+          const result = await callServer(
+            pinned ? 'unpinStandardForAssignment' : 'pinStandardForAssignment',
+            assignmentKey,
+            standard.key
+          );
+          if (assignmentKey !== state.selectedAssignmentKey) return;
+          state.pinnedStandardKeys = new Set(
+            (result.pinnedStandards || []).map(item => item.key)
+          );
+          renderAchievementStandards_();
+        }, false);
+      } finally {
+        button.disabled = false;
+      }
     }
 
     function clearStudentsForAssignment_(message) {
@@ -2329,6 +2627,7 @@
           const result = await callServer('updateRecord', state.editingRecordId, {
             category:$('recordCategory').value,
             competencies:Array.from(state.selectedCompetencies),
+            achievementStandard:$('recordAchievementStandard').value,
             memo:$('recordMemo').value,
           });
           cancelEditRecord_();
@@ -2341,9 +2640,11 @@
           studentKey:state.selectedStudent.studentKey,
           category:$('recordCategory').value,
           competencies:Array.from(state.selectedCompetencies),
+          achievementStandard:$('recordAchievementStandard').value,
           memo:$('recordMemo').value,
         });
         $('recordMemo').value = '';
+        $('recordAchievementStandard').value = '';
         state.selectedCompetencies = new Set();
         renderCompetencies();
         state.records = [
@@ -2370,6 +2671,9 @@
         <div class="row between"><strong>${escapeHtml(record.subject)} · ${escapeHtml(record.category)}</strong>
         <span class="small muted">${escapeHtml(record.recordedAt)}</span></div>
         <div class="small">${record.competencies.map(escapeHtml).join(', ')}</div>
+        ${record.achievementStandard
+          ? `<div class="small muted">${escapeHtml(record.achievementStandard)}</div>`
+          : ''}
         <div>${escapeHtml(record.memo)}</div>
         ${record.canEdit ? `<button class="ghost small" data-edit-record="${escapeHtml(record.id)}">수정</button>` : ''}
         ${record.canDelete ? `<button class="danger small" data-delete-record="${escapeHtml(record.id)}">삭제</button>` : ''}
@@ -2396,6 +2700,8 @@
       $('recordCategory').value = record.category;
       state.selectedCompetencies = new Set(record.competencies);
       renderCompetencies();
+      $('recordAchievementStandard').value = record.achievementStandard || '';
+      renderStandardPinControl_();
       $('recordMemo').value = record.memo;
       $('saveRecordButton').textContent = '수정 저장';
       $('cancelEditRecordButton').classList.remove('hidden');
@@ -2406,6 +2712,8 @@
       state.editingRecordId = null;
       state.selectedCompetencies = new Set();
       renderCompetencies();
+      $('recordAchievementStandard').value = '';
+      renderStandardPinControl_();
       $('recordMemo').value = '';
       $('saveRecordButton').textContent = '기록 저장';
       $('cancelEditRecordButton').classList.add('hidden');
@@ -2423,6 +2731,9 @@
           <div class="row between"><strong>${escapeHtml(record.student.name)} · ${escapeHtml(record.subject)}</strong>
           <span class="small muted">${escapeHtml(record.recordedAt)}${record.archived ? ' · 보관' : ''}</span></div>
           <div class="small">${record.student.grade}-${record.student.classNumber}-${record.student.studentNumber} · ${escapeHtml(record.category)}</div>
+          ${record.achievementStandard
+            ? `<div class="small muted">${escapeHtml(record.achievementStandard)}</div>`
+            : ''}
           <div>${escapeHtml(record.memo)}</div></div>`).join('')
           || '<p class="muted">조건에 맞는 기록이 없습니다.</p>';
       });
@@ -2461,6 +2772,17 @@
           input.className = 'modal-input';
           input.value = opts.defaultValue == null ? '' : String(opts.defaultValue);
           box.append(input);
+          if (Array.isArray(opts.datalistOptions) && opts.datalistOptions.length) {
+            const datalist = document.createElement('datalist');
+            datalist.id = `modal-options-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            opts.datalistOptions.forEach(value => {
+              const option = document.createElement('option');
+              option.value = String(value);
+              datalist.append(option);
+            });
+            input.setAttribute('list', datalist.id);
+            box.append(datalist);
+          }
         }
         const actions = document.createElement('div');
         actions.className = 'modal-actions';
@@ -2508,6 +2830,9 @@
     function showAlert(message) { return showModal_(message, {type:'alert'}); }
     function showConfirm(message) { return showModal_(message, {type:'confirm'}); }
     function showPrompt(message, defaultValue) { return showModal_(message, {type:'prompt', defaultValue}); }
+    function showSearchPrompt(message, defaultValue, datalistOptions) {
+      return showModal_(message, {type:'prompt', defaultValue, datalistOptions});
+    }
 
     function showError(error) {
       $('toPersonalButton').classList.add('hidden');
@@ -2561,6 +2886,7 @@
           connectExistingSchoolCentralResources:() => runner.connectExistingSchoolCentralResources(args[0]),
           resetSchoolInstallationConnections:() => runner.resetSchoolInstallationConnections(args[0]),
           initializeCentralDataSchema:() => runner.initializeCentralDataSchema(),
+          configureSchoolStandards:() => runner.configureSchoolStandards(args[0]),
           getAdminDashboard:() => runner.getAdminDashboard(),
           getAdminStudents:() => runner.getAdminStudents(args[0]),
           addCentralStudent:() => runner.addCentralStudent(args[0]),
@@ -2601,6 +2927,10 @@
           addExternalStudentToMyGroup:() => runner.addExternalStudentToMyGroup(args[0],args[1]),
           removeExternalStudentFromMyGroup:() => runner.removeExternalStudentFromMyGroup(args[0],args[1]),
           getStudentPhotosForMyAssignment:() => runner.getStudentPhotosForMyAssignment(args[0],args[1]),
+          getStandardsForSubject:() => runner.getStandardsForSubject(args[0]),
+          getPinnedStandardsForAssignment:() => runner.getPinnedStandardsForAssignment(args[0]),
+          pinStandardForAssignment:() => runner.pinStandardForAssignment(args[0],args[1]),
+          unpinStandardForAssignment:() => runner.unpinStandardForAssignment(args[0],args[1]),
           saveRecord:() => runner.saveRecord(args[0]),
           getRecentRecords:() => runner.getRecentRecords(args[0],args[1],args[2]),
           searchRecords:() => runner.searchRecords(args[0]),

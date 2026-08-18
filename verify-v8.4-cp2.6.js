@@ -54,8 +54,8 @@ test(1, '체크포인트 2.5 회귀 91/91', () => {
 test(2, '앱 버전이 semver 형식', () => {
   assert(/version: '\d+\.\d+\.\d+'/.test(code), '앱 버전이 semver 형식이 아닙니다.');
 });
-test(3, '중앙 스키마 버전 2', () => {
-  assert(central.includes("schemaVersion: '3'"), '중앙 스키마 버전이 3이 아닙니다.');
+test(3, '중앙 스키마 버전 4', () => {
+  assert(central.includes("schemaVersion: '4'"), '중앙 스키마 버전이 4가 아닙니다.');
 });
 test(4, '담당신청 시트 정의·초기화', () => {
   assert(central.includes("assignmentRequestSheetName: '담당신청'"), '담당신청 시트명이 없습니다.');
@@ -125,8 +125,9 @@ test(18, '처리 이력 중앙 감사 시트 기록', () => {
 });
 test(19, '관리자 입력 순서 학년·과목·반', () => {
   const body = functionBody(html, 'editAssignment');
-  assert(body.indexOf("showPrompt('담당 학년'") < body.indexOf("showPrompt('담당 과목'"), '학년보다 과목이 먼저입니다.');
-  assert(body.indexOf("showPrompt('담당 과목'") < body.indexOf('담당 반(여러 반은 쉼표로 구분)'), '과목보다 반이 먼저입니다.');
+  const subjectPrompt = body.indexOf('담당 과목을 검색하거나 직접 입력하세요.');
+  assert(body.indexOf("showPrompt('담당 학년'") < subjectPrompt, '학년보다 과목이 먼저입니다.');
+  assert(subjectPrompt < body.indexOf('담당 반(여러 반은 쉼표로 구분)'), '과목보다 반이 먼저입니다.');
 });
 test(20, '관리자 여러 반 일괄 호출', () => {
   const body = functionBody(html, 'editAssignment');
@@ -161,7 +162,7 @@ test(26, '잘못된 반 토큰 전체 차단', () => {
     '잘못된 반 입력이 조용히 누락될 수 있습니다.',
   );
 });
-test(27, '중앙 초기화가 스키마 버전 2 기록', () => {
+test(27, '중앙 초기화가 현재 스키마 버전을 기록', () => {
   const body = functionBody(admin, 'initializeCentralDataSchema');
   assert(
     body.includes("'schemaVersion'")

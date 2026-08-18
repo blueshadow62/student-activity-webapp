@@ -226,10 +226,11 @@ function searchRecordRows(mine, rows) {
   }
 }
 
-test(7, '활동기록 머리글 끝에 담당키가 있다', () => {
+test(7, '활동기록 머리글은 담당키 뒤에 성취기준을 확장한다', () => {
   assert(
-    app.RECORD_HEADERS[15] === '담당키',
-    '활동기록에 담당키 열이 없습니다.',
+    app.RECORD_HEADERS[15] === '담당키'
+      && app.RECORD_HEADERS[16] === '성취기준',
+    '활동기록의 담당키·성취기준 확장 열 순서가 다릅니다.',
   );
 });
 

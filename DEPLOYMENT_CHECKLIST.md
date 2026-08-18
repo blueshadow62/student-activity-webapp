@@ -1,4 +1,4 @@
-# 학생 활동 기록 웹앱 1.0.0 Apps Script 배포 체크리스트
+# 학생 활동 기록 웹앱 1.2.0 Apps Script 배포 체크리스트
 
 이 문서는 담당 반 일괄 등록, 교사 자기 담당 신청·관리자 승인, 승인 시 중앙 자료
 자동 공유·해지를 포함한 수동 설치 안내서입니다. 실제 Google 배포나 계정 A·B
@@ -21,8 +21,12 @@ Apps Script 프로젝트에 다음 파일을 같은 버전으로 복사합니다
 | `PersonalStorage.gs` | 필수 | 개인 데이터베이스 생성·검증·기록 저장소 |
 | `SchoolSetup.gs` | 필수 | 개인 데이터베이스 초기 시트 생성, CSV 파싱·정제 |
 | `CourseGroups.gs` | 필수 | 수강 그룹 학생 편성, 공동교육과정 타교생 추가 |
+| `StandardsData.gs` | 필수 | 학교급별 과목·성취기준 배포 번들 |
 | `Index.html` | 필수 | 웹앱 화면과 `google.script.run` 호출 |
 | `appsscript.json` | 필수(프로젝트 설정) | V8, 웹앱 실행 사용자, 접근 범위, OAuth scope |
+
+`StandardsData.gs`는 용량이 크므로 손으로 붙여넣기보다 설치 도우미 또는
+`clasp push` 사용을 권장합니다.
 
 `appsscript.json`은 Apps Script 편집기에서 **프로젝트 설정 → 매니페스트 파일
 "appsscript.json"을 편집기에 표시**를 켠 뒤 내용을 교체합니다. 파일명은
@@ -59,7 +63,7 @@ Apps Script 프로젝트에 다음 파일을 같은 버전으로 복사합니다
 | `ADMIN_EMAILS` | 이메일 1개 이상 | 관리자 역할 판정 |
 | `STAFF_GROUP_EMAIL` | 선택: 교직원 Google 그룹 이메일 | 운영 메모용. 인증·자동 공유·관리자 판정에는 사용하지 않음 |
 | `ALLOWED_TEACHER_EMAILS` | 선택: 이메일 또는 `@도메인` 목록 | 담당 신청을 할 수 있는 계정 제한. 관리자 화면 `교사 관리` 탭에서 설정하며 직접 편집할 필요 없음. 비우면 로그인 계정 누구나 신청 가능 |
-| `CENTRAL_SCHEMA_VERSION` | `3` | 수강그룹 시트를 포함한 중앙 스키마 버전 |
+| `CENTRAL_SCHEMA_VERSION` | `4` | 학교급·과목·성취기준 시트를 포함한 중앙 스키마 버전 |
 
 빈 설정표:
 
@@ -68,7 +72,7 @@ CENTRAL_DATABASE_FILE_ID = <중앙 스프레드시트 파일 ID>
 CENTRAL_PHOTO_FOLDER_ID = <중앙 사진 폴더 ID>
 ADMIN_EMAILS = <관리자 이메일>
 STAFF_GROUP_EMAIL = <선택: 교직원 Google 그룹 이메일>
-CENTRAL_SCHEMA_VERSION = 3
+CENTRAL_SCHEMA_VERSION = 4
 ```
 
 `ADMIN_EMAILS`는 코드의 `split(/[\s,;]+/)` 규칙을 따릅니다. 즉 쉼표, 공백,
