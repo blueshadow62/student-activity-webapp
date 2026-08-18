@@ -11,6 +11,6 @@ installer/**
 # only used when an admin runs "성취기준 데이터 설정". A single-school
 # install only ever needs its own level; to skip deploying (and parsing) the
 # others, uncomment the levels that don't apply:
-# StandardsData_elementary.gs
-# StandardsData_middle.gs
+StandardsData_elementary.gs
+StandardsData_middle.gs
 # StandardsData_high.gs
