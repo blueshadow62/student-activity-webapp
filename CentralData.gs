@@ -902,7 +902,28 @@ function getBundledStandardsRaw_(schoolLevel) {
 function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
   const normalized = normalizeSchoolLevel_(schoolLevel, true);
   const subjects = getSubjectCatalogForSchoolLevel_(normalized);
-  const standards = bundledStandardsForSchoolLevel_(normalized);
+  var standards;
+  try {
+    standards = bundledStandardsForSchoolLevel_(normalized);
+  } catch (bundleError) {
+    var existingSubjectSheet = spreadsheet.getSheetByName(
+      CENTRAL_CONFIG.subjectCatalogSheetName
+    );
+    var existingStandardSheet = spreadsheet.getSheetByName(
+      CENTRAL_CONFIG.achievementStandardSheetName
+    );
+    if (
+      existingSubjectSheet && existingSubjectSheet.getLastRow() > 1
+        && existingStandardSheet && existingStandardSheet.getLastRow() > 1
+    ) {
+      return {
+        schoolLevel: normalized,
+        subjectCount: existingSubjectSheet.getLastRow() - 1,
+        standardCount: existingStandardSheet.getLastRow() - 1,
+      };
+    }
+    throw bundleError;
+  }
   if (!subjects.length || !standards.length) {
     throw new Error(`${schoolLevelLabel_(normalized)} 과목·성취기준 데이터가 비어 있습니다.`);
   }

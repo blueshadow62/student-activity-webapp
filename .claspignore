@@ -13,4 +13,4 @@ installer/**
 # others, uncomment the levels that don't apply:
 StandardsData_elementary.gs
 StandardsData_middle.gs
-# StandardsData_high.gs
+StandardsData_high.gs
