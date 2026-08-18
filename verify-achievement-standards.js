@@ -4,11 +4,27 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const file = process.argv[2] || path.join(__dirname, 'StandardsData.gs');
+const dir = process.argv[2] || __dirname;
+const file = path.join(dir, 'StandardsData.gs');
+const levelFiles = {
+  elementary: ['StandardsData_elementary.gs', 'STANDARDS_DATA_ELEMENTARY'],
+  middle: ['StandardsData_middle.gs', 'STANDARDS_DATA_MIDDLE'],
+  high: ['StandardsData_high.gs', 'STANDARDS_DATA_HIGH'],
+};
 const source = fs.readFileSync(file, 'utf8');
 const context = {};
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.subjects = JSON.parse(STANDARDS_SUBJECTS); this.data = Object.fromEntries(Object.entries(STANDARDS_DATA).map(([key, value]) => [key, JSON.parse(value)]));`, context, { filename: file });
+vm.runInContext(`${source}\nthis.subjects = JSON.parse(STANDARDS_SUBJECTS);`, context, { filename: file });
+context.data = {};
+for (const [level, [levelFile, constant]] of Object.entries(levelFiles)) {
+  const levelPath = path.join(dir, levelFile);
+  vm.runInContext(
+    `${fs.readFileSync(levelPath, 'utf8')}\nthis.__level = JSON.parse(${constant});`,
+    context,
+    { filename: levelPath }
+  );
+  context.data[level] = context.__level;
+}
 
 const levels = ['elementary', 'middle', 'high'];
 const codePattern = /^\[(?:(?:\d{1,2}|[가-힣A-Za-z]{2,})[가-힣A-Za-z0-9ⅠⅡⅢ()]*-\d{2}(?:-\d{2})?|(?:[가-힣A-Za-z]{2,}|\d+[가-힣A-Za-z]+)\s+\d{2}-\d{2}(?:-\d{2})?)\]$/;

@@ -16,7 +16,7 @@ const sources = Object.fromEntries(gsFiles.map((name) => [
 // 아니다. 함수도 없는 대용량 번들을 제외해야 문자열 오탐과 구문 검사 비용을
 // 피하면서 실제 서버 코드 전체는 그대로 검사할 수 있다.
 const serverCode = gsFiles
-  .filter((name) => name !== 'StandardsData.gs')
+  .filter((name) => name !== 'StandardsData.gs' && !name.startsWith('StandardsData_'))
   .map((name) => sources[name])
   .join('\n');
 const html = fs.readFileSync(path.join(__dirname, 'Index.html'), 'utf8');

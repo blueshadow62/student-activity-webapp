@@ -10,11 +10,12 @@ const sources = Object.fromEntries(gsFiles.map((fileName) => [
   fileName,
   fs.readFileSync(path.join(__dirname, fileName), 'utf8'),
 ]));
-// StandardsData.gs는 함수가 없는 생성 데이터 번들이다. 대용량 JSON을 실행
-// 코드처럼 다시 컴파일하면 검증기가 메모리 부족으로 종료될 수 있으므로 구문
-// 검사는 서버 코드만 대상으로 하고, 번들은 전용 무결성 검증기가 검사한다.
+// StandardsData.gs와 학교급별 StandardsData_*.gs는 함수가 없는 생성 데이터
+// 번들이다. 대용량 JSON을 실행 코드처럼 다시 컴파일하면 검증기가 메모리
+// 부족으로 종료될 수 있으므로 구문 검사는 서버 코드만 대상으로 하고, 번들은
+// 전용 무결성 검증기가 검사한다.
 const serverCode = gsFiles
-  .filter((fileName) => fileName !== 'StandardsData.gs')
+  .filter((fileName) => fileName !== 'StandardsData.gs' && !fileName.startsWith('StandardsData_'))
   .map((fileName) => sources[fileName])
   .join('\n');
 const html = fs.readFileSync(path.join(__dirname, 'Index.html'), 'utf8');

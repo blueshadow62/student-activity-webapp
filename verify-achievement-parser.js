@@ -68,7 +68,7 @@ const reference = Array.from({ length:136 }, (_, index) => ({
 }));
 assert.strictEqual(verifyBook5Reference(reference, reference), 136);
 
-const existing2022 = loadExisting(require('path').resolve(__dirname, 'StandardsData.gs'));
+const existing2022 = loadExisting(__dirname);
 assert(existing2022.length > 50000);
 assert(existing2022.every((row) => row.curriculumRevision === '2022'));
 

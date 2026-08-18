@@ -12,6 +12,9 @@ const groups = read('CourseGroups.gs');
 const schoolSetup = read('SchoolSetup.gs');
 const html = read('Index.html');
 const standardsData = read('StandardsData.gs');
+const standardsElementary = read('StandardsData_elementary.gs');
+const standardsMiddle = read('StandardsData_middle.gs');
+const standardsHigh = read('StandardsData_high.gs');
 
 let passed = 0;
 let failed = 0;
@@ -62,23 +65,23 @@ test('중앙 과목·성취기준 시트 계약', () => {
 test('인코딩된 성취기준 번들을 학교급별로 런타임 복원', () => {
   const standardsContext = {};
   vm.createContext(standardsContext);
-  vm.runInContext(`${standardsData}\nthis.standardsData = STANDARDS_DATA;`, standardsContext);
-  const loadStandards = new Function(
-    'schoolLevel',
-    'normalizeSchoolLevel_',
-    'schoolLevelLabel_',
-    'STANDARDS_DATA',
-    'bundledStandardsMemo_',
-    functionBody(central, 'bundledStandardsForSchoolLevel_')
+  // 학교급별 파일은 각자 전역 상수(STANDARDS_DATA_ELEMENTARY 등)로만 존재하고
+  // 더 이상 하나의 STANDARDS_DATA 객체로 묶이지 않으므로, 실제 CentralData.gs
+  // 함수 본문(bundledStandardsForSchoolLevel_와 getBundledStandardsRaw_)을
+  // 그대로 vm 컨텍스트에 정의해 실제 조회 경로를 그대로 검증한다.
+  vm.runInContext(
+    [
+      standardsData, standardsElementary, standardsMiddle, standardsHigh,
+      'function normalizeSchoolLevel_(v) { return v; }',
+      'function schoolLevelLabel_(v) { return v; }',
+      'const bundledStandardsMemo_ = {};',
+      `function getBundledStandardsRaw_(schoolLevel) {${functionBody(central, 'getBundledStandardsRaw_')}}`,
+      `function bundledStandardsForSchoolLevel_(schoolLevel) {${functionBody(central, 'bundledStandardsForSchoolLevel_')}}`,
+    ].join('\n'),
+    standardsContext
   );
   ['elementary', 'middle', 'high'].forEach(schoolLevel => {
-    const result = loadStandards(
-      schoolLevel,
-      value => value,
-      value => value,
-      standardsContext.standardsData,
-      {}
-    );
+    const result = standardsContext.bundledStandardsForSchoolLevel_(schoolLevel);
     assert(Array.isArray(result), `${schoolLevel} 성취기준이 배열로 복원되지 않습니다.`);
     assert(result.length > 0, `${schoolLevel} 성취기준이 비어 있습니다.`);
     assert(
