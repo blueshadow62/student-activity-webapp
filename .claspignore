@@ -7,10 +7,9 @@ docs/**
 installer/**
 .github/**
 
-# StandardsData_*.gs holds achievement standards for one school level each,
-# only used when an admin runs "성취기준 데이터 설정". A single-school
-# install only ever needs its own level; to skip deploying (and parsing) the
-# others, uncomment the levels that don't apply:
-StandardsData_elementary.gs
-StandardsData_middle.gs
-StandardsData_high.gs
+# 성취기준 번들은 초기 설정에 필요하므로 기본 포함합니다.
+# 관리자가 "성취기준 데이터 설정"을 완료한 뒤, 아래 줄의 주석을
+# 해제하면 부팅 속도가 크게 빨라집니다.
+# StandardsData_elementary.gs
+# StandardsData_middle.gs
+# StandardsData_high.gs

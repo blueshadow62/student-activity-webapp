@@ -129,6 +129,18 @@ class ClaspService {
     }
     return deployment.deploymentId;
   }
+
+  async updateDeployment(projectDir, deploymentId) {
+    this.onProgress('기존 배포를 최신 코드로 갱신합니다.');
+    await this.run([
+      '--json',
+      'create-deployment',
+      '-i',
+      deploymentId,
+      '-d',
+      DEPLOYMENT_DESCRIPTION,
+    ], projectDir);
+  }
 }
 
 module.exports = { buildClaspCommandArgs, ClaspService };

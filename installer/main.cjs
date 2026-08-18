@@ -83,6 +83,7 @@ function publicState(state) {
     adminConfirmed: Boolean(state.adminConfirmed),
     hasDeployment: isValidDeploymentId(state.deploymentId),
     webAppUrl: isValidDeploymentId(state.deploymentId) ? URLS.webApp(state.deploymentId) : null,
+    optimized: Boolean(state.optimized),
   };
 }
 
@@ -182,6 +183,26 @@ function registerHandlers() {
     clipboard.writeText(URLS.webApp(state.deploymentId));
     return { ok: true, shortcutPath };
   });
+
+  ipcMain.handle('installer:optimize', () => runExclusive(async () => {
+    const state = stateStore.load();
+    if (!isValidDeploymentId(state.deploymentId)) throw new Error('먼저 웹앱을 배포해 주세요.');
+    const workDir = requireSafeWorkDirectory(state.workDir);
+    const bundleFiles = [
+      'StandardsData_elementary.gs',
+      'StandardsData_middle.gs',
+      'StandardsData_high.gs',
+    ];
+    bundleFiles.forEach(function (name) {
+      const filePath = path.join(workDir, name);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    });
+    sendProgress('성취기준 번들을 제외하고 다시 업로드합니다.');
+    await claspService.push(workDir);
+    sendProgress('배포를 갱신합니다.');
+    await claspService.updateDeployment(workDir, state.deploymentId);
+    return publicState(stateStore.update({ optimized: true }));
+  }));
 }
 
 function createWindow() {

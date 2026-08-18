@@ -12,6 +12,7 @@ const allowedActions = Object.freeze([
   'deploy',
   'open-web-app',
   'create-shortcut',
+  'optimize',
 ]);
 
 contextBridge.exposeInMainWorld('installer', {

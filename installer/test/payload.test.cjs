@@ -13,7 +13,7 @@ const {
 } = require('../lib/payload.cjs');
 
 test('payload whitelist contains only deployable Apps Script files', () => {
-  assert.equal(PAYLOAD_FILES.length, 12);
+  assert.equal(PAYLOAD_FILES.length, 15);
   assert.equal(PAYLOAD_FILES.includes('.clasp.json'), false);
   assert.equal(PAYLOAD_FILES.some((name) => name.startsWith('verify-')), false);
   assert.equal(PAYLOAD_FILES.some((name) => name.startsWith('docs')), false);

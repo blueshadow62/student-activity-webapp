@@ -11,6 +11,9 @@ const PAYLOAD_FILES = Object.freeze([
   'PersonalStorage.gs',
   'SchoolSetup.gs',
   'StandardsData.gs',
+  'StandardsData_elementary.gs',
+  'StandardsData_middle.gs',
+  'StandardsData_high.gs',
   'Index.html',
   'appsscript.json',
 ]);

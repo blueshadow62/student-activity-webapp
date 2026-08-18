@@ -9,6 +9,8 @@ const elements = {
   deploy: document.getElementById('deploy'),
   openWebApp: document.getElementById('open-web-app'),
   shortcut: document.getElementById('shortcut'),
+  optimize: document.getElementById('optimize'),
+  optimizeStatus: document.getElementById('optimize-status'),
   progress: document.getElementById('progress'),
   error: document.getElementById('error'),
   complete: document.getElementById('complete'),
@@ -56,6 +58,10 @@ function render(state) {
     setStatus(elements.deployStatus, '완료', 'done');
     elements.complete.hidden = false;
     elements.webAppUrl.value = state.webAppUrl;
+    if (state.optimized) {
+      setStatus(elements.optimizeStatus, '최적화 완료', 'done');
+      elements.optimize.disabled = true;
+    }
   }
 }
 
@@ -114,6 +120,15 @@ elements.shortcut.addEventListener('click', async () => {
     const result = await invoke('create-shortcut');
     elements.progress.textContent = `바탕화면 바로가기를 만들고 웹앱 주소를 복사했습니다: ${result.shortcutPath}`;
   } catch (error) { showError(error); }
+});
+
+elements.optimize.addEventListener('click', async () => {
+  setBusy(elements.optimize, true, '최적화 중…');
+  try {
+    await invoke('optimize');
+    setStatus(elements.optimizeStatus, '최적화 완료', 'done');
+  } catch (error) { showError(error); }
+  finally { setBusy(elements.optimize, false); }
 });
 
 window.installer.onProgress((message) => { elements.progress.textContent = message; });
