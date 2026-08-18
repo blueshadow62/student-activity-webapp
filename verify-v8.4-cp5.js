@@ -38,13 +38,13 @@ function functionBody(source, name) {
   return '';
 }
 
-test(1, '체크포인트 2.6 회귀 29/29', () => {
+test(1, '체크포인트 2.6 회귀 30/30', () => {
   const output = childProcess.execFileSync(
     process.execPath,
     [path.join(__dirname, 'verify-v8.4-cp2.6.js')],
     { cwd: root, encoding: 'utf8' },
   );
-  assert(output.includes('RESULT 29/29'), '체크포인트 2.6 회귀가 통과하지 않았습니다.');
+  assert(output.includes('RESULT 30/30'), '체크포인트 2.6 회귀가 통과하지 않았습니다.');
 });
 // 업데이트 알림이 이 값을 GitHub 릴리스 태그와 자리마다 숫자로 비교한다.
 // 'cp5' 같은 꼬리가 붙으면 비교가 무너지므로 순수 semver 만 허용한다.

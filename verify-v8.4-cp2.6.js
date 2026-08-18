@@ -200,6 +200,25 @@ test(29, '오류 화면에서 모드 전환 버튼 숨김', () => {
     '오류 화면에서 이전 모드 버튼이 남을 수 있습니다.',
   );
 });
+test(30, '관리자 학생 요약·사진 상태 캐시 필터 UI', () => {
+  const studentBody = functionBody(html, 'loadAdminStudents');
+  const photoBody = functionBody(html, 'renderPhotoStatus');
+  assert(
+    html.includes('id="adminStudentSummary"')
+      && studentBody.includes('result.students')
+      && studentBody.includes('summary.totalCount')
+      && studentBody.includes('summary.activeCount')
+      && studentBody.includes('summary.filteredCount'),
+    '학생 요약 DOM 또는 새 조회 계약 처리가 없습니다.',
+  );
+  assert(
+    html.includes('id="photoStatusFilter"')
+      && photoBody.includes('state.adminPhotoStatus')
+      && photoBody.includes("selectedStatus === 'ALL' || row.status === selectedStatus")
+      && !photoBody.includes('callServer('),
+    '사진 상태 필터가 캐시를 즉시 필터링하지 않습니다.',
+  );
+});
 
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
@@ -213,7 +232,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 29) {
-  console.error(`FAIL expected 29 tests, got ${tests.length}`);
+if (tests.length !== 30) {
+  console.error(`FAIL expected 30 tests, got ${tests.length}`);
   process.exitCode = 1;
 }

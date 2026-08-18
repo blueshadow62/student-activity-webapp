@@ -340,6 +340,7 @@
               <button id="rosterTemplateButton" class="ghost">빈 양식 받기</button>
             </div>
             <p class="small muted">처음이라면 <strong>빈 양식 받기</strong>로 CSV를 내려받아 채운 뒤 올리세요. 이미 올린 명단이 있으면 <strong>CSV 내보내기</strong>로 받은 파일을 고쳐서 다시 올려도 됩니다. 두 파일의 열 구성은 같습니다.</p>
+            <p id="adminStudentSummary" class="status" aria-live="polite">전체 등록 0명 · 활성 0명 · 조회 결과 0명</p>
           </div>
           <div class="card table-wrap"><table><thead><tr>
             <th>학생키</th><th>학년도</th><th>학년-반-번호</th><th>이름</th><th>상태</th><th>관리</th>
@@ -359,6 +360,8 @@
               화면에는 <strong>78×105px</strong>(가로:세로 = 3:4) 크기로 표시됩니다.
               선명하게 보이려면 그 2배인 <strong>156×210px</strong> 정도를 권장합니다.</p>
             <div id="photoSummary" class="status"></div>
+            <div class="row" style="margin-top:10px"><label for="photoStatusFilter">사진 상태</label>
+              <select id="photoStatusFilter"><option value="ALL">전체</option><option value="CONNECTED">연결</option><option value="READY_TO_SYNC">동기화 가능</option><option value="MISSING">누락</option><option value="DUPLICATE">중복</option></select></div>
           </div>
           <div id="photoStatusRows" class="card"></div>
         </div>
@@ -550,7 +553,7 @@
   <script>
     'use strict';
     const state = {
-      bootstrap:null, role:'', mode:'', students:[], photos:{},
+      bootstrap:null, role:'', mode:'', students:[], photos:{}, adminPhotoStatus:null,
       selectedStudent:null, selectedCompetencies:new Set(), records:[], editingRecordId:null,
       missingPhotos:new Set(), pendingPhotos:new Set(), photoQueue:[],
       activePhotoLoads:0, photoGeneration:0, photoObserver:null, photosEnabled:false,
@@ -609,6 +612,7 @@
       $('rosterTemplateButton').addEventListener('click', downloadRosterTemplate);
       $('loadPhotoStatusButton').addEventListener('click', loadPhotoStatus);
       $('syncPhotosButton').addEventListener('click', synchronizePhotos);
+      $('photoStatusFilter').addEventListener('change', renderPhotoStatus);
       $('newAssignmentButton').addEventListener('click', () => editAssignment());
       $('refreshAssignmentRequestsButton').addEventListener('click', loadAssignments);
       $('approveSelectedAssignmentRequestsButton').addEventListener('click', approveSelectedAssignmentRequests_);
@@ -1161,13 +1165,18 @@
 
     async function loadAdminStudents() {
       await runAction(async () => {
-        const students = await callServer('getAdminStudents', {
+        const result = await callServer('getAdminStudents', {
           query:$('adminStudentQuery').value,
           schoolYear:$('adminStudentYear').value,
           grade:$('adminStudentGrade').value,
           classNumber:$('adminStudentClass').value,
           includeInactive:$('includeInactiveStudents').checked,
         });
+        const students = Array.isArray(result && result.students) ? result.students : [];
+        const summary = result && result.summary;
+        $('adminStudentSummary').textContent = summary
+          ? `전체 등록 ${summary.totalCount}명 · 활성 ${summary.activeCount}명 · 조회 결과 ${summary.filteredCount}명`
+          : '학생 요약을 불러오지 못했습니다.';
         $('adminStudentRows').innerHTML = students.map(student => `<tr>
           <td class="small">${escapeHtml(student.studentKey)}</td>
           <td>${student.schoolYear}</td><td>${student.grade}-${student.classNumber}-${student.studentNumber}</td>
@@ -1219,8 +1228,6 @@
     }
 
     // 배포 직후 연습용 명단을 지우고 실제 학교 명단을 새로 올릴 수 있게 한다.
-    // getAdminStudents는 화면 표시용으로 결과를 100명까지 자르므로, 확인창에
-    // 미리 인원수를 보여주는 대신 실제 삭제 후 정확한 수를 알린다.
     async function resetStudentList_() {
       if (!(await showConfirm(
         '중앙 학생목록 전체를 영구 삭제할까요?\n'
@@ -1283,16 +1290,29 @@
     async function loadPhotoStatus() {
       await runAction(async () => {
         const result = await callServer('getAdminPhotoStatus', {});
-        const s = result.summary;
-        const folderLink = $('openPhotoFolderLink');
-        folderLink.classList.toggle('hidden', !result.folderUrl);
-        if (result.folderUrl) folderLink.href = result.folderUrl;
-        $('photoSummary').textContent = `전체 ${s.total}명 · 연결 ${s.CONNECTED} · 동기화 가능 ${s.READY_TO_SYNC} · 누락 ${s.MISSING} · 중복 ${s.DUPLICATE}`;
-        $('photoStatusRows').innerHTML = result.rows.map(row => `<div class="record">
-          ${row.student.grade}-${row.student.classNumber}-${row.student.studentNumber} ${escapeHtml(row.student.name)}
-          <span class="badge">${escapeHtml(row.status)}</span></div>`).join('')
-          || '<p class="muted">조회된 학생이 없습니다.</p>';
+        state.adminPhotoStatus = result || {
+          rows: [], summary: {total:0, CONNECTED:0, READY_TO_SYNC:0, MISSING:0, DUPLICATE:0},
+        };
+        renderPhotoStatus();
       });
+    }
+
+    function renderPhotoStatus() {
+      const result = state.adminPhotoStatus || {
+        rows: [], summary: {total:0, CONNECTED:0, READY_TO_SYNC:0, MISSING:0, DUPLICATE:0},
+      };
+      const s = result.summary;
+      const statusLabels = {CONNECTED:'연결', READY_TO_SYNC:'동기화 가능', MISSING:'누락', DUPLICATE:'중복'};
+      const selectedStatus = $('photoStatusFilter').value;
+      const rows = (result.rows || []).filter(row => selectedStatus === 'ALL' || row.status === selectedStatus);
+      const folderLink = $('openPhotoFolderLink');
+      folderLink.classList.toggle('hidden', !result.folderUrl);
+      if (result.folderUrl) folderLink.href = result.folderUrl;
+      $('photoSummary').textContent = `전체 ${s.total}명 · 연결 ${s.CONNECTED} · 동기화 가능 ${s.READY_TO_SYNC} · 누락 ${s.MISSING} · 중복 ${s.DUPLICATE} · 현재 표시 ${rows.length}명`;
+      $('photoStatusRows').innerHTML = rows.map(row => `<div class="record">
+        ${row.student.grade}-${row.student.classNumber}-${row.student.studentNumber} ${escapeHtml(row.student.name)}
+        <span class="badge">${escapeHtml(statusLabels[row.status] || row.status)}</span></div>`).join('')
+        || '<p class="muted">조회된 학생이 없습니다.</p>';
     }
 
     async function synchronizePhotos() {

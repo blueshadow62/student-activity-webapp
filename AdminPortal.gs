@@ -4,7 +4,6 @@
 
 const CENTRAL_ADMIN_CONFIG = Object.freeze({
   maxAssignmentResults: 500,
-  maxPhotoStatusResults: 500,
   defaultAssignmentType: '교과',
 });
 
@@ -223,10 +222,11 @@ function upsertCentralAppSetting_(sheet, key, value) {
 function getAdminStudents(filters) {
   requireAdmin_();
   const criteria = normalizeAdminStudentFilters_(filters);
-  return readCentralStudents_(
+  const allStudents = readCentralStudents_(
     getRequiredCentralStudentSheet_(),
     true
-  ).filter(function (student) {
+  );
+  const students = allStudents.filter(function (student) {
     return (!criteria.query
         || student.name.toLocaleLowerCase('ko').includes(criteria.query)
         || student.studentKey.toLowerCase().includes(criteria.query))
@@ -234,7 +234,15 @@ function getAdminStudents(filters) {
       && (!criteria.grade || student.grade === criteria.grade)
       && (!criteria.classNumber || student.classNumber === criteria.classNumber)
       && (criteria.includeInactive || student.active);
-  }).slice(0, criteria.limit).map(toPublicCentralStudent_);
+  }).map(toPublicCentralStudent_);
+  return {
+    students: students,
+    summary: {
+      totalCount: allStudents.length,
+      activeCount: allStudents.filter(function (student) { return student.active; }).length,
+      filteredCount: students.length,
+    },
+  };
 }
 
 function normalizeAdminStudentFilters_(filters) {
@@ -248,10 +256,6 @@ function normalizeAdminStudentFilters_(filters) {
     grade: grade,
     classNumber: classNumber,
     includeInactive: Boolean(value.includeInactive),
-    limit: Math.min(
-      Math.max(Number(value.limit) || CENTRAL_CONFIG.maxAdminStudentResults, 1),
-      CENTRAL_CONFIG.maxAdminStudentResults
-    ),
   };
 }
 
@@ -707,7 +711,6 @@ function exportCentralStudentCsv(filters) {
   const criteria = normalizeAdminStudentFilters_({
     ...(filters || {}),
     includeInactive: true,
-    limit: CENTRAL_CONFIG.maxCsvRows,
   });
   const rows = readCentralStudents_(
     getRequiredCentralStudentSheet_(),
@@ -1265,7 +1268,6 @@ function getAdminPhotoStatus(filters) {
       ? filters.schoolYear
       : getCurrentSchoolYear_(),
     includeInactive: false,
-    limit: CENTRAL_ADMIN_CONFIG.maxPhotoStatusResults,
   });
   const students = readCentralStudents_(
     getRequiredCentralStudentSheet_(),
@@ -1278,7 +1280,7 @@ function getAdminPhotoStatus(filters) {
   const photoRows = readCentralPhotoRows_(getRequiredCentralPhotoSheet_());
   const photoFolder = getCentralPhotoFolder_();
   const catalog = buildCentralPhotoCatalog_(photoFolder);
-  const rows = students.slice(0, criteria.limit).map(function (student) {
+  const rows = students.map(function (student) {
     const entry = photoRows.get(student.studentKey);
     const candidates = catalog.byPhotoKey.get(centralStudentPhotoKey_(student)) || [];
     let status = 'MISSING';

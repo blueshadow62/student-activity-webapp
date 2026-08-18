@@ -1386,6 +1386,55 @@ test(65, '승인된 담당 화면 이름은 가장 최근 신청 이력에서 �
   }
 });
 
+test(66, '관리자 학생 조회는 150명 전체와 정확한 요약을 반환한다', () => {
+  const original = {
+    requireAdmin_: app.requireAdmin_, readCentralStudents_: app.readCentralStudents_,
+    getRequiredCentralStudentSheet_: app.getRequiredCentralStudentSheet_,
+  };
+  const students = Array.from({ length: 150 }, (_, index) => ({
+    studentKey: `STU-${index + 1}`, schoolYear: 2026, grade: 1, classNumber: 1,
+    studentNumber: index + 1, name: `학생${index + 1}`, status: '재학', active: index < 120,
+  }));
+  Object.assign(app, {
+    requireAdmin_: () => {}, getRequiredCentralStudentSheet_: () => ({}),
+    readCentralStudents_: () => students,
+  });
+  try {
+    const all = app.getAdminStudents({ includeInactive: true });
+    const active = app.getAdminStudents({});
+    assert(all.students.length === 150, '150명 전체 학생이 반환되지 않습니다.');
+    assert(all.summary.totalCount === 150 && all.summary.activeCount === 120 && all.summary.filteredCount === 150,
+      '전체·활성·조회 결과 요약이 정확하지 않습니다.');
+    assert(active.students.length === 120 && active.summary.filteredCount === 120,
+      '비활성 제외 조회 결과가 정확하지 않습니다.');
+  } finally { Object.assign(app, original); }
+});
+
+test(67, '관리자 사진 현황은 150명 전체를 반환한다', () => {
+  const original = {
+    requireAdmin_: app.requireAdmin_, getCurrentSchoolYear_: app.getCurrentSchoolYear_,
+    readCentralStudents_: app.readCentralStudents_, getRequiredCentralStudentSheet_: app.getRequiredCentralStudentSheet_,
+    readCentralPhotoRows_: app.readCentralPhotoRows_, getRequiredCentralPhotoSheet_: app.getRequiredCentralPhotoSheet_,
+    getCentralPhotoFolder_: app.getCentralPhotoFolder_, buildCentralPhotoCatalog_: app.buildCentralPhotoCatalog_,
+  };
+  const students = Array.from({ length: 150 }, (_, index) => ({
+    studentKey: `STU-${index + 1}`, schoolYear: 2026, grade: 1, classNumber: 1,
+    studentNumber: index + 1, name: `학생${index + 1}`, status: '재학', active: true,
+  }));
+  Object.assign(app, {
+    requireAdmin_: () => {}, getCurrentSchoolYear_: () => 2026,
+    getRequiredCentralStudentSheet_: () => ({}), getRequiredCentralPhotoSheet_: () => ({}),
+    readCentralStudents_: () => students, readCentralPhotoRows_: () => new Map(),
+    getCentralPhotoFolder_: () => ({ getUrl: () => 'https://drive.example/folder' }),
+    buildCentralPhotoCatalog_: () => ({ byPhotoKey: new Map(), byFileId: new Map(), invalidFiles: [] }),
+  });
+  try {
+    const result = app.getAdminPhotoStatus({});
+    assert(result.rows.length === 150 && result.summary.total === 150 && result.summary.MISSING === 150,
+      '사진 현황이 100명 이상을 모두 반환하지 않습니다.');
+  } finally { Object.assign(app, original); }
+});
+
 let passed = 0;
 for (const item of tests.sort((left, right) => left.number - right.number)) {
   try {
@@ -1398,7 +1447,7 @@ for (const item of tests.sort((left, right) => left.number - right.number)) {
   }
 }
 console.log(`RESULT ${passed}/${tests.length}`);
-if (tests.length !== 65) {
-  console.error(`FAIL expected 65 tests, got ${tests.length}`);
+if (tests.length !== 67) {
+  console.error(`FAIL expected 67 tests, got ${tests.length}`);
   process.exitCode = 1;
 }
