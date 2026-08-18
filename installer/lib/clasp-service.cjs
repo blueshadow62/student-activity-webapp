@@ -15,20 +15,31 @@ const {
   PROJECT_TITLE,
 } = require('./constants.cjs');
 
+function buildClaspCommandArgs(cliPath, authFilePath, args) {
+  return [cliPath, '-A', authFilePath].concat(args);
+}
+
 class ClaspService {
   constructor(options) {
     this.executablePath = options.executablePath;
     this.cliPath = options.cliPath;
-    this.authDir = options.authDir;
+    this.authFilePath = options.authFilePath;
     this.onProgress = options.onProgress || function () {};
   }
 
   run(args, workingDirectory) {
-    const commandArgs = [this.cliPath, '-A', this.authDir].concat(args);
+    const commandArgs = buildClaspCommandArgs(
+      this.cliPath,
+      this.authFilePath,
+      args
+    );
     const environment = Object.assign({}, process.env, {
       ELECTRON_RUN_AS_NODE: '1',
     });
-    fs.mkdirSync(this.authDir, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(path.dirname(this.authFilePath), {
+      recursive: true,
+      mode: 0o700,
+    });
 
     return new Promise((resolve, reject) => {
       const child = spawn(this.executablePath, commandArgs, {
@@ -120,4 +131,4 @@ class ClaspService {
   }
 }
 
-module.exports = { ClaspService };
+module.exports = { buildClaspCommandArgs, ClaspService };

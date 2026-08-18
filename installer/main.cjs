@@ -223,7 +223,7 @@ app.whenReady().then(() => {
   claspService = new ClaspService({
     executablePath: process.execPath,
     cliPath: resolveClaspCli(),
-    authDir: path.join(userData, 'auth'),
+    authFilePath: path.join(userData, 'auth', '.clasprc.json'),
     onProgress: sendProgress,
   });
   registerHandlers();

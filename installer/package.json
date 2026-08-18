@@ -1,6 +1,6 @@
 {
   "name": "student-activity-installer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "학생 활동 기록 Google Apps Script Windows 설치 도우미",
   "main": "main.cjs",
