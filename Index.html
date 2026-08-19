@@ -2858,7 +2858,12 @@
       $('toPersonalButton').classList.add('hidden');
       $('toAdminButton').classList.add('hidden');
       $('errorScreen').classList.remove('hidden');
-      $('errorMessage').textContent = safeErrorMessage(error);
+      if (isTransientAccessError_(error)) {
+        $('errorMessage').textContent = '접속에 필요한 문서 권한을 확인할 수 없습니다.\n'
+          + '잠시 후 새로고침하거나, 관리자에게 문의해 주세요.';
+      } else {
+        $('errorMessage').textContent = safeErrorMessage(error);
+      }
       $('modeLabel').textContent = '접속 오류';
     }
     // Apps Script가 간헐적으로 던지는 원본 오류로, 우리 쪽 코드 문제가
