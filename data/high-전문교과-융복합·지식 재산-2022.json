@@ -1,0 +1,4319 @@
+{
+  "meta": {
+    "schoolLevel": "high",
+    "category": "전문교과",
+    "curriculumRevision": "2022",
+    "track": "융복합·지식 재산",
+    "description": "2022 개정 고등학교 전문교과(융복합·지식 재산) 과목 및 성취기준"
+  },
+  "subjects": [
+    {
+      "name": "지식 재산 관리",
+      "abbreviation": "지재 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f"
+    },
+    {
+      "name": "디지털과 직업 생활",
+      "abbreviation": "디직 02",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa"
+    },
+    {
+      "name": "스마트 설비 실무",
+      "abbreviation": "스실 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05"
+    },
+    {
+      "name": "발명과 기업가 정신",
+      "abbreviation": "발신 03",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97"
+    },
+    {
+      "name": "스마트 공장 운용",
+      "abbreviation": "스운 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c"
+    },
+    {
+      "name": "성공적인 직업 생활",
+      "abbreviation": "성직 06",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a"
+    },
+    {
+      "name": "발명과 디자인",
+      "abbreviation": "발디 02",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68"
+    },
+    {
+      "name": "스마트 공장 설계와 구축",
+      "abbreviation": "스구 02",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929"
+    },
+    {
+      "name": "발명･특허 기초",
+      "abbreviation": "발특 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208"
+    },
+    {
+      "name": "발명과 메이커",
+      "abbreviation": "발메 02",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8"
+    },
+    {
+      "name": "특허 출원의 실제",
+      "abbreviation": "특출 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc"
+    },
+    {
+      "name": "특허 정보 조사･분석",
+      "abbreviation": "특정 04",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a"
+    },
+    {
+      "name": "노동 인권과 산업 안전 보건",
+      "abbreviation": "인산 01",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc"
+    },
+    {
+      "name": "스마트 공장 일반",
+      "abbreviation": "스일 05",
+      "schoolLevel": "high",
+      "track": "융복합·지식 재산",
+      "category": "전문교과",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d"
+    }
+  ],
+  "standards": [
+    {
+      "code": "[발신 01-03]",
+      "subject": "발명과 기업가 정신",
+      "domain": "발명과 기업가 정신의 이해",
+      "text": "발명과 기업가 정신의 관계를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_001b61ab919937289502"
+    },
+    {
+      "code": "[발메 02-01]",
+      "subject": "발명과 메이커",
+      "domain": "디자인 씽킹을 통한 발명 아이디어 창출",
+      "text": "발명 아이디어 창출을 위해 다양한 아이디어 창출 방법과 평가 방법을 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_00c008e097cd86f1ab60"
+    },
+    {
+      "code": "[스운 01-01-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "생산 시스템의 유형별 장단점에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_00ee20e178a653d946ea"
+    },
+    {
+      "code": "[지재 04-05-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "지식 재산권(특허･실용신안권, 디자인권, 상표권)자의 약정 또는 허락에 의한 전용 시(사용)권 설정 등록 신청 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_012b2b5066f7b97cf99e"
+    },
+    {
+      "code": "[스구 02-04-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "제어 요구에 따라 구동 장치의 종류와 용량을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_01eca0fe810c8c2ad0d6"
+    },
+    {
+      "code": "[스일 06-04-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "마스터 데이터 관리(MDM: Master Data Management)의 개념을 이해하고 활용 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_0299ec93b1a80b260c2e"
+    },
+    {
+      "code": "[스구 05-03-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "시뮬레이션을 위한 디지털 모델(3D 오브젝트)을 선정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_031d2efed47d4a2dcdc6"
+    },
+    {
+      "code": "[스구 02-03-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "제어 동작의 흐름도를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_041e3ea3b5bfa03f89ad"
+    },
+    {
+      "code": "[디직 05-03]",
+      "subject": "디지털과 직업 생활",
+      "domain": "인공지능과 직업 생활",
+      "text": "직업 생활에서 인공지능의 필요성을 이해하고, 활용 분야를 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_044fc956031790290483"
+    },
+    {
+      "code": "[특출 04-03-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야에서 다루는 표준화 특허에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_048d2c51b24c25f28a38"
+    },
+    {
+      "code": "[특정 04-02-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "선행 기술 조사에 사용할 검색식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_05929af9c4edbf106400"
+    },
+    {
+      "code": "[발신 01-01]",
+      "subject": "발명과 기업가 정신",
+      "domain": "발명과 기업가 정신의 이해",
+      "text": "발명의 의미와 사회적 중요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_05dc641163e51259ed42"
+    },
+    {
+      "code": "[특정 02-01-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "다양한 정보원(source) 제공 정보의 종류, 범위, 특성을 정확하게 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_0912da1a57579c6a8ae5"
+    },
+    {
+      "code": "[특정 01-02-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 신고서에서 파악된 개발 분야의 기술 동향을 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_09d0d675af45ff927bfd"
+    },
+    {
+      "code": "[발신 04-02]",
+      "subject": "발명과 기업가 정신",
+      "domain": "창업 프로젝트",
+      "text": "사업 계획서 작성 방법에 따라 사업 계획서를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_0a4de8a4d7e2e5530626"
+    },
+    {
+      "code": "[발메 04-04]",
+      "subject": "발명과 메이커",
+      "domain": "발명 메이커 프로젝트",
+      "text": "정보통신기술을 활용하여 문제를 분석하고 해결 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_0b4ad201e9fc19da5660"
+    },
+    {
+      "code": "[특정 01-03-04]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 상담을 통해 최선 실시 예와 변형 실시 예가 무엇인지 구분할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_0d3658faa7e6badcca4e"
+    },
+    {
+      "code": "[성직 06-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "경력 관리와 평생 학습",
+      "text": "평생 학습의 의미를 설명할 수 있고, 평생 학습의 중요성과 활성화 방안에 대하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_0dcbfcc17a8ed89c2d8a"
+    },
+    {
+      "code": "[발메 01-02]",
+      "subject": "발명과 메이커",
+      "domain": "발명과 문제 해결의 이해",
+      "text": "발명 문제 정의 과정을 활용해 문제를 찾아 원인을 파악하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_0e32e8eae77ad8cc5596"
+    },
+    {
+      "code": "[스운 01-03-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "생산 공정에서 구성에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_0e38ac758017c1754a7c"
+    },
+    {
+      "code": "[스실 05-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "기계 장치 작동 도중에 HMI 장치와 관련된 문제가 발생하였을 때 원인을 파악하고 조치할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_0eb3286682efb878b811"
+    },
+    {
+      "code": "[스운 01-01-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "생산 시스템의 유형별 특징에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_0ed5c1308b3759824014"
+    },
+    {
+      "code": "[스구 05-03-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "PC 언어를 활용하여 시뮬레이션 스크립트를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_0fef058132a3c5b88c67"
+    },
+    {
+      "code": "[발디 04-02]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 제품화",
+      "text": "3D 모델링 프로그램을 사용하여 3D 모델링과 3D 렌더링으로 도면을 제작할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_1032de26c137ad4942c5"
+    },
+    {
+      "code": "[인산 05-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "사고 예방의 이해",
+      "text": "작업 현장 위험성 평가의 개념을 이해하고, 이를 활용한 예방 대책과 작업 방법에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_1059cb1f41861b7f99dd"
+    },
+    {
+      "code": "[디직 03-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 콘텐츠의 활용과 제작",
+      "text": "디지털 콘텐츠를 검색·선택·열람·평가하여 다양한 직업 생활에 활용할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_1114b8039e6a7d72420c"
+    },
+    {
+      "code": "[지재 02-02-03]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "직무 발명 관련 규정에 따라 출원, 등록, 실시, 처분 등 보상금 지급 대상을 선별하여 지급할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_11d1735863a84e7b4c6a"
+    },
+    {
+      "code": "[지재 01-02-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "서면 연구 노트를 발간 배포할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_11f53b96ed181a9d8a83"
+    },
+    {
+      "code": "[발디 03-02]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 과정",
+      "text": "발명 디자인 제품 개발을 위한 고객의 요구 사항을 파악하여 범위와 속성을 결정하고 성능 명세서를 작성하여 특성을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_126a9f1a517cb214d9c8"
+    },
+    {
+      "code": "[특출 01-02-03]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "명세서 중 발명의 명칭, 기술 분야, 발명의 배경이 되는 기술, 선행 기술 문헌을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_128f5704ac603321c1e6"
+    },
+    {
+      "code": "[지재 02-01-05]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "영업 비밀로 보유, 공지 증명 제도 이용, 출원 등 권리화 방안을 마련하고, 필요한 사후 조치를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_12d7948dd7eac875a0ac"
+    },
+    {
+      "code": "[지재 03-04-05]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "출원인 정보 변경에 관련된 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_134368dff80341c1179c"
+    },
+    {
+      "code": "[특출 04-01-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야 제어 알고리즘의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_1553841b4f817308fa77"
+    },
+    {
+      "code": "[발디 01-01]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 이해",
+      "text": "발명 디자인의 개념을 이해하고, 지식 재산권에서의 발명 디자인의 개념을 인식할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_1575453058c505757e44"
+    },
+    {
+      "code": "[스일 06-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "제조 실행 시스템(MES)의 개념을 기능을 이해하고, 도입 효과와 구축 사례를 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_175bb8147d3c4844fbd9"
+    },
+    {
+      "code": "[발메 01-03]",
+      "subject": "발명과 메이커",
+      "domain": "발명과 문제 해결의 이해",
+      "text": "다양한 분야의 지식, 기술, 그리고 전문가의 경험을 조사하여 문제를 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_178d133787d06cb3f10c"
+    },
+    {
+      "code": "[발특 01-04]",
+      "subject": "발명･특허 기초",
+      "domain": "발명의 이해",
+      "text": "우리 생활 속의 발명 사례를 조사하여 생활에 미친 영향을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_191372dd46531be6ad18"
+    },
+    {
+      "code": "[스일 05-04-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "가상 현실과 증강 현실의 개념을 이해하고, 가상 현실과 증강 현실을 비교 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_1924fed8b0f5810d63b3"
+    },
+    {
+      "code": "[지재 03-01-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "출원인 코드 부여 신청에 필요한 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_194886addcb1f6e96dc6"
+    },
+    {
+      "code": "[특출 05-03-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야에서 구조식의 필요성에 대해서 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_1a1e682c4da9b95fca83"
+    },
+    {
+      "code": "[스실 02-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "정확히 조립되었는지 전기조립도면과 비교할 수 있으며, 이상발생 시 수정보완 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_1aa7b4f0a5794de805d1"
+    },
+    {
+      "code": "[특정 02-03-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "지식 재산 정보 분석 목적에 적합한 자료 취합, 정리를 위한 분류 기준을 정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_1b38ae87eb1f2c5bbddf"
+    },
+    {
+      "code": "[발신 04-04]",
+      "subject": "발명과 기업가 정신",
+      "domain": "창업 프로젝트",
+      "text": "작성된 사업 계획서와 자금 투자 유치 계획을 반영한 IR 보고서를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_1d4b5b4a9e8e8276391f"
+    },
+    {
+      "code": "[스구 05-01-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "스마트 공장 계층적 구성(5 Layer)에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_1d83bd0ec07ccd6d1b3b"
+    },
+    {
+      "code": "[특정 03-01-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "산업 재산권, 저작권, 신지식 재산권에 맞게 분류 체계를 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_1df20c3edeb04b1b691c"
+    },
+    {
+      "code": "[스구 01-02-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 특징 및 유지 관리의 편의성을 고려하여 구성 부품 선정에 반영할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_1e9e865377e1c47764cf"
+    },
+    {
+      "code": "[스일 06-05-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "공급망 관리(SCM: Supply Chain Management)의 개념을 이해하고, 구성 요소에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_1ec9c25628dc29f6a653"
+    },
+    {
+      "code": "[특정 04-01-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명의 주요 키워드를 선정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_1f27b78014a597fd9b1a"
+    },
+    {
+      "code": "[특출 01-02-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "출원하고자 하는 발명에 대해 청구 범위를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_1f405cfa24c0368395d4"
+    },
+    {
+      "code": "[스운 04-01-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "산업용 센서의 종류 및 특징을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_1f9fe8de97973110dca8"
+    },
+    {
+      "code": "[스일 02-03-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "스마트 공장 구축 사례를 인터넷을 이용하여 찾아보고 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_2138510a3de0d8083a70"
+    },
+    {
+      "code": "[지재 03-03-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 민원 서식을 이용하여 서면으로 출원할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_214f45c18795d2b5f2f6"
+    },
+    {
+      "code": "[특정 01-01-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 신고서에 기재된 발명의 기술적 내용을 파악하여 특허 요소를 선별할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_22aed50d9af38fec575e"
+    },
+    {
+      "code": "[스구 04-02-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "기계 장비에 명령을 전달하고 작동 상태를 파악하도록 화면을 구성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_22e67fb38fd1a6f43584"
+    },
+    {
+      "code": "[인산 04-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "산업 안전 일반",
+      "text": "일터의 산업 재해 현황 및 현안 사항을 파악하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_23af217772fa9e89f62f"
+    },
+    {
+      "code": "[스실 05-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "사용자의 편의성과 스마트 설비의 성능을 고려하여 제어 조작 화면을 설계할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_24a188abdf47f88e71c0"
+    },
+    {
+      "code": "[스운 01-02-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "스마트 공장 운용에 필요한 기술을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_25454be26d0bcb337e65"
+    },
+    {
+      "code": "[특정 01-03-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 상담을 통해 종래 기술의 문제점을 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_25d452a1210e564b8cf7"
+    },
+    {
+      "code": "[지재 03-03-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 서식 작성기를 이용하여 출원을 신청할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_27033a75bbef313d823d"
+    },
+    {
+      "code": "[스운 02-01-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "산업용 IoT를 제어할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_2767f683bd2927d1044d"
+    },
+    {
+      "code": "[지재 04-01-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "우선 심사 신청서 서식의 주요 항목을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_28bddec8c12393381650"
+    },
+    {
+      "code": "[스운 03-01-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "APS(Advanced Planning and Scheduling) 기반으로 제조 실행 시스템의 기능을 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_2916ea1f8a02bb45aefb"
+    },
+    {
+      "code": "[발특 03-05]",
+      "subject": "발명･특허 기초",
+      "domain": "특허의 이해",
+      "text": "특허 침해와 분쟁 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_2afb4512a794f7c97809"
+    },
+    {
+      "code": "[스운 04-02-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "DBMS의 의미와 종류를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_2b12da225d3ed6154294"
+    },
+    {
+      "code": "[스운 01-04-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "자재 발주 시스템에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_2b9d8a09c9652669b9e1"
+    },
+    {
+      "code": "[스운 03-04-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "ERP 시스템의 운용 기술을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_2d071a95c90392d10e90"
+    },
+    {
+      "code": "[발메 04-02]",
+      "subject": "발명과 메이커",
+      "domain": "발명 메이커 프로젝트",
+      "text": "드론을 활용하여 문제를 분석하고 해결 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_2dc1ad50268aa4551365"
+    },
+    {
+      "code": "[성직 05-03]",
+      "subject": "성공적인 직업 생활",
+      "domain": "근로 관계와 산업 안전",
+      "text": "노사 관계의 의미와 중요성을 설명할 수 있고, 노동조합과 사용자 단체의 역할과 사회적 책임을 설명할 수 있으며, 상생의 노사 문화 형성의 중요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_2e6ccc7f858e462be2cc"
+    },
+    {
+      "code": "[특정 04-03-04]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "비교 분석 결과를 바탕으로 특허 출원용 선행 기술 조사 보고서를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_2e7ae65ce3e375d18e16"
+    },
+    {
+      "code": "[스실 01-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "기계조립 작업의 안전을 위하여 작업 안전 규정에 따라 기계조립을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_2ebefa87daf86938d47f"
+    },
+    {
+      "code": "[스일 01-03-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "4차 산업 혁명의 이해",
+      "text": "인더스트리 4.0의 장점과 문제점에 알아보고 개선점과 발전 방향에 대하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_2f5777f9f22c1dcd1efc"
+    },
+    {
+      "code": "[인산 05-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "사고 예방의 이해",
+      "text": "사고 발생의 주요 원인 및 형태에 대해 이해하고 전반적인 위험성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_2f6572f200176e13890b"
+    },
+    {
+      "code": "[스실 03-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "공기압 회로도에 따라 부품의 규격을 파악할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_2f68e3f499222a58bd6a"
+    },
+    {
+      "code": "[스실 06-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "체크리스트에 의거하여 설비를 점검할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_3047eef560bac74073c7"
+    },
+    {
+      "code": "[특출 05-02-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야의 제조 공정 기재의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_3055c3583bbef762d7a0"
+    },
+    {
+      "code": "[스운 04-03-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "제조 데이터의 수집하여 저장하는 과정을 구현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_31e93c9f448aaf272fdc"
+    },
+    {
+      "code": "[지재 04-02-07]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "특허･실용신안, 디자인, 상표에 대응하여 설정 등록, 변동 등록 관련 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_332229fb28adae7df742"
+    },
+    {
+      "code": "[특출 04-03-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야에서 다루는 표준에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_3326a9dc22e778bbbb70"
+    },
+    {
+      "code": "[디직 04-03]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 문제 해결",
+      "text": "디지털 문제 해결 방안을 디지털 기술을 활용하여 구현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_3388c0b774ee0a4dfb12"
+    },
+    {
+      "code": "[스구 03-03-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "스마트 설비 PLC 기반 제어 프로그래밍을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_344ef2317bfcf8270b31"
+    },
+    {
+      "code": "[스구 05-03-04]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "설비 공정의 구성 및 재구성 시뮬레이션을 통한 성능 변화를 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_35bbfc0a18694114d6cb"
+    },
+    {
+      "code": "[스구 01-01-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 설계 목표가 정확히 반영될 수 있도록 부품 배치도를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_36651be3db543d6d235e"
+    },
+    {
+      "code": "[스구 03-02-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "선정된 제어 기기의 파트 리스트를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_369edf671498b6185fa5"
+    },
+    {
+      "code": "[성직 06-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "경력 관리와 평생 학습",
+      "text": "경력의 의미에 대하여 설명할 수 있고, 경력 관리의 중요성과 경력 개발 방법에 대하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_371d0e1f5aae349430b9"
+    },
+    {
+      "code": "[특정 04-03-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "선행 기술 조사 자료를 바탕으로 특허와 비특허 문헌에 제시되어 있는 기술을 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_3750b08cf857934449d8"
+    },
+    {
+      "code": "[특정 03-03-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "기계, 화학･바이오, 전기･전자 등 기술 분야의 특징에 맞게 세부 기술을 분류할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_375cc0386ea21676aced"
+    },
+    {
+      "code": "[스일 03-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "스마트 제조 자동화 기술을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_38788a898abd72b5f1c0"
+    },
+    {
+      "code": "[지재 02-02-04]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "직무 발명 관련 규정에 따라 발명왕, 우수 발명 포상 등 비금전적 보상 제도를 검토 운영할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_387efa45852abaf5afde"
+    },
+    {
+      "code": "[스실 04-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "PLC 프로그램 작성 규칙에 따라 에러 없는 프로그램을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_38a6fb7a994b3cbe1a86"
+    },
+    {
+      "code": "[발디 02-01]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 발상과 시각화",
+      "text": "발명 문제 해결 과정에서 확산적 사고 기법을 이해하여 적용할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_3933fd2a2741af7e13dc"
+    },
+    {
+      "code": "[스실 02-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "안전표준규격에 따라 전기 전자 장치의 안전성 검사항목을 선정하고 검사를 실시할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_395a25a823c102a0e875"
+    },
+    {
+      "code": "[특정 02-02-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "정보원별로 정보를 확보할 수 있는 정확한 이용 방법 및 정보 제공 범위를 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_396c52c2e075cea717a9"
+    },
+    {
+      "code": "[발특 03-02]",
+      "subject": "발명･특허 기초",
+      "domain": "특허의 이해",
+      "text": "발명과 지식 재산권과의 관계를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_3a3a4ed3508d9f412cd4"
+    },
+    {
+      "code": "[지재 04-04-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "디자인에 대응하는 연차 등록료 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_3a40289a8edc982b6766"
+    },
+    {
+      "code": "[특출 03-01-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "기계･금속･토목 특허 명세서 검토",
+      "text": "기계･금속･토목 분야에서 사용하는 특허 도면의 한 종류를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_3b01f5e94f5ea18d8c62"
+    },
+    {
+      "code": "[발특 03-03]",
+      "subject": "발명･특허 기초",
+      "domain": "특허의 이해",
+      "text": "특허와 실용신안의 차이점을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_3b0a9706aacba6a2a745"
+    },
+    {
+      "code": "[발특 03-04]",
+      "subject": "발명･특허 기초",
+      "domain": "특허의 이해",
+      "text": "특허의 요건을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_3bae6e7dfffe3709f11d"
+    },
+    {
+      "code": "[스실 03-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "정확히 조립되었는지 공기압 회로 도면과 비교할 수 있으며, 이상발생 시 수정보완 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_3c6c9ddabe7c261150d4"
+    },
+    {
+      "code": "[스운 01-03-04]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "설비 종합 효율에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_3cd19d4a3b65b9ab094a"
+    },
+    {
+      "code": "[인산 04-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "산업 안전 일반",
+      "text": "「산업 안전 보건법」(규칙)을 통해 주체별 의무와 권리를 이해하고 법의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_3e3ea0342b0e5d85efe5"
+    },
+    {
+      "code": "[스구 05-02-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "디지털 트윈에서 공정 시스템(시스템 트윈) 구현을 위한 레이아웃을 디자인할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_3f22bede5c23a718811b"
+    },
+    {
+      "code": "[지재 04-05-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "특허권자의 약정 또는 허락에 의한 통상 실시(사용)권 설정 등록 신청 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_3f2ba11eeb65a345eb00"
+    },
+    {
+      "code": "[스구 03-02-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "스마트 설비 제어 설계도를 기준으로 제어 기기를 선정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_3fb65c5d7ce58d31d968"
+    },
+    {
+      "code": "[특출 05-04-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야를 이해하여, 해당 기술 분야 특허의 청구항을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_4041b575ffc53eb05e47"
+    },
+    {
+      "code": "[지재 02-01-03]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "발명 신고서 수정 보완 의견서를 작성하여 작성자에게 발송할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_407d84d9a186acae8582"
+    },
+    {
+      "code": "[특출 05-02-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야의 제조 공정에 대해서 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_41ae9a404d6b95654d62"
+    },
+    {
+      "code": "[스실 03-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "공기압 회로도를 파악하기 위하여 도면을 해독할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_42523244cfa8c0e5c583"
+    },
+    {
+      "code": "[발디 01-02]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 이해",
+      "text": "발명 디자인의 영역을 구분하여 디자인의 종류를 구분할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_43a7cd45aaa32b4e37fd"
+    },
+    {
+      "code": "[스구 02-02-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "제어 신호의 전달을 위해 디지털 신호의 유접점 방식과 무접점 방식을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_43c24858a3e478b71d9c"
+    },
+    {
+      "code": "[스운 01-01-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "생산 시스템에 방식에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_44607fb8d05445aa0812"
+    },
+    {
+      "code": "[특정 03-01-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "관련 기술을 이해하고 기술에 맞는 분류 체계를 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_456403be2f0e24ce5482"
+    },
+    {
+      "code": "[스운 01-02-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "일반 공장과 스마트 공장의 차이에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_465191777872db5066b4"
+    },
+    {
+      "code": "[스일 02-02-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "스마트 공장의 특징을 정리하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_469c6e68b2c6f10e7b8a"
+    },
+    {
+      "code": "[스운 04-02-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "DBMS의 기능에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_476c68d215820b289e4b"
+    },
+    {
+      "code": "[발특 02-03]",
+      "subject": "발명･특허 기초",
+      "domain": "발명 아이디어 창출",
+      "text": "확산적･수렴적 사고 기법과 발명 아이디어 창출 기법을 활용하여 아이디어를 창출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_478172634b4332ca51f2"
+    },
+    {
+      "code": "[인산 06-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "안전한 작업 방법",
+      "text": "위험 기계·기구 등 설비의 위험 요소를 파악하고 안전한 작업 방법을 선택할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_4781f2bce647f194c8ab"
+    },
+    {
+      "code": "[스운 02-01-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "산업용 IoT 종류별 동작 원리를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_47b9bf513cb8ed3617bd"
+    },
+    {
+      "code": "[스실 02-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "전기전자회로를 이해하고, 연결상태 및 전자회로부품을 해독할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_48e86ea734dc8254187b"
+    },
+    {
+      "code": "[특출 04-02-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야 회로도를 이루는 다양한 소자를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_496e87f6e22b0bb525c8"
+    },
+    {
+      "code": "[특출 01-03-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "작성된 출원 서류의 형식과 구비 서류를 검토할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_4af77d2a4a04c853c1eb"
+    },
+    {
+      "code": "[스구 04-02-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "사용자 편의성을 고려하여 화면을 구성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_4b8734a9b962ebb7a9df"
+    },
+    {
+      "code": "[스실 05-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "HMI와 연결되어 작동되는 기계 장비 종류와 성능을 파악할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_4bb69a05e794da393d4f"
+    },
+    {
+      "code": "[특정 02-01-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "주어진 예산과 자원을 고려하여 검색 대상 정보원(source)을 확정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_4cdd39b22dcb9fd1c005"
+    },
+    {
+      "code": "[특출 04-01-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야 제어 알고리즘을 이해하여 동작 방식을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_4d6faf237d40bc410ad9"
+    },
+    {
+      "code": "[지재 02-02-02]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "직무 발명에 관한 사항을 심의하기 위하여 직무 발명심의위원회를 설치 운영할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_4dfe4e2f10c9f691efc4"
+    },
+    {
+      "code": "[특정 02-02-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "정보원별 특징에 맞는 검색 조건을 사용하여 지식 재산 정보를 검색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_4e351fca18452f4a7d09"
+    },
+    {
+      "code": "[스일 02-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "스마트 공장 핵심 기술을 정의하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_4ef15c99b6333a0590d5"
+    },
+    {
+      "code": "[스일 01-01-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "4차 산업 혁명의 이해",
+      "text": "4차 산업 혁명의 역사에 대하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_4fae8a00b0ec14c250f2"
+    },
+    {
+      "code": "[스일 04-03-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "제품이 공급자로부터 소비자에 이동하는 진행 과정을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_4ff0f5aeb4ed8b8ca47d"
+    },
+    {
+      "code": "[지재 03-01-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "대리인 위임과 관련된 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_506fdc4092564c1c8561"
+    },
+    {
+      "code": "[스운 01-04-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "재고의 의미와 종류에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_51085f3fdeef74682bdd"
+    },
+    {
+      "code": "[지재 01-01-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "지식 재산 관리 시스템의 운용 계획에 따라 사용자 교육을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_5188e79ac3622f6aba38"
+    },
+    {
+      "code": "[스구 01-03-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 메커니즘 특성을 고려하여 제어 회로를 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_5225b6e3d04994b718ea"
+    },
+    {
+      "code": "[스운 05-01-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "빅 데이터의 의미와 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_524ecef43faa5c551892"
+    },
+    {
+      "code": "[스실 06-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "스마트 공장 시스템 장치 점검 결과를 기록하고 이력을 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_52b5f4a60e4cf01004a6"
+    },
+    {
+      "code": "[특정 01-01-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 신고서의 작성 내용 중 필수 기재 사항의 누락 여부를 검토할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_532ac9d518324fffe65c"
+    },
+    {
+      "code": "[지재 04-03-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "업무용 소프트웨어를 활용하여 작성한 자료를 정리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_5397cfd805a01859e00f"
+    },
+    {
+      "code": "[발신 03-01]",
+      "subject": "발명과 기업가 정신",
+      "domain": "사업 타당성 분석과 사업 계획서",
+      "text": "사업 타당성 분석의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_539c945b1536590e428a"
+    },
+    {
+      "code": "[인산 02-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권의 보장",
+      "text": "노동 3권과 노동조합의 의미와 역할에 대해 파악하고, 사회적 인식에 대해 비판적으로 토론할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_53e36e95aff4b7d8acc7"
+    },
+    {
+      "code": "[발신 03-04]",
+      "subject": "발명과 기업가 정신",
+      "domain": "사업 타당성 분석과 사업 계획서",
+      "text": "사업 계획서 작성 순서 및 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_54838d022b952f063893"
+    },
+    {
+      "code": "[특출 03-02-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "기계･금속･토목 특허 명세서 검토",
+      "text": "기계･토목 분야를 이해하여, 해당 기술 분야 특허의 구성 요소를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_55f1825e743bf24d6b9c"
+    },
+    {
+      "code": "[스일 02-01-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "스마트 공장의 정의 및 특징을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_5600bf45687a305aa6fa"
+    },
+    {
+      "code": "[스운 04-03-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "제조 데이터의 수집 목적과 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_564ed6097f6ae4587df6"
+    },
+    {
+      "code": "[스실 05-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "HMI 장치에 맞도록 설계서의 내용대로 HMI 프로그램을 구현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_565e7daededcb755d32a"
+    },
+    {
+      "code": "[지재 04-02-05]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "특허･실용신안권, 디자인권, 상표권에 대응하는 말소 등록 신청 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_573048dd523a6d4458be"
+    },
+    {
+      "code": "[스일 06-04-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "감시 제어 데이터 수집(SCADA: Supervisory Control And Data Acquisition)의 용어의 개념을 이해하고, 주로 적용되는 산업군을 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_587ad761d6c683749c49"
+    },
+    {
+      "code": "[디직 05-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "인공지능과 직업 생활",
+      "text": "인공지능의 개념과 특징을 이해할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_58bf5868e73f880c8b3a"
+    },
+    {
+      "code": "[스실 01-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "수립된 기계 조립 계획에 따라 기계장치 조립에 필요한 공구와 기계장치, 소요부품의 수량을 확인하고 조립인원을 배치하고 준비할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_59995bd498d1cc882d85"
+    },
+    {
+      "code": "[스운 04-03-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "저장된 제조 데이터를 활용하는 과정을 구현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_5a2b095ac400e86fe2d3"
+    },
+    {
+      "code": "[스실 05-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "작성된 프로그램의 오류를 체크하여 수정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_5a63a08f38e34754bab0"
+    },
+    {
+      "code": "[지재 03-01-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 전자 문서 이용 신고 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_5bdef90f189d403d1319"
+    },
+    {
+      "code": "[발디 03-03]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 과정",
+      "text": "발명 디자인 아이디어 도출을 위한 과정을 이해하여 제품의 기능과 기능 수행 부분을 목록화하고, 적용 가능한 다양한 아이디어를 조합하여 새로운 아이디어를 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_5c3c8c8719b3fa833f0c"
+    },
+    {
+      "code": "[디직 01-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 전환과 직업 생활",
+      "text": "디지털 전환이 우리 생활에 미친 영향을 설명하고, 자신의 디지털 역량을 진단할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_5cab3dae48ae7848e6c4"
+    },
+    {
+      "code": "[인산 07-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권 실천과 사회 참여",
+      "text": "노동의 연대 의미를 이해하고, 노동자와 다양한 사회 주체들 간의 연대의 필요성을 공감하고 실천적 방안을 탐색하여 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_5ea32c417c29155fe4be"
+    },
+    {
+      "code": "[발특 04-05]",
+      "subject": "발명･특허 기초",
+      "domain": "특허 출원의 이해",
+      "text": "특허 정보 조사 방법을 습득하여 특허 정보를 검색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_5f60a331a8ce51535c04"
+    },
+    {
+      "code": "[스구 04-01-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "감시 제어 시스템의 주요 기능을 설정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_5f705bc2304edfa69cdf"
+    },
+    {
+      "code": "[스구 05-02-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "가상 물리 엔진을 이용하여 컴포넌트 및 모듈을 디자인할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_5f751f7fbe609ff3bac7"
+    },
+    {
+      "code": "[스운 05-03-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "스마트 공장 발전을 위해 빅 데이터와 인공지능의 향후 발전 분야를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_5fdd29676a5e9c7bcc46"
+    },
+    {
+      "code": "[특정 03-02-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "특허 분석 의뢰자의 의견을 들어 분류를 검증할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_604dc4806c1e69d47aba"
+    },
+    {
+      "code": "[스구 05-01-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "디지털 트윈을 활용한 스마트 공장 설계 및 개발 방법에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_61884a01ddb5e471af9b"
+    },
+    {
+      "code": "[성직 03-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "취업과 창업",
+      "text": "합리적인 의사 결정 방법으로 자신의 경력 개발 경로를 취업과 연계하여 수립할 수 있고, 경력 개발 경로와 취업을 연계해서 미래의 경력 개발 경로를 설정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_6231aa6d5b6684b0729e"
+    },
+    {
+      "code": "[스운 05-02-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "스마트 공장에서 인공지능의 의미를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_62b5d3c837ea4c15a8d4"
+    },
+    {
+      "code": "[인산 06-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "안전한 작업 방법",
+      "text": "업종별 작업의 특성을 고려한 안전한 작업 방법을 선택할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_63fd074e7612bde2223b"
+    },
+    {
+      "code": "[스실 02-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "전기 전자 장치의 안전을 확인하기 위하여 측정한 데이터를 기록하고 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_642211ec849b2581cdb2"
+    },
+    {
+      "code": "[스운 04-01-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "산업용 센서를 제어할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_6455f193fc1def3e917a"
+    },
+    {
+      "code": "[스운 03-03-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "CPS 시스템의 기능을 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_651af5b0f4c9e6405d9c"
+    },
+    {
+      "code": "[특정 02-02-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "수행된 검색 결과물을 추출하여 원하는 형태로 취합할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_664bfe4c45933d039ca5"
+    },
+    {
+      "code": "[스일 04-02-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "공정 제어, 공정 관리에 대한 시스템 전체를 파악하고 문제 해결하는 방법을 토론할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_67a13782cd33756291d4"
+    },
+    {
+      "code": "[성직 01-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "일과 직업",
+      "text": "생애 발달의 개념을 알고 생애 발달 과정을 구분할 수 있으며, 생애 발달의 과정 속에서 직업적 성공을 위해 필요한 것을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_67baaf9b9c0b69c9ef30"
+    },
+    {
+      "code": "[특정 02-01-04]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "대상 정보원(source)별 검색 결과 산출 범위 및 산출 대상을 확정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_68ae20a00a24ac530de4"
+    },
+    {
+      "code": "[지재 04-01-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "제출 기한을 연장 또는 단축을 요청하는 기간 연장(단축) 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_6955141de635b97a9932"
+    },
+    {
+      "code": "[지재 03-03-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "다양한 출원 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_6996d7f3f8e1789fcd66"
+    },
+    {
+      "code": "[특정 01-03-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 상담을 통해 발명자가 생각하는 발명의 목적, 구성, 효과를 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_6a1ec52f07e12e6063cc"
+    },
+    {
+      "code": "[특출 01-02-04]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "명세서 중 발명의 내용(해결하고자 하는 과제, 과제의 해결 수단, 발명의 효과)을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_6a3eedc98cc1b16886ff"
+    },
+    {
+      "code": "[지재 02-01-04]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "비밀 유지를 위해 발명 신고서를 분류하여 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_6a3f807142f7e93f4d44"
+    },
+    {
+      "code": "[스일 02-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "스마트 공장 등장 배경을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_6ab6db2915e1b08fe246"
+    },
+    {
+      "code": "[스구 01-03-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 메커니즘 특성과 안정도를 고려하여 제어 방식을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_6b68b293e0add85ee469"
+    },
+    {
+      "code": "[디직 06-03]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 시민 의식과 직업 윤리",
+      "text": "디지털 시대의 직업인이 갖추어야 할 직업 윤리의 개념에 대해 설명하고, 디지털 직업 환경에서 올바른 가치관을 바탕으로 윤리적 의사 결정 및 행동을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_6c176ff4c11d6c8af388"
+    },
+    {
+      "code": "[스운 02-03-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "기업 네트워크 장비의 동작 원리를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_6cccf54155097beb2ce6"
+    },
+    {
+      "code": "[인산 01-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동과 인간의 존엄",
+      "text": "인간이 일을 하는 이유와 노동의 의미와 개념을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_6cd982c388ebdf1734de"
+    },
+    {
+      "code": "[지재 04-01-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "등록 권리의 양도, 상속, 합병 등 여러 가지 사유에 대응하는 권리관계 변경 신고서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_6d1d58560fff1b86ae9b"
+    },
+    {
+      "code": "[스운 03-01-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "제조 실행 시스템을 이해하고 구성과 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_6d3399ce1cc54081dd5b"
+    },
+    {
+      "code": "[스운 01-03-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "생산 공정의 핵심 지표에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_6d641d03c651c7c0e1e4"
+    },
+    {
+      "code": "[특출 05-03-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야에서 서열의 필요성에 대해서 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_6d8d3345ec8cd6152f05"
+    },
+    {
+      "code": "[스구 03-03-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "스마트 설비 PC 기반 제어 프로그래밍을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_6dc95e0f0b47a6276f1f"
+    },
+    {
+      "code": "[발신 02-04]",
+      "subject": "발명과 기업가 정신",
+      "domain": "기업가 정신과 창업",
+      "text": "유형별 창업을 예를 들어 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_6e05c50abb719b1de609"
+    },
+    {
+      "code": "[스구 04-03-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "프로그램 설계서의 내용을 파악하고 프로그램 방법을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_6e501a4ec80144bf6c96"
+    },
+    {
+      "code": "[성직 04-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "직업 생활과 직업 윤리",
+      "text": "직업인으로서 갖추어야 할 기본적인 자세를 표현할 수 있으며, 직장 생활에서의 인간관계 갈등과 극복 방법 등에 대한 사례를 조사하여 소개하고, 자신의 생각을 정리하여 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_6e6d722b2ef6047e6432"
+    },
+    {
+      "code": "[특정 03-03-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "지식 재산권 소유 기준에 따라 분류 체계를 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_6f6e196723bd0e699a0c"
+    },
+    {
+      "code": "[스운 05-01-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "빅 데이터가 생성되는 과정을 제어할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_6f80fb95cacb40f211fb"
+    },
+    {
+      "code": "[스일 01-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "4차 산업 혁명의 이해",
+      "text": "4차 산업 혁명의 특징과 개요에 대하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_70c60e420eec0633305e"
+    },
+    {
+      "code": "[발특 02-04]",
+      "subject": "발명･특허 기초",
+      "domain": "발명 아이디어 창출",
+      "text": "창출한 발명 아이디어를 평가하여 개선할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_70cf2a847f988dd255f2"
+    },
+    {
+      "code": "[지재 04-03-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "중간 서식 및 등록 서식을 특허청에 제출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_72cc6e2f6bb66a5e761c"
+    },
+    {
+      "code": "[스일 03-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "스마트 센서를 정의하고 센서의 종류를 구분하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_72f7d07b38ecdcbe26da"
+    },
+    {
+      "code": "[스일 05-05-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "디지털 트윈(Digital Twin)의 개념을 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_73227c5baef81f31563b"
+    },
+    {
+      "code": "[성직 03-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "취업과 창업",
+      "text": "취업 계획 수립 절차와 방법을 설명할 수 있고, 자신이 관심 있는 기업체의 구인 정보를 토대로 이력서와 자기소개서 작성, 자격증 취득, 입사 시험 정보, 면접 정보 등에 대한 자료 준비 과정을 통하여 구직 활동을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_7395602f1374550d6b77"
+    },
+    {
+      "code": "[발메 03-03]",
+      "subject": "발명과 메이커",
+      "domain": "메이커 활동과 발명품 제작",
+      "text": "제작된 시제품을 평가하고 개선 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_74f8f80f358c109446ca"
+    },
+    {
+      "code": "[스실 04-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "프로그램에서 이상이 발견되었을 경우 수정 및 보완할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_75dceb564b8bf25213f2"
+    },
+    {
+      "code": "[스구 02-01-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "필요한 센서 및 스위치의 종류와 수량을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_76b2a9ce52319ee8b55e"
+    },
+    {
+      "code": "[발메 03-02]",
+      "subject": "발명과 메이커",
+      "domain": "메이커 활동과 발명품 제작",
+      "text": "설계된 발명품을 메이커 활동을 통해 시제품을 제작할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_770f4ddffddad8fb382a"
+    },
+    {
+      "code": "[스일 06-05-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "거래 처리 시스템(TPS: Transaction Processing Systems) 개념과 목표를 이해하고, 역할과 특징에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_776b467b1a0e77f1b4bb"
+    },
+    {
+      "code": "[스운 05-02-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "스마트 공장에서 인공지능 사례 및 향후 발전 분야를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_7847b616f4faf5e93906"
+    },
+    {
+      "code": "[특출 02-02-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "특허 도면 작성",
+      "text": "특허 도면의 작성법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_78d56eb2a7594d7ccb13"
+    },
+    {
+      "code": "[발메 02-02]",
+      "subject": "발명과 메이커",
+      "domain": "디자인 씽킹을 통한 발명 아이디어 창출",
+      "text": "디자인 씽킹의 정의와 필요성을 조사하고 디자인 씽킹을 활용한 사례를 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_78ec612ae66960e2e378"
+    },
+    {
+      "code": "[스운 01-04-04]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "재고 관리 비용에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_78f51c32fd1538d4976f"
+    },
+    {
+      "code": "[스구 03-01-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "자동화 시스템 PLC/PC 기반 제어 기기 종류에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_79ca532e21c152886ace"
+    },
+    {
+      "code": "[스구 02-04-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "설비 제어에 필요한 구동 장치의 동작 범위를 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_7a6f2b3821961f278287"
+    },
+    {
+      "code": "[디직 03-03]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 콘텐츠의 활용과 제작",
+      "text": "다양한 디지털 콘텐츠 편집 소프트웨어를 사용하여 직업 생활에 필요한 창의적인 디지털 콘텐츠를 제작할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_7b1c4293b1eb69dcbcb4"
+    },
+    {
+      "code": "[발디 04-03]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 제품화",
+      "text": "3D 프린팅의 개념과 디자인 제작 시 고려 사항에 대해 이해하여 최적화된 형태의 3D 모델링 데이터로 설계하여 3D 프린팅을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_7b98dc84fc428000908c"
+    },
+    {
+      "code": "[디직 03-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 콘텐츠의 활용과 제작",
+      "text": "디지털 콘텐츠의 개념과 특징에 대해 이해하고, 다양한 유형의 디지털 콘텐츠를 구분할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_7bff6d77e5562db7fd7f"
+    },
+    {
+      "code": "[지재 03-02-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 문서 작성 서식 작성기를 사용할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_7c8a4d22aceb62d569b8"
+    },
+    {
+      "code": "[스구 01-01-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 구동 특성과 선정된 단위 구동 요소 조합을 검토하여, 2개 이상의 복합 구동 메커니즘을 구성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_7ca2dccf1827df9dfe1b"
+    },
+    {
+      "code": "[발신 04-03]",
+      "subject": "발명과 기업가 정신",
+      "domain": "창업 프로젝트",
+      "text": "사업을 위한 자금 투자 유치 계획을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_7d4aad60a1abc639a0dd"
+    },
+    {
+      "code": "[특정 01-02-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 신고서에서 파악된 발명에 대한 관련 기초 기술을 조사할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_7dae5887c64018cd446b"
+    },
+    {
+      "code": "[스일 04-01-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "제품의 생산, 납품, 재고 관리에 대하여 효율적으로 처리할 수는 있는 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_81e1f3143dc40ed131b0"
+    },
+    {
+      "code": "[스일 06-03-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "임베디드 SW 환경의 개념을 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_8222291b8f318072687b"
+    },
+    {
+      "code": "[인산 01-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동과 인간의 존엄",
+      "text": "산업 혁명 전후의 노동 형태 변화를 이해하고, 노동 인권의 발전 배경과 내용을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_82ce4ceb70f69abdd6f9"
+    },
+    {
+      "code": "[스구 02-04-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "설비 제어에 필요한 구동 장치의 제어 방식을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_83db4b1de78925e16b2e"
+    },
+    {
+      "code": "[스실 01-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "기계 조립 일정에 맞추기 위하여 조립작업의 순서 및 절차를 파악하고 기계조립 계획을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_84b18c17b6fbe31bc546"
+    },
+    {
+      "code": "[디직 02-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 의사소통과 협업",
+      "text": "자신의 직무를 수행하는 과정에서 적합한 디지털 도구나 기술을 이용하여 타인과 다양한 의견이나 자료를 교환할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_851dbfc1d17271a1d9c6"
+    },
+    {
+      "code": "[발특 01-02]",
+      "subject": "발명･특허 기초",
+      "domain": "발명의 이해",
+      "text": "기술의 발전과 발명의 관계를 산업 혁명 이전과 이후, 현재와 미래로 구분하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_85bd3de37737515439b4"
+    },
+    {
+      "code": "[스운 03-04-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "ERP 시스템의 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_863ed98a8a87129b27a2"
+    },
+    {
+      "code": "[스일 01-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "4차 산업 혁명의 이해",
+      "text": "4차 산업 혁명에 따른 제조 산업의 환경 변화를 살펴보고, 우리가 대응해야 하는 바른 자세에 대해 사례를 들어 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_8690c40d1d87a0cee892"
+    },
+    {
+      "code": "[지재 03-04-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허법 시행 규칙에 맞는 보정서를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_877c022b4aa75ba08f01"
+    },
+    {
+      "code": "[스구 03-03-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "입출력 제어를 위한 논리 회로 및 기본 제어 회로에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_8827f2003623b4e4e63c"
+    },
+    {
+      "code": "[스일 04-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "공급망 관리의 정의 및 개념에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_8841569fde7f5b4e0a67"
+    },
+    {
+      "code": "[지재 04-05-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "법령의 요건에 의한 권리 이전 등록 신청서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_887cdfd9be5f6f7acbe8"
+    },
+    {
+      "code": "[특출 03-01-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "기계･금속･토목 특허 명세서 검토",
+      "text": "기계･금속･토목 분야에서 사용하는 특허 도면의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_89a1fab980e1173a147d"
+    },
+    {
+      "code": "[스구 02-02-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "신호 전달이 필요한 장치 간에 통신 방식과 통신 프로토콜을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_8b7ab392871448201bd8"
+    },
+    {
+      "code": "[특정 01-01-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "기관의 특성을 고려하여 발명 신고서 양식을 개발할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_8be20dedabbca16f430c"
+    },
+    {
+      "code": "[지재 03-02-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "국내 출원 서식의 기재 사항을 정확하게 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_8c413244b5b02a743423"
+    },
+    {
+      "code": "[인산 07-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권 실천과 사회 참여",
+      "text": "직장 내 민주주의 실현을 위한 제도의 핵심 내용을 파악하고, 일터와 사회 경제적 민주주의 성장에 있어서 노동의 역할을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_8cb3405dda6abcc52d87"
+    },
+    {
+      "code": "[성직 05-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "근로 관계와 산업 안전",
+      "text": "고용 서비스의 의미와 중요성을 설명할 수 있으며, 고용 보험 제도의 종류별 특징을 알고, 신청 절차를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_8d391b4885cb21fce93b"
+    },
+    {
+      "code": "[인산 03-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "다양한 노동과 노동 인권",
+      "text": "노동 시장 유연화의 증대에 따른 비정규 노동과 플랫폼 노동 등 다양한 고용 형태에 대한 이해와 쟁점을 토론할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_8e7cac455ea7b054abf0"
+    },
+    {
+      "code": "[발특 04-02]",
+      "subject": "발명･특허 기초",
+      "domain": "특허 출원의 이해",
+      "text": "특허 출원 방법과 절차를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_8f449d5f7aa31f881654"
+    },
+    {
+      "code": "[지재 04-02-06]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "거래 관계에서 발생하는 불확정한 채권을 담보로 할 목적으로 질권 설정 등록 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_8f89f03475191620b0cb"
+    },
+    {
+      "code": "[스실 02-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "전기 전자 장치의 기능을 확인하기 위하여 측정한 데이터를 기록하고 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_90f29345fe67b8fd5736"
+    },
+    {
+      "code": "[스운 02-03-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "기업에서 사용되는 네트워크 장비의 종류를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_9276cc52d9851858ffb1"
+    },
+    {
+      "code": "[스구 03-01-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 시스템 구축",
+      "text": "자동화 시스템 PLC/PC 기반 제어 기기별 특징에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_93fb6f5537f65ab52eff"
+    },
+    {
+      "code": "[지재 01-01-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "지식 재산 관리 시스템의 운용 계획을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_947b62841c359973f101"
+    },
+    {
+      "code": "[스일 02-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장(Smart Factory)",
+      "text": "주요 기업과 국가가 스마트 공장에 대응하는 전략을 알아보고, 그 현황을 비교 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_9488cf656302a673181c"
+    },
+    {
+      "code": "[성직 05-04]",
+      "subject": "성공적인 직업 생활",
+      "domain": "근로 관계와 산업 안전",
+      "text": "안전사고의 형태와 원인을 알고 안전 수칙 및 사고 형태별 안전 대책을 수립할 수 있고, 산업 재해의 개념을 알고 예방 원칙과 대책을 수립할 수 있으며, 산업 재해의 종류를 알고 산업 재해 처리 방법을 제시할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_95b11fba5fdfe94f5c3e"
+    },
+    {
+      "code": "[스운 01-05-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "품질의 의미와 제조 단계별 품질의 정의를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_9872009475f0b1b7785e"
+    },
+    {
+      "code": "[성직 04-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "직업 생활과 직업 윤리",
+      "text": "직업 생활의 모습이 내용, 성격, 장소, 방식 등에 따라 다양한 모습으로 나타날 수 있음을 제시할 수 있고, 직업 생활의 의미와 중요성을 개인적･사회적 측면에서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_9a7f4b1c6cebf53777d1"
+    },
+    {
+      "code": "[스일 05-01-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "블록체인의 개념과 정의를 이해하고, 블록체인을 활용하는 다른 사례를 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_9a83c273e060eff09da9"
+    },
+    {
+      "code": "[성직 05-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "근로 관계와 산업 안전",
+      "text": "근로 관련 법의 기본 원리를 설명할 수 있고, ｢근로 기준법｣에 따른 근로 계약 체결의 의미를 설명할 수 있으며, 근로 계약 관계에서 권익의 침해와 차별이 발생되었을 때 해결 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_9ace060ce7f03ea63be4"
+    },
+    {
+      "code": "[스운 03-05-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "SCM 시스템의 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_9b0dc8200f7458d9f4b8"
+    },
+    {
+      "code": "[발특 01-01]",
+      "subject": "발명･특허 기초",
+      "domain": "발명의 이해",
+      "text": "발명의 의미를 이해하여 발명의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_9bf58d2549e6771f4161"
+    },
+    {
+      "code": "[지재 01-02-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "서면 연구 노트의 작성 방법을 지도할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_9d52ef547df32e5e6300"
+    },
+    {
+      "code": "[특정 03-02-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "분석 수행자 상호 간에 교차로 분류를 검증할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_9d6d90f6da76b9cc5176"
+    },
+    {
+      "code": "[디직 04-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 문제 해결",
+      "text": "직업 생활에서 디지털 기술을 활용한 문제 해결의 필요성을 이해할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_9d806c23b7859dc5ef15"
+    },
+    {
+      "code": "[스실 01-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "기계조립 장치의 정확한 구동을 위하여 측정하고 검사한 데이터를 기록하고 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_9d8724d6c149390fa0ec"
+    },
+    {
+      "code": "[지재 03-02-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "지식 재산권 출원에 필요한 서류를 검토하고 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_9dfd6f1c16aeae8ed026"
+    },
+    {
+      "code": "[스일 05-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "사물 인터넷을 개념을 이해하고, 사물 인터넷이 활용되는 실제 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_9e152ae817d796e19b7c"
+    },
+    {
+      "code": "[지재 01-02-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "전자 연구 노트 관리 시스템을 이용하여 사용자 교육을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_9eca32f4c75b83abda4e"
+    },
+    {
+      "code": "[스운 01-02-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "스마트 공장의 기능에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_9ef46312942adc9fe036"
+    },
+    {
+      "code": "[특출 01-02-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "특허 명세서에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_9f5858d7b2815334d2de"
+    },
+    {
+      "code": "[특정 04-02-04]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명과 동일 또는 유사한 비특허 자료를 검색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_9f777b114ed390fba18b"
+    },
+    {
+      "code": "[스실 03-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "공기압 장치의 기능을 확인하기 위하여 측정한 데이터를 기록하고 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_9fb35736e12f6accef66"
+    },
+    {
+      "code": "[디직 04-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 문제 해결",
+      "text": "디지털 기술을 활용한 문제 해결을 위해 직무를 분석하고, 디지털 기술의 활용 방안을 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_a0029792a7edfb6b485f"
+    },
+    {
+      "code": "[성직 02-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "진로 직업 설계와 직업 기초 능력",
+      "text": "다양한 검색 도구를 활용하여 진로와 직업에 대한 정보를 탐색하여 정리할 수 있고, 자신이 탐색한 진로와 직업 분야에서 성공한 다양한 직업인을 찾아보고 그들의 성공 요인들을 분석하여 정리할 수 있으며, 자신의 흥미와 적성에 맞는 진로와 직업을 설정하여 구체적으로 미래를 설계해 보고 이를 프레젠테이션 자료로 제작하여 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_a0aab8c8bbc7310b6493"
+    },
+    {
+      "code": "[특출 01-01-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "특허 출원서를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_a103ea5de65d3952e954"
+    },
+    {
+      "code": "[특출 01-02-05]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "명세서 중 발명을 실시하기 위한 구체적인 내용을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_a1c785d07b9bf3cf4b1a"
+    },
+    {
+      "code": "[스실 05-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "HMI 프로그램 개발",
+      "text": "HMI 장치와 기계 장치가 연결되어 정상 작동하는지 점검하고 테스트할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_a444e73ba67a2035b5da"
+    },
+    {
+      "code": "[발디 01-03]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 이해",
+      "text": "발명 디자인의 고려 사항과 조건을 이해하고 적용할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_a4edcaac30a83dc0e06e"
+    },
+    {
+      "code": "[발특 04-04]",
+      "subject": "발명･특허 기초",
+      "domain": "특허 출원의 이해",
+      "text": "전자 출원의 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_a5841919aef5a785a630"
+    },
+    {
+      "code": "[인산 03-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "다양한 노동과 노동 인권",
+      "text": "노동 시장 내 다양한 노동의 실태를 파악하고, 차별적 요소의 원인을 분석하여 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_a60490f8c5f5558ea633"
+    },
+    {
+      "code": "[지재 04-04-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "상표에 대응하는 존속 기간 갱신 등록료 납부 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_a64f737eb6b803dc6355"
+    },
+    {
+      "code": "[발특 02-01]",
+      "subject": "발명･특허 기초",
+      "domain": "발명 아이디어 창출",
+      "text": "발명과 문제 해결의 정의를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_a6e4ef2a4226d5196289"
+    },
+    {
+      "code": "[발메 04-03]",
+      "subject": "발명과 메이커",
+      "domain": "발명 메이커 프로젝트",
+      "text": "피지컬 컴퓨팅을 활용하여 문제를 분석하고 해결 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_a7a0842785b8e0f77844"
+    },
+    {
+      "code": "[발신 04-01]",
+      "subject": "발명과 기업가 정신",
+      "domain": "창업 프로젝트",
+      "text": "아이디어 창출 기법을 활용하여 창업 아이디어를 창출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_a8d394daf89c49e1a466"
+    },
+    {
+      "code": "[성직 03-04]",
+      "subject": "성공적인 직업 생활",
+      "domain": "취업과 창업",
+      "text": "창업의 의미를 알고 창업 조건과 절차에 대하여 설명할 수 있고, 창업의 성공과 실패 사례를 다양하게 조사하여 원인을 분석하고 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_a8e6948ed3311fd94a50"
+    },
+    {
+      "code": "[스실 04-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "제어 대상 기계의 작동 순서에 따라 작업 내용의 공정도를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_a90ffa23c005c484480d"
+    },
+    {
+      "code": "[디직 01-03]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 전환과 직업 생활",
+      "text": "자신의 전공과 관련된 직업 분야에 나타난 디지털 전환 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_aa751c390310750c8655"
+    },
+    {
+      "code": "[스실 06-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "점검 결과를 확인하여 스마트 설비 장치 관리 항목을 변경할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_aac85fb5d99aada80b2d"
+    },
+    {
+      "code": "[발디 03-01]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 과정",
+      "text": "발명 디자인 대상의 목표 및 기능 설정하기의 필요성과 과정을 이해하여 목표 계층도를 작성하고, 제품의 입력과 출력에 따른 세부적인 기능과 장치를 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_aad3d4d1833b4126b2a4"
+    },
+    {
+      "code": "[스구 02-03-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "제어 요구에 따라 후행 동작 이행의 조건을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_ab25e9fef606a857d7c5"
+    },
+    {
+      "code": "[발메 03-01]",
+      "subject": "발명과 메이커",
+      "domain": "메이커 활동과 발명품 제작",
+      "text": "창출된 아이디어를 구체화하여 발명 시제품을 설계할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_ac634d006ad59e182098"
+    },
+    {
+      "code": "[지재 03-01-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "지식 재산권 출원에 필요한 온라인 인증서 발급 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_ad0d9af6d274b106f935"
+    },
+    {
+      "code": "[스실 04-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "통신 소프트웨어, 위치 제어 소프트웨어 등의 사용 설명서를 파악할 수 있어야 한다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_ad60bb23bfcdba544412"
+    },
+    {
+      "code": "[특정 02-01-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "대상 정보원(source)별 특징과 시스템에 맞도록 분석 목적과 범위에 맞는 검색 조건을 확정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_adefecffd7a3eaa2a64c"
+    },
+    {
+      "code": "[스실 06-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "스마트 공장 시스템 장치 관리 항목 체크리스트를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_ae25324783519803c6e8"
+    },
+    {
+      "code": "[발메 04-01]",
+      "subject": "발명과 메이커",
+      "domain": "발명 메이커 프로젝트",
+      "text": "로봇 제작 프로그램을 활용하여 문제를 분석하고 해결 방법을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_ae284593fb5db4496117"
+    },
+    {
+      "code": "[성직 01-01]",
+      "subject": "성공적인 직업 생활",
+      "domain": "일과 직업",
+      "text": "일과 직업의 의미를 알고, 일과 직업이 자신의 삶에서 어떠한 가치를 가지고 있는지를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_ae48d9080eef514ede14"
+    },
+    {
+      "code": "[스일 04-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "공정 설계의 정의와 개념에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_af218f779f314f30705e"
+    },
+    {
+      "code": "[특출 04-02-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "회로도의 기능과 동작에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_b0add067f59d7cea258c"
+    },
+    {
+      "code": "[스운 03-05-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "SCM 시스템의 운용 기술을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_b0d76982614a90eeb58c"
+    },
+    {
+      "code": "[특정 02-02-05]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "지식 재산 정보 분석의 목적과 범위에 맞게 누락 없이 검색이 잘 수행되었는지를 검토할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_b1aff3361c2df9cfa9a6"
+    },
+    {
+      "code": "[지재 02-02-05]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "직무 발명 제도에 관한 제반 사항을 주기적으로 교육할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_b21730cd7b49e7c0b71f"
+    },
+    {
+      "code": "[인산 04-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "산업 안전 일반",
+      "text": "산업 안전의 개념을 이해하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_b2546e1172c9b5c20b2c"
+    },
+    {
+      "code": "[스구 04-03-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "설계서의 내용대로 감시 제어 시스템 프로그램을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_b3702622f625a0059957"
+    },
+    {
+      "code": "[지재 04-05-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "개인의 의사에 의한 권리 이전 등록 신청서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_b46e5ad9923e86ae0c00"
+    },
+    {
+      "code": "[스일 01-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "4차 산업 혁명의 이해",
+      "text": "주요 기업과 국가에서 4차 산업 혁명에 대응하는 사례를 알아보고, 이를 비교 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_b510efdd0e7620c0d7c9"
+    },
+    {
+      "code": "[특출 02-01-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "특허 도면 작성",
+      "text": "특허 도면을 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_b5a93277087468cf6ada"
+    },
+    {
+      "code": "[발특 03-01]",
+      "subject": "발명･특허 기초",
+      "domain": "특허의 이해",
+      "text": "지식 재산의 개념과 유형을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_b608b83b2f25c38ffca3"
+    },
+    {
+      "code": "[지재 04-04-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "특허･실용신안에 대응하는 연차 등록료 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_b61f65e4b98c26c0a45d"
+    },
+    {
+      "code": "[인산 02-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권의 보장",
+      "text": "노동 계약과 노동 시간의 의미와 내용을 이해하고, 현실 사례에 근거해 공정한 처우를 위한 대처 방안을 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_b6939546694bba5ce8bf"
+    },
+    {
+      "code": "[발신 03-02]",
+      "subject": "발명과 기업가 정신",
+      "domain": "사업 타당성 분석과 사업 계획서",
+      "text": "사업 타당성 분석 방법을 이해하여 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_b6aa9022752b0fe59808"
+    },
+    {
+      "code": "[발디 05-01]",
+      "subject": "발명과 디자인",
+      "domain": "발명 캡스톤 디자인",
+      "text": "발명 캡스톤 디자인의 개념과 의미를 이해할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_b6ff41a0e22b39700cfe"
+    },
+    {
+      "code": "[디직 05-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "인공지능과 직업 생활",
+      "text": "데이터를 활용한 기계 학습을 이해하고, 기계 학습 모델을 구현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_b73cef9f5acee158591b"
+    },
+    {
+      "code": "[스구 05-03-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "디지털 트윈 구축",
+      "text": "3D 오브젝트와 제어 기기 간 인터페이스를 설정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_b76f190d0ce85a486397"
+    },
+    {
+      "code": "[스운 02-02-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "산업용 로봇의 장비 구성과 동작 원리를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_b942fee5f40820b524ce"
+    },
+    {
+      "code": "[스운 02-02-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "PLC와 산업용 로봇의 표준 연동 기술을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_b97f0547361403a1e330"
+    },
+    {
+      "code": "[스구 01-02-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "설계할 구성 부품의 특징 및 성능을 검토하고, 필요한 단위 구성 부품들을 결정하고 조합할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_bacdf1a6cafd8260ce67"
+    },
+    {
+      "code": "[발메 01-01]",
+      "subject": "발명과 메이커",
+      "domain": "발명과 문제 해결의 이해",
+      "text": "메이커 활동의 배경과 다양한 사례를 조사하고 메이커 활동의 중요성에 대해 토의할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_bad7288b283fde53a690"
+    },
+    {
+      "code": "[스구 04-02-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "프로그램 설계서에 제어 화면 설계 내용을 반영하여 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_bc07bcec1b628a5632dc"
+    },
+    {
+      "code": "[지재 03-04-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "지식 재산권 출원 서식의 보정할 사항에 대해서 알 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_bc1c46eae7ce2989c4f2"
+    },
+    {
+      "code": "[지재 04-02-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "심사관의 의견 제출 통지서에 대응하는 의견서 및 보정서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_bd32746053ec951a34f6"
+    },
+    {
+      "code": "[특출 01-01-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "국내 출원 형식에 맞게 출원에 관련된 출원서를 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_bdfec961216d7d40f996"
+    },
+    {
+      "code": "[성직 02-03]",
+      "subject": "성공적인 직업 생활",
+      "domain": "진로 직업 설계와 직업 기초 능력",
+      "text": "직업 기초 능력이 성공적인 직업 생활에 미치는 영향을 설명할 수 있고, 성공적인 직업 생활을 위한 효과적인 직업 기초 능력 향상 방법을 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_be59427af4c6c92fdb93"
+    },
+    {
+      "code": "[특정 03-02-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "분류 검증을 통해 기술 분류표의 자료를 수정 및 보완할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_bef123ad931be40d7813"
+    },
+    {
+      "code": "[특출 03-03-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "기계･금속･토목 특허 명세서 검토",
+      "text": "금속･소재 분야를 이해하여, 해당 기술 분야 특허의 구성 요소를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_bf3565fb82e4261a4d06"
+    },
+    {
+      "code": "[성직 04-03]",
+      "subject": "성공적인 직업 생활",
+      "domain": "직업 생활과 직업 윤리",
+      "text": "직업 윤리의 개념에 대하여 설명할 수 있고, 직업 윤리와 사회 윤리와의 관계를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_bf67bf252c877b8eb390"
+    },
+    {
+      "code": "[디직 06-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 시민 의식과 직업 윤리",
+      "text": "다양한 디지털 환경에 적합한 예절을 이해하고 실천할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_c1a35668b903dfdf0f7b"
+    },
+    {
+      "code": "[스구 01-02-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비의 기능에 따라 필요한 구성 부품들을 선정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_c409a2d81c934e7fbc74"
+    },
+    {
+      "code": "[스실 03-02-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "공기압 장치 조립 작업의 안전을 위하여 공기압 장치 조립 시 안전 사항을 준수할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_c512261c348c6d15e768"
+    },
+    {
+      "code": "[스운 02-01-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "산업용 IoT 종류 및 특징을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_c586a00ea5895e8d7fa1"
+    },
+    {
+      "code": "[스일 04-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 시스템",
+      "text": "생산 계획의 정의 및 개념에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_c5fa6ba508c7d6d75dd9"
+    },
+    {
+      "code": "[지재 04-02-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "심사 완료 후 특허･실용신안, 디자인, 상표에 대응하는 설정 등록료 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_c70be088659e7a637e28"
+    },
+    {
+      "code": "[스구 04-01-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "통신 설정을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_c719a1be1fee0998b0e1"
+    },
+    {
+      "code": "[발신 02-03]",
+      "subject": "발명과 기업가 정신",
+      "domain": "기업가 정신과 창업",
+      "text": "지식 재산권을 활용한 창업을 예를 들어 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_c742fdcb12c01f910f69"
+    },
+    {
+      "code": "[스일 05-02-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "클라우드의 개념을 이해하고, 사용 사례를 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_c790c985f2e9412f9bba"
+    },
+    {
+      "code": "[스운 01-04-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "자재 관리의 의미와 자재 발주 방법에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_c88ab1a42f1f3d122b3c"
+    },
+    {
+      "code": "[스실 06-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "체크리스트에 따라 관리 주기, 관리 조건, 관리 도구를 설정 및 준비할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_c8af2988f70775b8cffe"
+    },
+    {
+      "code": "[지재 01-01-04]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "지식 재산 관리 시스템의 유지･보수 계획을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_c8cf400550e82d7180ec"
+    },
+    {
+      "code": "[인산 07-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권 실천과 사회 참여",
+      "text": "디지털 혁명으로 인한 미래 사회의 노동의 변화를 탐색하고, 기후위기 극복과 불평등 해소를 포함한 노동 존중 사회를 상상하고 실천 방안에 대해 토론할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_c8f833b150ae6157dedc"
+    },
+    {
+      "code": "[스일 03-02-03]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "로봇과 사람이 공존하는 제조 환경 변화에 대응하여 로봇과 사람이 공존하는 사례를 들어 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_c9b8acfc7c24de026218"
+    },
+    {
+      "code": "[스일 05-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "인공지능의 개념과 정의를 이해하고, 다른 스마트 공장 핵심 기술과 연계하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_c9f3e3ddf78d8cceabf7"
+    },
+    {
+      "code": "[발디 05-02]",
+      "subject": "발명과 디자인",
+      "domain": "발명 캡스톤 디자인",
+      "text": "인공지능 기술과 SW 코딩을 이용한 발명 캡스톤 디자인 제품을 만들 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_caba96ac6f878d8e836a"
+    },
+    {
+      "code": "[지재 01-01-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "지식 재산 관리 시스템을 이용하여 필요한 자료를 검색 및 출력할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_cc43174d1fadc4085b5b"
+    },
+    {
+      "code": "[디직 06-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 시민 의식과 직업 윤리",
+      "text": "디지털 시민 의식의 의미와 중요성에 대해 이해하고, 디지털 시민 의식의 구성 요소를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_ccafbf98ed06e9b2032d"
+    },
+    {
+      "code": "[특정 02-02-04]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "검색 수행 결과를 분석하여 검색의 방향에 맞게 보완적인 추가 검색을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_ce8708e1c2d927a1df49"
+    },
+    {
+      "code": "[발디 01-04]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 이해",
+      "text": "과거와 현재의 발명 디자인에 대해 이해하여 미래의 발명 디자인을 예측하고 첨단 기술을 발명 디자인에 접목할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_cf5e3e9523ceb25eeabb"
+    },
+    {
+      "code": "[디직 01-01]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 전환과 직업 생활",
+      "text": "디지털 전환의 의미와 디지털 전환을 가져온 주요 기술의 개념을 이해하고, 이러한 기술이 적용된 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_cf8caa0f624b08feefb1"
+    },
+    {
+      "code": "[성직 02-02]",
+      "subject": "성공적인 직업 생활",
+      "domain": "진로 직업 설계와 직업 기초 능력",
+      "text": "직업 기초 능력의 개념을 설명할 수 있고, 직업 기초 능력과 하위 능력을 종류별로 구분하여 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_cfbe76b51e05db0a00fe"
+    },
+    {
+      "code": "[스실 06-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "스마트 공장 시스템 장치 관리",
+      "text": "이상 발생 원인을 분석하여 해결하고, 재발 방지 및 개선 계획을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_cfc8c3409403553675b4"
+    },
+    {
+      "code": "[인산 02-01]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동 인권의 보장",
+      "text": "노동자의 권리와 임금의 의미와 내용을 이해하고, 공정한 처우를 위한 대처 방안을 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_d02fb6cf7e0fb6fb5ae5"
+    },
+    {
+      "code": "[발신 02-02]",
+      "subject": "발명과 기업가 정신",
+      "domain": "기업가 정신과 창업",
+      "text": "창업의 방법과 절차를 이해하여 창업 과정을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_d03548fff3ecf3e20ede"
+    },
+    {
+      "code": "[특출 05-01-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야의 조성물 가재의 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_d0755f43713f9ad4ea76"
+    },
+    {
+      "code": "[성직 03-03]",
+      "subject": "성공적인 직업 생활",
+      "domain": "취업과 창업",
+      "text": "면접 준비 전략과 이미지 메이킹에 대하여 설명할 수 있고, 이미지 메이킹을 효과적으로 표현할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_d075b1ff4969b67eaabc"
+    },
+    {
+      "code": "[발특 02-02]",
+      "subject": "발명･특허 기초",
+      "domain": "발명 아이디어 창출",
+      "text": "발명 문제를 확인하여 해결 과정을 설계할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_d0bb4471f7592e9026ca"
+    },
+    {
+      "code": "[스일 03-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "PLC의 종류와 특징을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_d0ed0980dc678c49b835"
+    },
+    {
+      "code": "[스일 06-01-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "전사적 자원 관리(ERP)의 개념과 도입 배경을 이해하고, ERP의 기능에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_d10a26a44ac091fe4a3f"
+    },
+    {
+      "code": "[특정 04-01-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명의 배경 기술을 파악할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_d1e7107ed7e0a42a29fe"
+    },
+    {
+      "code": "[스운 03-02-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "SCADA 시스템을 이해하고 구성과 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_d2a751402561534b32d6"
+    },
+    {
+      "code": "[지재 04-02-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "거절 결정서를 접수한 후 명세서 또는 도면의 보정을 위한 재심사 청구서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_d2da634f9adcbe597614"
+    },
+    {
+      "code": "[지재 04-02-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "우선 심사 신청서 및 권리관계 변경 신고서, 기간 연장(단축) 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_d3291c8a3b1935b5a760"
+    },
+    {
+      "code": "[발신 01-02]",
+      "subject": "발명과 기업가 정신",
+      "domain": "발명과 기업가 정신의 이해",
+      "text": "기업가 정신을 이해하여 기업가 정신의 개념과 가치를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_d4e7209f3edf5020dd1d"
+    },
+    {
+      "code": "[지재 03-03-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 홈페이지를 이용하여 출원을 신청할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_d509b960e0861cb6bb33"
+    },
+    {
+      "code": "[스운 03-02-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "SCADA 시스템의 기능을 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_d5c881620688b078c64a"
+    },
+    {
+      "code": "[특정 01-03-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "발명 상담",
+      "text": "발명 상담을 통해 발명의 필수 구성 요소와 부가 구성 요소가 무엇인지 구분할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_d6aa0ee32eceb9dfa331"
+    },
+    {
+      "code": "[지재 04-03-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "등록 서식과 관련된 납부료를 지정된 금융 기관에 직접 제출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_d747d27d246556856340"
+    },
+    {
+      "code": "[스구 04-03-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "작성된 프로그램의 오류를 체크하여 수정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_d7b8a99d6f0b281a1b9b"
+    },
+    {
+      "code": "[발디 02-02]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 발상과 시각화",
+      "text": "발명 문제 해결 과정에서 수렴적 사고 기법을 이해하여 적용할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_d8ef2fdbea6b269a7e76"
+    },
+    {
+      "code": "[인산 03-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "다양한 노동과 노동 인권",
+      "text": "우리 주변에 숨겨진 노동의 존재와 중요성을 파악하고, 숨겨진 노동을 대하는 우리 사회의 인식을 제고하고 사회적 역할에 대해 발표할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_dab562d756abc080fe9a"
+    },
+    {
+      "code": "[발디 03-04]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 과정",
+      "text": "발명 디자인 아이디어 평가를 위한 방법과 절차를 이해하여 다양한 아이디어의 가치를 평가하고 개선할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_db3351e8ce060c7b13e9"
+    },
+    {
+      "code": "[발특 04-01]",
+      "subject": "발명･특허 기초",
+      "domain": "특허 출원의 이해",
+      "text": "특허 출원 제도를 이해하여 특허 출원의 개념과 중요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_db68cd3bc1ae35463ed6"
+    },
+    {
+      "code": "[스운 03-03-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "스마트 공장 시스템",
+      "text": "CPS 시스템을 이해하고 구성과 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_dbf2af50c750802005aa"
+    },
+    {
+      "code": "[특출 02-02-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "특허 도면 작성",
+      "text": "2D 도면 작성 소프트웨어를 활용하여 특허 도면을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_dbf6a77c7aaccb09fd60"
+    },
+    {
+      "code": "[스운 01-03-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "설비 관리의 의미와 관리 항목에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_dc769f19d43f925b0671"
+    },
+    {
+      "code": "[성직 06-03]",
+      "subject": "성공적인 직업 생활",
+      "domain": "경력 관리와 평생 학습",
+      "text": "과거로부터 현재까지의 직업 세계 변화 동향과 특징을 조사하고 설명할 수 있고, 미래 사회 변화와 그에 따른 직업 세계의 변화를 예측하고 대처 방법을 모색해 볼 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_7cea49af56bc487e645a",
+      "standardKey": "standard_dcdf6e850bfca95208aa"
+    },
+    {
+      "code": "[스실 03-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "공기압 장치 조립",
+      "text": "작업표준서에 따라 공기압 장치 부품을 지정된 위치에 적합한 공구와 장비를 활용하여 조립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_dceccd3cf78f3f82f869"
+    },
+    {
+      "code": "[스운 02-02-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "산업용 IoT 활용 기술",
+      "text": "PLC의 기능을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_dcf1e55e79d346b3688f"
+    },
+    {
+      "code": "[인산 06-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "안전한 작업 방법",
+      "text": "안전 수칙·표지·보호구 등 근로자 보호 대책에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_dd7a2316edd49a91b43b"
+    },
+    {
+      "code": "[특출 03-04-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "기계･금속･토목 특허 명세서 검토",
+      "text": "기계･금속･소재 분야를 이해하여, 해당 기술 분야 특허의 청구항을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_dd811badd29c14b3ba7f"
+    },
+    {
+      "code": "[발메 02-03]",
+      "subject": "발명과 메이커",
+      "domain": "디자인 씽킹을 통한 발명 아이디어 창출",
+      "text": "디자인 씽킹 방법으로 토의하여 발명 아이디어를 창출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_93b4349da977217827c8",
+      "standardKey": "standard_ddaf1fa87c79f3562251"
+    },
+    {
+      "code": "[특정 02-03-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "각 정보원별로 수집된 다양한 형태의 자료를 분류 기준에 맞게 취합할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_de011557c93f29c48a2f"
+    },
+    {
+      "code": "[스구 04-01-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "감시 제어 시스템 설계",
+      "text": "감시 제어 시스템에 연결된 설비의 종류와 특성을 구분할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_de491ad9b1f0eab0b674"
+    },
+    {
+      "code": "[스운 01-05-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "품질 경영의 원칙을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_de7f099ba185883ddd46"
+    },
+    {
+      "code": "[발신 02-01]",
+      "subject": "발명과 기업가 정신",
+      "domain": "기업가 정신과 창업",
+      "text": "창업과 기업의 관계를 이해하여 창업과 기업의 유형과 종류를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_dea8a1de8108762f8a7f"
+    },
+    {
+      "code": "[지재 03-04-02]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "특허청 통합 서식 작성기를 사용하여 보정서를 신청할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_deadd880213b0e626e51"
+    },
+    {
+      "code": "[특정 04-03-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "선행 기술 조사 자료를 바탕으로 출원하고자 하는 발명의 진보성을 비교 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_df308d400bb7b100f71a"
+    },
+    {
+      "code": "[특정 04-02-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명과 동일 또는 유사한 선행 특허 자료를 검색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_e087fbbe6a51e88cbeaf"
+    },
+    {
+      "code": "[스구 02-01-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "설계 요구에 따라 입력 장치의 종류와 수량을 선정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_e0dedca94ae122aff041"
+    },
+    {
+      "code": "[지재 01-02-05]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "전자 연구 노트 관리 시스템을 운용･관리･유지･보수할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_e0f4f9269089c154558f"
+    },
+    {
+      "code": "[스일 03-02-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "로봇의 종류를 구분하여 정리하고 로봇 운영의 사례를 찾아 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_e1f96a9eb4f6f24a382e"
+    },
+    {
+      "code": "[특정 03-01-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "산업 재산권의 서지 사항을 이해하여 통계 분석을 하기 위한 계산 기준을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_e40db292d0fe2e7872cd"
+    },
+    {
+      "code": "[특정 03-03-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 자료 정리",
+      "text": "분석 대상 기술을 세부적으로 이해하고 그에 맞게 세부 기술로 분류할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_e46ebb831aadd7cdc635"
+    },
+    {
+      "code": "[스구 02-01-03]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "설계 요구에 따른 출력 장치의 종류와 수량을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_e48516734c0344e01546"
+    },
+    {
+      "code": "[지재 04-03-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "제출된 중간 및 등록 서식을 자료 정리 기준에 따라 분류할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_e552940be58e6bcfa6e8"
+    },
+    {
+      "code": "[스실 01-03-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "정확히 조립되었는지 기계조립도면과 비교할 수 있으며, 이상발생 시 수정보완 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_e7038ecca5f635254ac7"
+    },
+    {
+      "code": "[스실 02-01-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "전기 전자 부품 장치 조립",
+      "text": "스마트 설비 제어를 위해 선정된 전기 전자 장치 부품을 지정된 위치에 적합한 조립 공구를 이용하여 조립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_e70d9001e5db659c4b79"
+    },
+    {
+      "code": "[특정 02-03-03]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "지식 재산 정보 검색",
+      "text": "취합된 결과 자료를 조사 분석 목적에 맞게 분석 항목별로 정리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_e8a4176c372ebd8d7e56"
+    },
+    {
+      "code": "[지재 02-01-01]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "대상 기관과 목적에 맞는 발명 신고서 양식을 만들 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_e98a814a41cfbfc591f3"
+    },
+    {
+      "code": "[인산 05-02]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "사고 예방의 이해",
+      "text": "작업 현장에서 발생하는 주요 재해 사례의 예방 대책에 대해 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_eaf14fb637dd454fd4a6"
+    },
+    {
+      "code": "[스실 04-01-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "PLC 특수 기능 모듈의 종류와 원리를 파악하고 제어 시스템 구축을 실시할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_eaf522e3cafd96c2fcfd"
+    },
+    {
+      "code": "[지재 02-01-02]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "발명 신고서 양식에 따라 작성되었는지 검토할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_eb1da28e112bae0e0959"
+    },
+    {
+      "code": "[특출 01-03-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "출원 서류 검토",
+      "text": "작성된 국내 특허 출원서의 형식과 내용을 검토할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_eb2285aa844d9a402733"
+    },
+    {
+      "code": "[발특 01-03]",
+      "subject": "발명･특허 기초",
+      "domain": "발명의 이해",
+      "text": "발명이 인류 문명에 미친 영향과 발명의 역사를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_eb9230e01647e404ae4e"
+    },
+    {
+      "code": "[디직 02-02]",
+      "subject": "디지털과 직업 생활",
+      "domain": "디지털 의사소통과 협업",
+      "text": "디지털 직업 환경에서 타인과 다양한 의견이나 자료의 공동 작업을 통해 협업할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_26127edcfac018de1baa",
+      "standardKey": "standard_ebe8914ca6455f3185f5"
+    },
+    {
+      "code": "[스구 02-03-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "설비 운전 방식을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_ec01a053c3dbda89569d"
+    },
+    {
+      "code": "[스일 06-03-01]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 응용 시스템",
+      "text": "사이버 물리 시스템(CPS: Cyber-Physical Systems)의 개념을 이해하고 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_ec6631788c43b35dbd65"
+    },
+    {
+      "code": "[특출 02-01-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "특허 도면 작성",
+      "text": "특허 도면의 종류를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_ed71665da813b99addcb"
+    },
+    {
+      "code": "[스운 05-03-01]",
+      "subject": "스마트 공장 운용",
+      "domain": "빅 데이터와 인공지능",
+      "text": "스마트 공장에서 빅 데이터와 인공지능 활용 사례를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_ee0cd9729e792866ed28"
+    },
+    {
+      "code": "[스실 01-02-01]",
+      "subject": "스마트 설비 실무",
+      "domain": "기계 부품 조립",
+      "text": "정확한 기계조립을 위하여 수립된 기계조립계획에 따라 공정순서와 일정을 고려하여 기계장치 조립을 할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_ee59f16b2628ad7908aa"
+    },
+    {
+      "code": "[지재 03-04-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "지식 재산권 출원 서식 보정 신청에 관한 절차를 수행할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f00b1af7d13ac5ed5364"
+    },
+    {
+      "code": "[스운 01-05-03]",
+      "subject": "스마트 공장 운용",
+      "domain": "생산 관리 기술",
+      "text": "품질 관리 시스템을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_f08638c1ebf2879b1d0b"
+    },
+    {
+      "code": "[스운 04-01-02]",
+      "subject": "스마트 공장 운용",
+      "domain": "데이터 전 주기 관리",
+      "text": "산업용 센서의 종류별 동작 원리를 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_4e6850c983f38e9a1a5c",
+      "standardKey": "standard_f161d088fecf7163c80b"
+    },
+    {
+      "code": "[인산 01-03]",
+      "subject": "노동 인권과 산업 안전 보건",
+      "domain": "노동과 인간의 존엄",
+      "text": "헌법에서 보장하는 노동권의 의미를 이해하고, 노동자의 행복 추구권 실현을 위한 방안을 탐색할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_b77c60af4ba0fe1ca4fc",
+      "standardKey": "standard_f1b5a57a14b2b9752472"
+    },
+    {
+      "code": "[지재 04-02-08]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "특허･실용신안, 디자인, 상표에 대응하여 기타 등록 관련 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f35d16fc9928f159e894"
+    },
+    {
+      "code": "[특정 04-02-01]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명에 대한 선행 기술 조사 검색 범위를 설정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_f3e4f8e5fde89953d36f"
+    },
+    {
+      "code": "[지재 03-03-05]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 출원 서식 작성",
+      "text": "출원에 관련된 비용을 산출할 수 있으며 납부할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f48706651ad01084017f"
+    },
+    {
+      "code": "[발특 04-03]",
+      "subject": "발명･특허 기초",
+      "domain": "특허 출원의 이해",
+      "text": "특허 명세서와 특허 도면을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_903270f10d9301024208",
+      "standardKey": "standard_f566d5af505ed358a72a"
+    },
+    {
+      "code": "[지재 02-02-01]",
+      "subject": "지식 재산 관리",
+      "domain": "발명 서식 검토",
+      "text": "발명 진흥법에 따라 직무 발명 관련 규정을 만들 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f583d2d9138ddcf7a654"
+    },
+    {
+      "code": "[스구 01-03-01]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 메커니즘 설계",
+      "text": "스마트 설비 제어 방식 결정을 위한 자료를 수집할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_f5bbfc09b8052cbc4117"
+    },
+    {
+      "code": "[특출 05-01-02]",
+      "subject": "특허 출원의 실제",
+      "domain": "화학･바이오 특허 명세서 검토",
+      "text": "화학･바이오 분야의 조성물에 대해서 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_f6355bbe40374109e3ba"
+    },
+    {
+      "code": "[스일 03-03-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 제조 자동화 기술",
+      "text": "HMI의 기능과 활용을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_f66346127ef2c2b41d13"
+    },
+    {
+      "code": "[특출 04-04-01]",
+      "subject": "특허 출원의 실제",
+      "domain": "전기･전자･통신 특허 명세서 검토",
+      "text": "전기･전자･통신 분야를 이해하여, 해당 기술 분야 특허의 청구항을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_aac4d522dc50bf7b9cbc",
+      "standardKey": "standard_f67c9a85cd2dc92785bd"
+    },
+    {
+      "code": "[지재 01-02-03]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 관리 시스템 운영",
+      "text": "전자 연구 노트의 작성을 위한 관리 시스템 운용 계획을 수립할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f72877c05a729463030f"
+    },
+    {
+      "code": "[발디 04-01]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인 제품화",
+      "text": "3D 모델링, 3D 렌더링의 개념과 발명 디자인에서 3D 프린팅의 역할을 인식할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_f79150f0097ffcf2d7a2"
+    },
+    {
+      "code": "[스구 02-02-02]",
+      "subject": "스마트 공장 설계와 구축",
+      "domain": "스마트 설비 제어 설계",
+      "text": "제어 신호의 전달을 위해 아날로그 신호의 전압, 전류, 펄스 등 신호 방식을 결정할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_8ebf5e616cc5af64c929",
+      "standardKey": "standard_f842b6fce1feeab98c81"
+    },
+    {
+      "code": "[지재 04-01-01]",
+      "subject": "지식 재산 관리",
+      "domain": "지식 재산 등록 서식 작성",
+      "text": "심사관의 의견 제출 통지서에 대응하는 의견서 및 보정서 서식을 작성할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_14b4ea03386addcf1f2f",
+      "standardKey": "standard_f887ac91da7ce5456dad"
+    },
+    {
+      "code": "[특정 04-03-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "선행 기술 조사 자료를 바탕으로 출원하고자 하는 발명의 신규성을 비교 분석할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_f9255bea9a1d64637c3b"
+    },
+    {
+      "code": "[스일 05-02-02]",
+      "subject": "스마트 공장 일반",
+      "domain": "스마트 공장 관련 핵심 기술",
+      "text": "빅 데이터의 정의와 개념을 이해하고, 빅 데이터의 활용 환경에 대응하는 바른 자세에 대해 알 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_d33f415f9ad8ced0128d",
+      "standardKey": "standard_fa800a119f8a8e5e3982"
+    },
+    {
+      "code": "[특정 04-01-02]",
+      "subject": "특허 정보 조사･분석",
+      "domain": "선행 기술 조사 분석",
+      "text": "출원하고자 하는 발명 기술의 주요 구성 요소를 추출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_ae83a246846f1dfb674a",
+      "standardKey": "standard_faed9fb55f22874c6599"
+    },
+    {
+      "code": "[발신 03-03]",
+      "subject": "발명과 기업가 정신",
+      "domain": "사업 타당성 분석과 사업 계획서",
+      "text": "사업 계획서의 의미와 필요성을 설명할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_3f5c97cf1c80bdd53f97",
+      "standardKey": "standard_fb9f16d5d81482151d39"
+    },
+    {
+      "code": "[스실 04-03-02]",
+      "subject": "스마트 설비 실무",
+      "domain": "PLC 제어 특수 모듈 프로그램 개발",
+      "text": "PLC 프로그램 이력표에 의해 보완 및 개선 이력을 작성 및 관리할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_288590a95d2ee9d1ec05",
+      "standardKey": "standard_fe52397ddebf4c22751b"
+    },
+    {
+      "code": "[발디 02-03]",
+      "subject": "발명과 디자인",
+      "domain": "발명 디자인의 발상과 시각화",
+      "text": "발명 디자인 발상 기법을 복합적으로 사용하여 창의적인 발명 디자인을 도출할 수 있다.",
+      "track": "융복합·지식 재산",
+      "curriculumRevision": "2022",
+      "subjectKey": "subject_89a099d2a43d480dee68",
+      "standardKey": "standard_ff6bff927cab38790e1b"
+    }
+  ]
+}
