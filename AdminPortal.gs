@@ -89,25 +89,26 @@ function initializeCentralDataSchema() {
       const achievementStandardSheet = spreadsheet.getSheetByName(
         CENTRAL_CONFIG.achievementStandardSheetName
       );
-      if (!subjectCatalogSheet && !achievementStandardSheet) {
-        replaceCentralStandardsData_(spreadsheet, schoolLevel);
-      } else if (
-        !subjectCatalogSheet
-          || !achievementStandardSheet
-          || !centralHeadersMatch_(
-            subjectCatalogSheet,
-            CENTRAL_SUBJECT_CATALOG_HEADERS
-          )
-          || !centralHeadersMatch_(
-            achievementStandardSheet,
-            CENTRAL_ACHIEVEMENT_STANDARD_HEADERS
-          )
-          || subjectCatalogSheet.getLastRow() < 2
-          || achievementStandardSheet.getLastRow() < 2
-      ) {
-        // 성취기준은 임시 시트 검증 후 백업을 남기고 승격한다. v4 머리글은
-        // 여기서 안전하게 v5 데이터 구조로 올릴 수 있다.
-        replaceCentralStandardsData_(spreadsheet, schoolLevel);
+      var hasBundles = typeof STANDARDS_SUBJECTS !== 'undefined';
+      if (hasBundles) {
+        if (!subjectCatalogSheet && !achievementStandardSheet) {
+          replaceCentralStandardsData_(spreadsheet, schoolLevel);
+        } else if (
+          !subjectCatalogSheet
+            || !achievementStandardSheet
+            || !centralHeadersMatch_(
+              subjectCatalogSheet,
+              CENTRAL_SUBJECT_CATALOG_HEADERS
+            )
+            || !centralHeadersMatch_(
+              achievementStandardSheet,
+              CENTRAL_ACHIEVEMENT_STANDARD_HEADERS
+            )
+            || subjectCatalogSheet.getLastRow() < 2
+            || achievementStandardSheet.getLastRow() < 2
+        ) {
+          replaceCentralStandardsData_(spreadsheet, schoolLevel);
+        }
       }
       upsertCentralAppSetting_(appSettings, 'schoolLevel', schoolLevel);
     }
@@ -121,6 +122,14 @@ function initializeCentralDataSchema() {
     clearCentralTeacherAssignmentCache_(spreadsheet);
     clearCentralPhotoRowsCache_(spreadsheet);
     return buildAdminDashboard_();
+  });
+}
+
+function uploadStandardsJson(jsonText) {
+  requireAdmin_();
+  return withCentralWriteLock_(function () {
+    var spreadsheet = getCentralDatabase_();
+    return importStandardsFromJson_(spreadsheet, jsonText);
   });
 }
 

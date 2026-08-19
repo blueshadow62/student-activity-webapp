@@ -173,18 +173,38 @@ function getAllowedGrades_() {
     : APP_CONFIG.allowedGrades.slice();
 }
 
-// 승인 전 교사는 중앙 Drive 파일을 읽을 권한이 없다. 담당 신청 과목 목록은
-// 배포 번들에서 학교급만 골라 내려 줘야 신청 화면 자체가 중앙 공유에 의존하지 않는다.
+// 과목 목록은 이제 관리자가 올린 JSON으로 중앙 '과목목록' 시트를 채운다.
+// 이 함수 이름은 예전 번들 시절 이름을 그대로 쓰지만(호출부가 많아 유지),
+// 읽는 곳은 시트다. 설치 전이거나 승인 전 교사처럼 중앙 자료에 접근할 수
+// 없는 상태에서도 부팅 자체는 실패하면 안 되므로 실패 시 빈 배열로 넘어간다.
 let bundledSubjectCatalogMemo_ = null;
 
 function readBundledSubjectCatalog_() {
   if (bundledSubjectCatalogMemo_ !== null) return bundledSubjectCatalogMemo_;
-  if (typeof STANDARDS_SUBJECTS === 'undefined') {
+  try {
+    const sheet = getCentralDatabase_().getSheetByName(
+      CENTRAL_CONFIG.subjectCatalogSheetName
+    );
+    if (!sheet || sheet.getLastRow() < 2) {
+      bundledSubjectCatalogMemo_ = [];
+      return bundledSubjectCatalogMemo_;
+    }
+    const rows = sheet.getRange(
+      2, 1, sheet.getLastRow() - 1, CENTRAL_SUBJECT_CATALOG_HEADERS.length
+    ).getValues();
+    bundledSubjectCatalogMemo_ = rows.map(function (row) {
+      return {
+        name: String(row[0] || '').trim(),
+        abbreviation: String(row[1] || '').trim(),
+        schoolLevel: String(row[2] || '').trim(),
+        track: String(row[3] || '').trim(),
+        category: String(row[4] || '').trim(),
+        curriculumRevision: String(row[5] || '').trim(),
+        subjectKey: String(row[6] || '').trim(),
+      };
+    }).filter(function (item) { return Boolean(item.name); });
+  } catch (error) {
     bundledSubjectCatalogMemo_ = [];
-  } else if (Array.isArray(STANDARDS_SUBJECTS)) {
-    bundledSubjectCatalogMemo_ = STANDARDS_SUBJECTS;
-  } else {
-    bundledSubjectCatalogMemo_ = JSON.parse(String(STANDARDS_SUBJECTS || '[]'));
   }
   return bundledSubjectCatalogMemo_;
 }
@@ -899,9 +919,34 @@ function getBundledStandardsRaw_(schoolLevel) {
   return lookup[schoolLevel];
 }
 
+// replaceCentralStandardsData_ 전용 원본 번들 읽기. readBundledSubjectCatalog_는
+// 이제 '과목목록' 시트에서 읽는데, 이 함수는 그 시트를 새로 채워 넣는 쪽이라
+// 시트를 거치면 지우기 전의 낡은(또는 아직 없는) 값을 읽게 된다.
+function bundledSubjectCatalogForSchoolLevel_(schoolLevel) {
+  const normalized = normalizeSchoolLevel_(schoolLevel, false);
+  if (!normalized) return [];
+  const raw = typeof STANDARDS_SUBJECTS === 'undefined'
+    ? []
+    : Array.isArray(STANDARDS_SUBJECTS)
+      ? STANDARDS_SUBJECTS
+      : JSON.parse(String(STANDARDS_SUBJECTS || '[]'));
+  return raw.filter(function (item) {
+    return String(item && item.schoolLevel || '').trim() === normalized;
+  }).map(function (item) {
+    return {
+      name: String(item.name || '').trim(),
+      abbreviation: String(item.abbreviation || '').trim(),
+      track: String(item.track || '').trim(),
+      category: String(item.category || '').trim(),
+      curriculumRevision: String(item.curriculumRevision || '2022').trim(),
+      subjectKey: String(item.subjectKey || '').trim(),
+    };
+  }).filter(function (item) { return Boolean(item.name); });
+}
+
 function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
   const normalized = normalizeSchoolLevel_(schoolLevel, true);
-  const subjects = getSubjectCatalogForSchoolLevel_(normalized);
+  const subjects = bundledSubjectCatalogForSchoolLevel_(normalized);
   var standards;
   try {
     standards = bundledStandardsForSchoolLevel_(normalized);
@@ -1009,6 +1054,69 @@ function replaceCentralStandardsData_(spreadsheet, schoolLevel) {
     schoolLevel: normalized,
     subjectCount: subjectRows.length,
     standardCount: standardRows.length,
+  };
+}
+
+function importStandardsFromJson_(spreadsheet, jsonText) {
+  var parsed = JSON.parse(jsonText);
+  if (!parsed || !parsed.meta || !Array.isArray(parsed.subjects) || !Array.isArray(parsed.standards)) {
+    throw new Error('JSON 형식이 올바르지 않습니다. meta, subjects, standards 필드가 필요합니다.');
+  }
+  var schoolLevel = normalizeSchoolLevel_(parsed.meta.schoolLevel, true);
+  var subjectRows = parsed.subjects.map(function (s) {
+    return [
+      String(s.name || '').trim(), String(s.abbreviation || '').trim(),
+      schoolLevel, String(s.track || '').trim(), String(s.category || '').trim(),
+      String(s.curriculumRevision || '').trim(), String(s.subjectKey || '').trim(),
+    ];
+  }).filter(function (r) { return Boolean(r[0]); });
+  var standardRows = parsed.standards.map(function (s) {
+    return [
+      String(s.code || '').trim(), String(s.subject || '').trim(),
+      String(s.domain || '').trim(), String(s.text || '').trim(),
+      schoolLevel, String(s.track || '').trim(),
+      String(s.curriculumRevision || '').trim(), String(s.subjectKey || '').trim(),
+      String(s.standardKey || '').trim(),
+    ];
+  }).filter(function (r) { return Boolean(r[1]) && Boolean(r[3]); });
+  var subjectSheet = spreadsheet.getSheetByName(CENTRAL_CONFIG.subjectCatalogSheetName);
+  if (!subjectSheet) {
+    subjectSheet = spreadsheet.insertSheet(CENTRAL_CONFIG.subjectCatalogSheetName);
+    initializeCentralSheet_(subjectSheet, CENTRAL_SUBJECT_CATALOG_HEADERS, '#1565c0');
+  }
+  var standardSheet = spreadsheet.getSheetByName(CENTRAL_CONFIG.achievementStandardSheetName);
+  if (!standardSheet) {
+    standardSheet = spreadsheet.insertSheet(CENTRAL_CONFIG.achievementStandardSheetName);
+    initializeCentralSheet_(standardSheet, CENTRAL_ACHIEVEMENT_STANDARD_HEADERS, '#6a1b9a');
+  }
+  var existingSubjectKeys = new Set();
+  if (subjectSheet.getLastRow() > 1) {
+    subjectSheet.getRange(2, 7, subjectSheet.getLastRow() - 1, 1)
+      .getValues().forEach(function (r) { existingSubjectKeys.add(String(r[0]).trim()); });
+  }
+  var existingStandardKeys = new Set();
+  if (standardSheet.getLastRow() > 1) {
+    standardSheet.getRange(2, 9, standardSheet.getLastRow() - 1, 1)
+      .getValues().forEach(function (r) { existingStandardKeys.add(String(r[0]).trim()); });
+  }
+  var newSubjects = subjectRows.filter(function (r) { return !existingSubjectKeys.has(r[6]); });
+  var newStandards = standardRows.filter(function (r) { return !existingStandardKeys.has(r[8]); });
+  if (newSubjects.length > 0) {
+    var sStart = subjectSheet.getLastRow() + 1;
+    subjectSheet.getRange(sStart, 1, newSubjects.length, newSubjects[0].length).setValues(newSubjects);
+  }
+  if (newStandards.length > 0) {
+    var tStart = standardSheet.getLastRow() + 1;
+    standardSheet.getRange(tStart, 1, newStandards.length, newStandards[0].length).setValues(newStandards);
+  }
+  bundledSubjectCatalogMemo_ = null;
+  return {
+    schoolLevel: schoolLevel,
+    description: String(parsed.meta.description || ''),
+    subjectCount: newSubjects.length,
+    standardCount: newStandards.length,
+    skippedSubjects: subjectRows.length - newSubjects.length,
+    skippedStandards: standardRows.length - newStandards.length,
   };
 }
 
