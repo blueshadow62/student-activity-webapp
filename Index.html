@@ -189,6 +189,13 @@
     .loading-progress-bar{width:42%;height:100%;border-radius:inherit;background:var(--accent);
       animation:loading-progress 1.2s ease-in-out infinite}
     @keyframes loading-progress{from{transform:translateX(-110%)}to{transform:translateX(240%)}}
+    .autocomplete-wrap{position:relative}
+    .autocomplete-list{display:none;position:absolute;left:0;right:0;top:100%;
+      max-height:200px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);
+      border-radius:8px;box-shadow:0 4px 16px -4px rgba(27,42,58,.18);z-index:50;margin-top:2px}
+    .autocomplete-list.open{display:block}
+    .autocomplete-item{padding:8px 12px;cursor:pointer;font-size:14px}
+    .autocomplete-item:hover,.autocomplete-item.focused{background:var(--accent-soft)}
     /* 학생 카드 칸은 104px 로 좁아, 안내 문구가 칸에 갇히면 세로로 쪼개진다.
        문구는 항상 한 줄 전체를 쓰게 한다. */
     .student-list-message,.students>.muted{grid-column:1/-1}
@@ -298,6 +305,14 @@
                 <option value="high">고등학교</option>
               </select>
               <button id="configureSchoolStandardsButton" class="secondary">성취기준 데이터 설정</button>
+            </div>
+            <div style="margin-top:10px">
+              <p class="small muted">또는 JSON 파일로 과목·성취기준을 등록할 수 있습니다. 여러 파일을 한꺼번에 올릴 수 있습니다.</p>
+              <div class="row" style="gap:8px;margin-top:6px;align-items:center">
+                <input type="file" id="standardsFileInput" accept=".json" multiple style="font-size:13px">
+                <button id="uploadStandardsButton" class="secondary" disabled>업로드</button>
+              </div>
+              <div id="standardsUploadStatus" class="small muted" style="margin-top:6px;white-space:pre-line"></div>
             </div>
             <p id="updateNotice" class="status hidden" style="margin-top:10px"></p>
           </div>
@@ -440,7 +455,7 @@
               <div><label for="requestSchoolYear">학년도</label><input id="requestSchoolYear" type="number" min="2000" max="2100"></div>
               <div><label for="requestGrade">담당 학년</label><select id="requestGrade"><option value="">선택</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div>
               <div id="requestTrackField" class="hidden"><label for="requestTrackFilter">전문교과 계열(선택)</label><select id="requestTrackFilter"><option value="">전체 (보통교과 포함)</option></select></div>
-              <div><label for="requestSubject">담당 과목</label><input id="requestSubject" list="requestSubjectOptions" maxlength="50" placeholder="과목명을 입력해 검색"><datalist id="requestSubjectOptions"></datalist><div id="requestCurriculumStatus" class="small muted" aria-live="polite"></div></div>
+              <div class="autocomplete-wrap"><label for="requestSubject">담당 과목</label><input id="requestSubject" autocomplete="off" maxlength="50" placeholder="과목명을 입력해 검색"><div id="requestSubjectOptions" class="autocomplete-list" role="listbox"></div><div id="requestCurriculumStatus" class="small muted" aria-live="polite"></div></div>
               <div id="requestClassesField"><label for="requestClasses">담당 반</label><input id="requestClasses" placeholder="예: 1, 2, 3"></div>
               <div id="requestGroupNameField" class="hidden"><label for="requestGroupName">수강 그룹 이름</label><input id="requestGroupName" maxlength="50" placeholder="예: 심화국어 A"></div>
               <div id="requestGroupGradesField" class="hidden"><label for="requestGroupGrades">함께 듣는 다른 학년(선택)</label><input id="requestGroupGrades" placeholder="예: 3"></div>
@@ -506,8 +521,8 @@
               <div id="achievementStandardField" class="hidden" style="margin-top:12px">
                 <label for="recordAchievementStandard">성취기준 (선택)</label>
                 <div class="row">
-                  <input id="recordAchievementStandard" list="achievementStandardOptions" placeholder="코드나 문구 키워드로 검색" style="flex:1">
-                  <datalist id="achievementStandardOptions"></datalist>
+                  <div class="autocomplete-wrap" style="flex:1"><input id="recordAchievementStandard" autocomplete="off" placeholder="코드나 문구 키워드로 검색" style="width:100%">
+                  <div id="achievementStandardOptions" class="autocomplete-list" role="listbox"></div></div>
                   <button id="toggleStandardPinButton" class="ghost hidden" type="button">이 수업에 고정</button>
                 </div>
                 <div id="achievementStandardStatus" class="small muted" aria-live="polite"></div>
@@ -600,6 +615,10 @@
       $('runSchoolYearButton').addEventListener('click', runSchoolYearTransition_);
       $('initializeCentralButton').addEventListener('click', initializeCentral);
       $('configureSchoolStandardsButton').addEventListener('click', configureSchoolStandards_);
+      $('standardsFileInput').addEventListener('change', function () {
+        $('uploadStandardsButton').disabled = !this.files.length;
+      });
+      $('uploadStandardsButton').addEventListener('click', uploadStandardsFiles_);
       $('resetSchoolInstallationButton').addEventListener('click', resetSchoolInstallation);
       $('provisionSchoolButton').addEventListener('click', provisionSchool);
       $('connectExistingSchoolButton').addEventListener('click', connectExistingSchool);
@@ -635,8 +654,9 @@
       $('requestTrackFilter').addEventListener('change', renderSubjectCatalog_);
       $('requestSchoolYear').addEventListener('input', renderSubjectCatalog_);
       $('requestGrade').addEventListener('change', renderSubjectCatalog_);
-      // 큰 과목 목록을 datalist에 한꺼번에 넣으면 모바일 브라우저가 느려진다.
       $('requestSubject').addEventListener('input', () => renderSubjectCatalog_($('requestSubject').value));
+      $('requestSubject').addEventListener('blur', () => setTimeout(() => $('requestSubjectOptions').classList.remove('open'), 150));
+      $('requestSubject').addEventListener('focus', () => { if ($('requestSubject').value) renderSubjectCatalog_($('requestSubject').value); });
       $('groupAddSelected').addEventListener('click', () => moveGroupSelection_(true));
       $('groupRemoveSelected').addEventListener('click', () => moveGroupSelection_(false));
       $('groupCandidateFilter').addEventListener('input', renderGroupRoster_);
@@ -713,7 +733,22 @@
       $('loadStudentsButton').addEventListener('click', loadStudents);
       $('studentQuery').addEventListener('input', debounce(loadStudents, 250));
       $('recordCategory').addEventListener('change', renderCompetencies);
-      $('recordAchievementStandard').addEventListener('input', renderStandardPinControl_);
+      $('recordAchievementStandard').addEventListener('input', function () {
+        renderStandardPinControl_();
+        var query = normalizeSubjectSearchText_($('recordAchievementStandard').value);
+        var items = $('achievementStandardOptions').querySelectorAll('.autocomplete-item');
+        var anyVisible = false;
+        items.forEach(function (el) {
+          var show = !query || normalizeSubjectSearchText_(el.getAttribute('data-value')).includes(query);
+          el.style.display = show ? '' : 'none';
+          if (show) anyVisible = true;
+        });
+        $('achievementStandardOptions').classList.toggle('open', anyVisible && query.length > 0);
+      });
+      $('recordAchievementStandard').addEventListener('blur', () => setTimeout(() => $('achievementStandardOptions').classList.remove('open'), 150));
+      $('recordAchievementStandard').addEventListener('focus', function () {
+        if ($('recordAchievementStandard').value) $('recordAchievementStandard').dispatchEvent(new Event('input'));
+      });
       $('toggleStandardPinButton').addEventListener('click', toggleSelectedStandardPin_);
       $('saveRecordButton').addEventListener('click', saveActivityRecord);
       $('cancelEditRecordButton').addEventListener('click', cancelEditRecord_);
@@ -985,8 +1020,8 @@
       $('photoCount').textContent = connection.counts.photos;
       $('assignmentCount').textContent = connection.counts.assignments;
       $('pendingRequestCount').textContent = dashboard.pendingAssignmentRequests || 0;
-      $('subjectCount').textContent = connection.counts.subjects || 0;
-      $('standardCount').textContent = connection.counts.standards || 0;
+      $('subjectCount').textContent = connection.counts.subjects || '미등록';
+      $('standardCount').textContent = connection.counts.standards || '미등록';
       const schoolLevel = dashboard.schoolLevel || state.bootstrap.schoolLevel || '';
       const schoolLevelLabel = dashboard.schoolLevelLabel
         || state.bootstrap.schoolLevelLabel || '';
@@ -1023,6 +1058,36 @@
         );
         await loadApp('ADMIN_PORTAL');
       });
+    }
+
+    async function uploadStandardsFiles_() {
+      var files = Array.from($('standardsFileInput').files);
+      if (!files.length) return;
+      var statusEl = $('standardsUploadStatus');
+      statusEl.textContent = '';
+      var results = [];
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        statusEl.textContent += '⏳ ' + file.name + ' 업로드 중...\n';
+        try {
+          var text = await file.text();
+          var result = await callServer('uploadStandardsJson', text);
+          results.push(result);
+          statusEl.textContent += '✅ ' + file.name + ': '
+            + result.schoolLevel + ' — 과목 ' + result.subjectCount + '개, '
+            + '성취기준 ' + result.standardCount + '개'
+            + (result.skippedSubjects || result.skippedStandards
+              ? ' (중복 건너뜀: 과목 ' + (result.skippedSubjects || 0)
+                + ', 성취기준 ' + (result.skippedStandards || 0) + ')'
+              : '')
+            + '\n';
+        } catch (err) {
+          statusEl.textContent += '❌ ' + file.name + ': ' + err.message + '\n';
+        }
+      }
+      $('standardsFileInput').value = '';
+      $('uploadStandardsButton').disabled = true;
+      if (results.length) await loadApp('ADMIN_PORTAL');
     }
 
     // 새 버전 확인은 브라우저에서 GitHub에 직접 묻는다. 서버(Apps Script)에서
@@ -1946,8 +2011,17 @@
             ? 0 : rightValue.startsWith(normalizedQuery) ? 1 : 2;
           return leftRank - rightRank || left.localeCompare(right, 'ko');
         }).slice(0, 20);
-      $('requestSubjectOptions').innerHTML = names
-        .map(name => `<option value="${escapeHtml(name)}"></option>`).join('');
+      var listEl = $('requestSubjectOptions');
+      listEl.innerHTML = names
+        .map(name => `<div class="autocomplete-item" role="option">${escapeHtml(name)}</div>`).join('');
+      listEl.classList.toggle('open', names.length > 0 && normalizedQuery.length > 0);
+      listEl.querySelectorAll('.autocomplete-item').forEach(function (el) {
+        el.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          $('requestSubject').value = el.textContent;
+          listEl.classList.remove('open');
+        });
+      });
       $('requestSubject').placeholder = names.length
         ? '과목명을 입력해 검색하거나 직접 입력'
         : '예: 문학';
@@ -2387,9 +2461,17 @@
           || String(left.code || left.text || '').localeCompare(String(right.code || right.text || ''), 'ko');
       });
       $('achievementStandardOptions').innerHTML = ordered.map(standard =>
-        `<option value="${escapeHtml(standardDisplay_(standard))}"`
-          + `${standard.domain ? ` label="${escapeHtml(standard.domain)}"` : ''}></option>`
+        `<div class="autocomplete-item" role="option" data-value="${escapeHtml(standardDisplay_(standard))}">`
+          + `${escapeHtml(standardDisplay_(standard))}${standard.domain ? ` <span class="muted small">· ${escapeHtml(standard.domain)}</span>` : ''}</div>`
       ).join('');
+      $('achievementStandardOptions').querySelectorAll('.autocomplete-item').forEach(function (el) {
+        el.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          $('recordAchievementStandard').value = el.getAttribute('data-value');
+          $('achievementStandardOptions').classList.remove('open');
+          renderStandardPinControl_();
+        });
+      });
       const pinned = ordered.filter(standard =>
         state.pinnedStandardKeys.has(standard.key));
       $('pinnedStandards').innerHTML = pinned.map(standard =>
@@ -2996,6 +3078,7 @@
           resetSchoolInstallationConnections:() => runner.resetSchoolInstallationConnections(args[0]),
           initializeCentralDataSchema:() => runner.initializeCentralDataSchema(),
           configureSchoolStandards:() => runner.configureSchoolStandards(args[0]),
+          uploadStandardsJson:() => runner.uploadStandardsJson(args[0]),
           getAdminDashboard:() => runner.getAdminDashboard(),
           getAdminStudents:() => runner.getAdminStudents(args[0]),
           addCentralStudent:() => runner.addCentralStudent(args[0]),
