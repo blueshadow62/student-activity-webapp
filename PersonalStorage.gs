@@ -80,25 +80,35 @@ function preparePersonalStorageContext_() {
     };
   }
 
-  return withPersonalStorageLock_(function () {
-    try {
-      const context = getOrCreatePersonalAppContext_(userEmail);
-      return {
-        storage: buildPublicPersonalStorageState_(context),
-        context: context.state === 'READY' ? context : null,
-      };
-    } catch (error) {
-      return {
-        storage: buildPersonalStorageFailure_(
-          error && error.personalStorageCode
-            ? error.personalStorageCode
-            : 'STORAGE_CREATION_FAILED',
-          safePersonalStorageErrorMessage_(error)
-        ),
-        context: null,
-      };
-    }
-  });
+  try {
+    return withPersonalStorageLock_(function () {
+      try {
+        const context = getOrCreatePersonalAppContext_(userEmail);
+        return {
+          storage: buildPublicPersonalStorageState_(context),
+          context: context.state === 'READY' ? context : null,
+        };
+      } catch (error) {
+        return {
+          storage: buildPersonalStorageFailure_(
+            error && error.personalStorageCode
+              ? error.personalStorageCode
+              : 'STORAGE_CREATION_FAILED',
+            safePersonalStorageErrorMessage_(error)
+          ),
+          context: null,
+        };
+      }
+    });
+  } catch (lockError) {
+    return {
+      storage: buildPersonalStorageFailure_(
+        'STORAGE_LOCK_FAILED',
+        '개인 저장소에 접근하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+      ),
+      context: null,
+    };
+  }
 }
 
 function resolvePersonalStorageIssue(action, candidateToken) {
