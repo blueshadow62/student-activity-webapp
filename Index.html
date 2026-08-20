@@ -792,6 +792,7 @@
         state.bootstrap.central = status.central;
         state.bootstrap.assignments = status.assignments;
         state.bootstrap.previousAssignmentCount = status.previousAssignmentCount || 0;
+        if (Array.isArray(status.subjectCatalog)) state.bootstrap.subjectCatalog = status.subjectCatalog;
       } catch (error) {
         state.bootstrap.central = {
           ready: false,

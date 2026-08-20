@@ -130,13 +130,6 @@ function getAppBootstrapState(requestedMode) {
   personal.schoolName = installation.schoolName;
   personal.schoolLevel = installation.schoolLevel;
   personal.schoolLevelLabel = installation.schoolLevelLabel;
-  try {
-    personal.subjectCatalog = getSubjectCatalogForSchoolLevel_(
-      installation.schoolLevel
-    );
-  } catch (_) {
-    personal.subjectCatalog = [];
-  }
   return personal;
 }
 
@@ -182,6 +175,8 @@ function getPersonalCentralStatus() {
   const centralContext = getCentralConnectionContext_(false);
   const central = centralContext.state;
   const result = { central: central, assignments: [], previousAssignmentCount: 0 };
+  const schoolLevel = getConfiguredSchoolLevel_();
+  result.subjectCatalog = getSubjectCatalogForSchoolLevel_(schoolLevel);
   if (central.ready && centralContext.schema) {
     result.assignments = getMyAssignmentsFromCentralSheet_(
       centralContext.schema.assignmentSheet
