@@ -212,7 +212,7 @@ function readBundledSubjectCatalog_() {
 function getSubjectCatalogForSchoolLevel_(schoolLevel) {
   const normalized = normalizeSchoolLevel_(schoolLevel, false);
   if (!normalized) return [];
-  return readBundledSubjectCatalog_().filter(function (item) {
+  var result = readBundledSubjectCatalog_().filter(function (item) {
     return String(item && item.schoolLevel || '').trim() === normalized;
   }).map(function (item) {
     return {
@@ -224,6 +224,24 @@ function getSubjectCatalogForSchoolLevel_(schoolLevel) {
       subjectKey: String(item.subjectKey || '').trim(),
     };
   }).filter(function (item) { return Boolean(item.name); });
+  if (result.length > 0) {
+    try {
+      CacheService.getScriptCache().put(
+        'subjectCatalog_' + normalized, JSON.stringify(result), 21600
+      );
+    } catch (_) {}
+  }
+  return result;
+}
+
+function getSubjectCatalogCached() {
+  var schoolLevel = getConfiguredSchoolLevel_();
+  if (!schoolLevel) return [];
+  try {
+    var cached = CacheService.getScriptCache().get('subjectCatalog_' + schoolLevel);
+    if (cached) return JSON.parse(cached);
+  } catch (_) {}
+  return [];
 }
 
 function getSubjectCatalog() {

@@ -802,6 +802,11 @@
         state.bootstrap.assignments = [];
         state.bootstrap.previousAssignmentCount = 0;
       }
+      if (!Array.isArray(state.bootstrap.subjectCatalog) || !state.bootstrap.subjectCatalog.length) {
+        try {
+          state.bootstrap.subjectCatalog = await callServer('getSubjectCatalogCached');
+        } catch (_) {}
+      }
       renderPersonalBootstrap();
     }
 
@@ -3077,6 +3082,7 @@
         const methods = {
           getAppBootstrapState:() => runner.getAppBootstrapState(args[0]),
           getPersonalCentralStatus:() => runner.getPersonalCentralStatus(),
+          getSubjectCatalogCached:() => runner.getSubjectCatalogCached(),
           resolvePersonalStorageIssue:() => runner.resolvePersonalStorageIssue(args[0],args[1]),
           connectPersonalDatabaseByLink:() => runner.connectPersonalDatabaseByLink(args[0]),
           provisionSchoolCentralResources:() => runner.provisionSchoolCentralResources(args[0]),
