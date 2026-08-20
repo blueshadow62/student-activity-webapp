@@ -130,9 +130,13 @@ function getAppBootstrapState(requestedMode) {
   personal.schoolName = installation.schoolName;
   personal.schoolLevel = installation.schoolLevel;
   personal.schoolLevelLabel = installation.schoolLevelLabel;
-  personal.subjectCatalog = getSubjectCatalogForSchoolLevel_(
-    installation.schoolLevel
-  );
+  try {
+    personal.subjectCatalog = getSubjectCatalogForSchoolLevel_(
+      installation.schoolLevel
+    );
+  } catch (_) {
+    personal.subjectCatalog = [];
+  }
   return personal;
 }
 
