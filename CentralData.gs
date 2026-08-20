@@ -226,8 +226,8 @@ function getSubjectCatalogForSchoolLevel_(schoolLevel) {
   }).filter(function (item) { return Boolean(item.name); });
   if (result.length > 0) {
     try {
-      CacheService.getScriptCache().put(
-        'subjectCatalog_' + normalized, JSON.stringify(result), 21600
+      PropertiesService.getScriptProperties().setProperty(
+        'subjectCatalog_' + normalized, JSON.stringify(result)
       );
     } catch (_) {}
   }
@@ -238,8 +238,8 @@ function getSubjectCatalogCached() {
   var schoolLevel = getConfiguredSchoolLevel_();
   if (!schoolLevel) return [];
   try {
-    var cached = CacheService.getScriptCache().get('subjectCatalog_' + schoolLevel);
-    if (cached) return JSON.parse(cached);
+    var stored = PropertiesService.getScriptProperties().getProperty('subjectCatalog_' + schoolLevel);
+    if (stored) return JSON.parse(stored);
   } catch (_) {}
   return [];
 }
